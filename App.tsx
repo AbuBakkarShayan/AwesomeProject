@@ -12,22 +12,50 @@ import TScreenComponent from './screens/Components/TScreenComponent';
 import TeacherDashboard from './screens/TeacherScreen/TeacherDashboard';
 import StudentDashboard from './screens/StudentScreen/StudentDashboard';
 import AdminDashboard from './screens/AdminScreen/AdminDashboard';
-
+import CoursesScreen from './screens/StudentScreen/CoursesScreen';
+import LibraryBooksScreen from './screens/LibraryBooksScreen';
+import MyCourseItemsScreen from './screens/StudentScreen/MyCourseItemsScreen';
+import StudentProfileScreen from './screens/StudentScreen/StudentProfileScreen';
+import StudentDepartmentScreen from './screens/AdminScreen/StudentDepartmentScreen';
+import BooksManagementScreen from './screens/AdminScreen/BooksManagementScreen';
+import CourseManagementScreen from './screens/AdminScreen/CourseManagementScreen';
+import TeacherDepartmentScreen from './screens/AdminScreen/TeacherDepartmentScreen';
+import AdminProfileScreen from './screens/AdminScreen/AdminProfileScreen';
 const Stack = createStackNavigator();
 
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName="LoginScreen1"  screenOptions={{
+        headerStyle: {
+          height: 80,
+          backgroundColor: '#5B5D8B', // Customize header background color
+          
+        },
+        headerTitleStyle: {
+          fontSize: 30, // Customize header title font size
+          textAlign:"center"
+        },
+        headerTintColor: 'white', // Customize header text color
+        headerTitleAlign:"center"
+      }}>
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="ImageScreen" component={ImageScreen} />
         <Stack.Screen name="CounterScreen" component={CounterScreen} />
         <Stack.Screen name="ColorScreen" component={ColorScreen} />
-        <Stack.Screen name="LoginScreen" component={LoginScreen1} options={{headerShown:false}} />
+        <Stack.Screen name="LoginScreen1" component={LoginScreen1} options={{headerShown:false}} />
         <Stack.Screen name="TeacherDashboard" component={TeacherDashboard} />
         <Stack.Screen name="StudentDashboard" component={StudentDashboard} />
         <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
-        
+        <Stack.Screen name="CoursesScreen" component={CoursesScreen} />
+        <Stack.Screen name='LibraryBooksScreen' component={LibraryBooksScreen} />
+        <Stack.Screen name='MyCourseItemsScreen' component={MyCourseItemsScreen} />
+        <Stack.Screen name='StudentProfileScreen' component={StudentProfileScreen} />
+        <Stack.Screen name='StudentDepartmentScreen' component={StudentDepartmentScreen} />
+        <Stack.Screen name='TeacherDepartmentScreen' component={TeacherDepartmentScreen} />
+        <Stack.Screen name='BooksManagementScreen' component={BooksManagementScreen} />
+        <Stack.Screen name='CourseManagementScreen' component={CourseManagementScreen} />
+        <Stack.Screen name='AdminProfileScreen' component={AdminProfileScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

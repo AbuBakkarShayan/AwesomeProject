@@ -14,7 +14,7 @@ const LoginScreen = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch('http://192.168.12.180/FYPAPI/api/user/LoginUser', {
+      const response = await fetch('http://192.168.10.5/FYPAPI/api/user/loginUser', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -23,25 +23,31 @@ const LoginScreen = () => {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        if (data.message === 'user found') {
-          // Check role and navigate accordingly
-          if (data.data[0].role === 'Student') {
-            // Navigate to Student screen
-            navigation.navigate('StudentDashboard');
-          } else if (data.data[0].role === 'Teacher') {
-            // Navigate to Teacher screen
-            navigation.navigate('TeacherDashboard');
+        const responseData = await response.json();
+        if (responseData.status === 'Success') {
+          // Check if data is present and has length > 0
+          if (responseData.data && responseData.data.length > 0) {
+            const role = responseData.data[0].role;
+            if (role === 'Student') {
+              navigation.navigate('StudentDashboard');
+            } else if (role === 'Teacher') {
+              navigation.navigate('TeacherDashboard');
+            } else if (role === 'Admin') {
+              navigation.navigate('AdminDashboard');
+            }
           } else {
-            // Navigate to Admin screen
-            navigation.navigate('AdminDashboard');
+            // No user data returned
+            Alert.alert('Login Failed', 'Invalid username or password.');
           }
         } else {
-          Alert.alert('Login Failed' ,'Invalid username or password.');
+          // Failed status from the backend
+          Alert.alert('Login Failed', 'Invalid username or password.');
         }
       } else {
-        Alert.alert("Failed to login", "Please try again later.");
+        // HTTP error (e.g., 404, 500)
+        Alert.alert('Failed to login', 'Please try again later.');
       }
+      
     } catch (error) {
       Alert.alert('Error:', error);
       Alert.alert('An error occurred while logging in.');
@@ -60,6 +66,7 @@ const LoginScreen = () => {
         placeholderTextColor="#7E7E7E"
         onChangeText={setUsername}
         value={username}
+        autoCapitalize='none'
       />
       <TextInput
         style={styles.input}
@@ -68,6 +75,7 @@ const LoginScreen = () => {
         onChangeText={setPassword}
         value={password}
         secureTextEntry
+        autoCapitalize='none'
       />
       
       <TouchableOpacity onPress={handleLogin} style={styles.buttonStyle}>

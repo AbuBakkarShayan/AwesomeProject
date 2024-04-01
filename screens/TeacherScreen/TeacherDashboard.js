@@ -1,77 +1,68 @@
-// import React from 'react';
-// import { View, Text, TouchableOpacity, StyleSheet, NavigationContainer } from 'react-native';
-// import { createStackNavigator } from '@react-navigation/stack';
-// import Courses from './Courses';
-// import MyBooks from './MyBooks';
-// import LibraryBooks from './LibraryBooks';
-// import StudentLogs from './StudentsLogs';
+import React from 'react';
+import { StyleSheet, Text, View, FlatList } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
+const TeacherDashboard = () => {
+  const list = [
+    {
+      index: '1',
+      name: 'Courses',
+      
+    },
+    {
+      index: '2',
+      name: 'Library Books',
+    
+    },
+    {
+      index: '3',
+      name: 'My Books List',
+          },
+    {
+      index: '4',
+      name: 'Students Log',
+          
+    },
+    {
+      index: '5',
+      name: 'Profile',
+    },
+  ];
 
-// const Stack = createStackNavigator();
-
-
-// const TeacherDashboard = ({ navigation }) => {
-//   return (
-//     <View style={styles.container}>
-//       <TouchableOpacity style={styles.option} title="Courses" onPress={() => navigation.navigate('Courses')}>
-//         <Text>Courses</Text>
-//       </TouchableOpacity>
-//       <TouchableOpacity style={styles.option} title="Courses" onPress={() => navigation.navigate('LibraryBooks')}>
-//         <Text>Library Books</Text>
-//       </TouchableOpacity>
-//       <TouchableOpacity style={styles.option} title="Courses" onPress={() => navigation.navigate('MyBooks')}>
-//         <Text>My Books</Text>
-//       </TouchableOpacity>
-//       <TouchableOpacity style={styles.option} title="Courses" onPress={() => navigation.navigate('StudentLogs')}>
-//         <Text>Student Logs</Text>
-//       </TouchableOpacity>
-//     </View>
-//   );
-// };
-
-// const TeacherDashboardNavigator = () => {
-//   return (
-//     <NavigationContainer>
-//       <Stack.Navigator>
-       
-//         <Stack.Screen name="Courses" component={Courses} />
-//         <Stack.Screen name="LibraryBooks" component={LibraryBooks} />
-//         <Stack.Screen name="MyBooks" component={MyBooks} />
-//         <Stack.Screen name="StudentLogs" component={StudentLogs} />
-//       </Stack.Navigator>
-//     </NavigationContainer>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-//   option: {
-//     padding: 10,
-//     marginVertical: 5,
-//     backgroundColor: '#f0f0f0',
-//     borderRadius: 5,
-//   },
-//   screen: {
-//     flex: 1,
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-// });
-
-// export default TeacherDashboardNavigator;
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
-
-export default function TeacherDashboard() {
   return (
     <View>
-      <Text>TeacherDashboard</Text>
+      <FlatList
+        style={styles.listStyle}
+        keyExtractor={(item) => item.index}
+        data={list}
+        renderItem={({ item }) => (
+          <View style={styles.listStyle}>
+            <TouchableOpacity>
+            <Text style={styles.textStyle}>{item.name}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      />
+      
     </View>
-  )
-}
+  );
+};
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  listStyle:{
+    textAlign:"center",
+    marginTop:20,
+    marginHorizontal:5, 
+   
+  },
+  textStyle: {
+    fontSize: 30,
+    color:"white",
+    backgroundColor:"#5B5D8B",
+    padding:30, 
+    textAlign:"center",
+   // paddingBottom:30
+  },
+});
+
+export default TeacherDashboard;
