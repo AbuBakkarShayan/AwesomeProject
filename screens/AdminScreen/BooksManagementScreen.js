@@ -11,7 +11,7 @@ const BooksManagementScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>CourseManagementScreen</Text>
+      <Text style={styles.text}>BooksManagementScreen</Text>
       <TouchableOpacity style={styles.addButton} onPress={handleAddCourse}>
         <Icon name="add-circle-outline" size={60} color="#5B5D8B" />
       </TouchableOpacity>
