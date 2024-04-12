@@ -9,7 +9,7 @@ const TeacherDashboard = () => {
     {
       index: '1',
       name: 'Courses',
-      screen:'Courses'
+      screen:'TeacherCoursesScreen'
       
     },
     {

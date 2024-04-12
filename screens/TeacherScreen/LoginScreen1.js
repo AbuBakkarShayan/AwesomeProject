@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert , Dimensions, TouchableOpacity} from 'react-native';
-import { useNavigation } from '@react-navigation/native'; // Import navigation hook
+import { View, Text, TextInput, Button, StyleSheet, Alert, Dimensions, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
-const LoginScreen = () => {
-  
+
+const LoginScreen1 = () => {
   const halfScreenHeight = screenHeight / 2.5;
   const navigation = useNavigation(); // Initialize navigation
 
@@ -14,7 +15,7 @@ const LoginScreen = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch('http://192.168.178.100/FYPAPI/api/user/loginUser', {
+      const response = await fetch('http://192.168.10.6/FYPAPI/api/user/loginuser', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -22,12 +23,18 @@ const LoginScreen = () => {
         body: JSON.stringify({ username, password }),
       });
 
+      //console.log('response', response);
+
       if (response.ok) {
         const responseData = await response.json();
         if (responseData.status === 'Success') {
           // Check if data is present and has length > 0
           if (responseData.data && responseData.data.length > 0) {
             const role = responseData.data[0].role;
+            // Save username and password to AsyncStorage
+            await AsyncStorage.setItem('username', username);
+            await AsyncStorage.setItem('password', password);
+
             if (role === 'Student') {
               navigation.navigate('StudentDashboard');
             } else if (role === 'Teacher') {
@@ -49,15 +56,16 @@ const LoginScreen = () => {
       }
       
     } catch (error) {
-      Alert.alert('Error:', error);
-      Alert.alert('An error occurred while logging in.');
+      console.log('Error: ', error); // Log the error to the console
+      Alert.alert('An error occurred while logging in: ' + error.message); // Display a detailed error message to the user
     }
+    
   };
 
   return (
     <View style={styles.container}>
       <View style={{ height: halfScreenHeight,width: screenWidth, backgroundColor: '#5B5D8B', alignItems: "center", justifyContent:"center"}}>
-      <Text style={{fontSize:30,color:"white"}}>Welcome!</Text>
+        <Text style={{fontSize:30,color:"white"}}>Welcome!</Text>
       </View>
       <Text style={styles.title}>Please Sign in to Continue</Text>
       <TextInput
@@ -79,8 +87,8 @@ const LoginScreen = () => {
       />
       
       <TouchableOpacity onPress={handleLogin} style={styles.buttonStyle}>
-      <Text style={styles.buttonText}>Login</Text>
-    </TouchableOpacity>
+        <Text style={styles.buttonText}>Login</Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -128,6 +136,5 @@ const styles = StyleSheet.create({
   }
 });
 
-export default LoginScreen;
-
+export default LoginScreen1;
 
