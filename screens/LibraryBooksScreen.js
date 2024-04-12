@@ -4,7 +4,7 @@ import React from 'react'
 export default function LibraryBooksScreen() {
   return (
     <View>
-      <Text>LibraryBooksScreen</Text>
+      <Text style={{color:"black"}}>LibraryBooksScreen</Text>
     </View>
   )
 }

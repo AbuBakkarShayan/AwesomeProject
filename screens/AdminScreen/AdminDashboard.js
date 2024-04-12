@@ -53,6 +53,7 @@ const AdminDashboard = () => {
 const styles = StyleSheet.create({
   listStyle: {
     marginTop: 20,
+    padding:8
   },
   listItem: {
     backgroundColor: '#5B5D8B',

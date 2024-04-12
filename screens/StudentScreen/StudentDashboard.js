@@ -1,29 +1,37 @@
 import React from 'react';
-import { StyleSheet, Text, View, FlatList } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { StyleSheet, Text, View, FlatList,TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native'; // Importing useNavigation hook
 
 const StudentDashboard = () => {
+  const navigation = useNavigation();
   const list = [
     {
       index: '1',
       name: 'Courses',
+      screen: 'CoursesScreen',
       
     },
     {
       index: '2',
       name: 'Library Books',
+      screen: 'LibraryBooksScreen', // Define the corresponding screen name
     
     },
     {
       index: '3',
       name: 'My Course Items',
-          },
+      screen: 'MyCourseItemsScreen',
+    },
     {
       index: '4',
       name: 'Profile',
-          
+      screen:'StudentProfileScreen'  
     },
   ];
+
+  const navigateToScreen = (screenName) => {
+    navigation.navigate(screenName); // Navigate to the screen based on screen name
+  };
 
   return (
     <View>
@@ -33,8 +41,8 @@ const StudentDashboard = () => {
         keyExtractor={(item) => item.index}
         data={list}
         renderItem={({ item }) => (
-          <View style={styles.listStyle}>
-            <TouchableOpacity>
+          <View style={styles.listItem}>
+            <TouchableOpacity onPress={()=>navigateToScreen(item.screen)}>
             <Text style={styles.textStyle}>{item.name}</Text>
             </TouchableOpacity>
           </View>
@@ -47,20 +55,21 @@ const StudentDashboard = () => {
 };
 
 const styles = StyleSheet.create({
-  listStyle:{
-    textAlign:"center",
-    marginTop:20,
-    marginHorizontal:5, 
-   
+  listStyle: {
+    marginTop: 20,
+    padding:8
+  },
+  listItem: {
+    backgroundColor: '#5B5D8B',
+    margin: 5,
+    padding: 20,
+    borderRadius: 10,
   },
   textStyle: {
-    fontSize: 30,
-    color:"white",
-    backgroundColor:"#5B5D8B",
-    padding:30, 
-    textAlign:"center",
-   // paddingBottom:30
-  },
-});
+    fontSize: 20,
+    color: 'white',
+    textAlign: 'center',
+  },});
 
 export default StudentDashboard;
+

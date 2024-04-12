@@ -7,7 +7,7 @@ const StudentDepartmentScreen = () => {
   // Function to fetch departments from the API
   const fetchDepartments = async () => {
     try {
-      const response = await fetch('http://192.168.10.5/FYPAPI/api/department/alldepartment');
+      const response = await fetch('http://192.168.178.100/FYPAPI/api/department/alldepartment');
       if (!response.ok) {
         throw new Error('Failed to fetch departments');
       }
@@ -31,9 +31,7 @@ const StudentDepartmentScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.screenTitle}>Student Management</Text>
-      <Button title="Refresh Departments" onPress={fetchDepartments} />
+    <View style={styles.container}>      
       <FlatList
         data={departments}
         renderItem={renderDepartmentItem}
@@ -48,11 +46,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#fff',
-  },
-  screenTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
+    
   },
   itemContainer: {
     paddingVertical: 10,
@@ -60,11 +54,15 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     backgroundColor: '#5B5D8B',
     borderRadius: 8,
+    
   },
   departmentName: {
     fontSize: 16,
+    color:"white",
+    textAlign:"center"
   },
 });
 
 export default StudentDepartmentScreen;
 
+//<Button title="Refresh Departments" onPress={fetchDepartments} />

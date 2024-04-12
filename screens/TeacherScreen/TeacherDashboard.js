@@ -1,34 +1,41 @@
 import React from 'react';
 import { StyleSheet, Text, View, FlatList } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useNavigation } from '@react-navigation/core';
 
 const TeacherDashboard = () => {
+  const navigation=useNavigation();
   const list = [
     {
       index: '1',
       name: 'Courses',
+      screen:'Courses'
       
     },
     {
       index: '2',
       name: 'Library Books',
-    
+      screen:'LibraryBooksScreen',
     },
     {
       index: '3',
       name: 'My Books List',
-          },
+      screen:'MyBooksScreen'
+    },
     {
       index: '4',
       name: 'Students Log',
-          
+      screen:'StudentLogsScreen'  
     },
     {
       index: '5',
       name: 'Profile',
+      screen:'StudentProfileScreen'
     },
   ];
-
+  const navigateToScreen = (screenName) => {
+    navigation.navigate(screenName); // Navigate to the screen based on screen name
+  };
   return (
     <View>
       <FlatList
@@ -36,8 +43,8 @@ const TeacherDashboard = () => {
         keyExtractor={(item) => item.index}
         data={list}
         renderItem={({ item }) => (
-          <View style={styles.listStyle}>
-            <TouchableOpacity>
+          <View style={styles.listItem}>
+            <TouchableOpacity onPress={()=>navigateToScreen(item.screen)}>
             <Text style={styles.textStyle}>{item.name}</Text>
             </TouchableOpacity>
           </View>
@@ -49,19 +56,20 @@ const TeacherDashboard = () => {
 };
 
 const styles = StyleSheet.create({
-  listStyle:{
-    textAlign:"center",
-    marginTop:20,
-    marginHorizontal:5, 
-   
+  listStyle: {
+    marginTop: 20,
+    padding:8
+  },
+  listItem: {
+    backgroundColor: '#5B5D8B',
+    margin: 5,
+    padding: 20,
+    borderRadius: 10,
   },
   textStyle: {
-    fontSize: 30,
-    color:"white",
-    backgroundColor:"#5B5D8B",
-    padding:30, 
-    textAlign:"center",
-   // paddingBottom:30
+    fontSize: 20,
+    color: 'white',
+    textAlign: 'center',
   },
 });
 

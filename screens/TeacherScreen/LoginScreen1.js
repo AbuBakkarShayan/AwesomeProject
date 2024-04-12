@@ -14,7 +14,7 @@ const LoginScreen = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch('http://192.168.10.5/FYPAPI/api/user/loginUser', {
+      const response = await fetch('http://192.168.178.100/FYPAPI/api/user/loginUser', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

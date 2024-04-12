@@ -10,6 +10,7 @@ import ColorScreen from './screens/ColorScreen';
 import LoginScreen1 from './screens/TeacherScreen/LoginScreen1';
 import TScreenComponent from './screens/Components/TScreenComponent';
 import TeacherDashboard from './screens/TeacherScreen/TeacherDashboard';
+import StudentLogsScreen from './screens/TeacherScreen/StudentsLogsScreen';
 import StudentDashboard from './screens/StudentScreen/StudentDashboard';
 import AdminDashboard from './screens/AdminScreen/AdminDashboard';
 import CoursesScreen from './screens/StudentScreen/CoursesScreen';
@@ -21,6 +22,7 @@ import BooksManagementScreen from './screens/AdminScreen/BooksManagementScreen';
 import CourseManagementScreen from './screens/AdminScreen/CourseManagementScreen';
 import TeacherDepartmentScreen from './screens/AdminScreen/TeacherDepartmentScreen';
 import AdminProfileScreen from './screens/AdminScreen/AdminProfileScreen';
+import MyBooksScreen from './screens/TeacherScreen/MyBooksScreen';
 const Stack = createStackNavigator();
 
 const App = () => {
@@ -33,7 +35,7 @@ const App = () => {
           
         },
         headerTitleStyle: {
-          fontSize: 30, // Customize header title font size
+          fontSize: 20, // Customize header title font size
           textAlign:"center"
         },
         headerTintColor: 'white', // Customize header text color
@@ -45,6 +47,8 @@ const App = () => {
         <Stack.Screen name="ColorScreen" component={ColorScreen} />
         <Stack.Screen name="LoginScreen1" component={LoginScreen1} options={{headerShown:false}} />
         <Stack.Screen name="TeacherDashboard" component={TeacherDashboard} />
+        <Stack.Screen name='MyBooksScreen' component={MyBooksScreen} />
+        <Stack.Screen name='StudentLogsScreen' component={StudentLogsScreen} />
         <Stack.Screen name="StudentDashboard" component={StudentDashboard} />
         <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
         <Stack.Screen name="CoursesScreen" component={CoursesScreen} />
