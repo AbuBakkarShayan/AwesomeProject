@@ -20,6 +20,8 @@ import MyCourseItemsScreen from './screens/StudentScreen/MyCourseItemsScreen';
 import StudentProfileScreen from './screens/StudentScreen/StudentProfileScreen';
 import StudentDepartmentScreen from './screens/AdminScreen/StudentDepartmentScreen';
 import AddStudentScreen from './screens/AdminScreen/AddStudentScreen';
+import AddStudentBatch from './screens/AdminScreen/AddStudentBatch';
+import AddSingleStudent from './screens/AdminScreen/AddSingleStudent';
 import BooksManagementScreen from './screens/AdminScreen/BooksManagementScreen';
 import CourseManagementScreen from './screens/AdminScreen/CourseManagementScreen';
 import TeacherDepartmentScreen from './screens/AdminScreen/TeacherDepartmentScreen';
@@ -64,6 +66,8 @@ const App = () => {
         <Stack.Screen name='StudentProfileScreen' component={StudentProfileScreen} />
         <Stack.Screen name='StudentDepartmentScreen' component={StudentDepartmentScreen} />
         <Stack.Screen name='AddStudentScreen' component={AddStudentScreen} />
+        <Stack.Screen name='AddStudentBatch' component={AddStudentBatch} />
+        <Stack.Screen name='AddSingleStudent' component={AddSingleStudent} />
         <Stack.Screen name='TeacherDepartmentScreen' component={TeacherDepartmentScreen} />
         <Stack.Screen name='BooksManagementScreen' component={BooksManagementScreen} />
         <Stack.Screen name='CourseManagementScreen' component={CourseManagementScreen} />

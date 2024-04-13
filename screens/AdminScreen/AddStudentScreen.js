@@ -26,8 +26,10 @@ const AddStudentScreen = () => {
     setIsModalVisible(false);
     if (option === 'batch') {
       // Navigate to add batch screen
+      navigation.navigate("AddStudentBatch")
     } else if (option === 'single') {
       // Navigate to add single student screen
+      navigation.navigate("AddSingleStudent")
     }
   };
 
