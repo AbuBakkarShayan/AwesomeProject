@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert,launchImageLibrary } from 'react-native';
-import ImagePicker from 'react-native-image-picker'; // Import ImagePicker for selecting images from device
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
 
 const UpdateCourseScreen = () => {
   const [courseCode, setCourseCode] = useState('');
   const [courseName, setCourseName] = useState('');
   const [creditHours, setCreditHours] = useState('');
-  const [courseImage, setCourseImage] = useState(null);
   const [courseContentUri, setCourseContentUri] = useState('');
 
   const handleChooseImage = () => {
@@ -34,10 +32,9 @@ const UpdateCourseScreen = () => {
     console.log('Course Code:', courseCode);
     console.log('Course Name:', courseName);
     console.log('Credit Hours:', creditHours);
-    console.log('Course Image:', courseImage);
     console.log('Course Content URI:', courseContentUri);
     // Add your logic to call the API here
-    Alert.alert('Course Added Successfully');
+    Alert.alert('Course Updated Successfully');
   };
 
   return (
@@ -65,26 +62,16 @@ const UpdateCourseScreen = () => {
       />
       <TextInput
         style={styles.input}
-        placeholder="Course Image Path"
-        placeholderTextColor={"#7E7E7E"}
-        value={courseImage}
-        editable={false} // Make the TextInput read-only
-      />
-      <TouchableOpacity style={styles.button} /*onPress={handleChooseImage}*/>
-        <Text style={styles.buttonText}>Choose Image</Text>
-      </TouchableOpacity>
-      <TextInput
-        style={styles.input}
         placeholder="Course Content URI"
         placeholderTextColor={"#7E7E7E"}
         /*onChangeText={text => setCourseContentUri(text)}
         value={courseContentUri}*/
       />
       <TouchableOpacity style={styles.button} /*onPress={handleEmbedURL}*/>
-        <Text style={styles.buttonText}>Embed URL</Text>
+        <Text style={styles.buttonText}>Update URL</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.button} onPress={handleAddCourse}>
-        <Text style={styles.buttonText}>Update Course</Text>
+        <Text style={styles.buttonText}>Update</Text>
       </TouchableOpacity>
     </View>
   );
