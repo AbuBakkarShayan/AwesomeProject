@@ -7,7 +7,7 @@ const TeacherDepartmentScreen = () => {
   // Function to fetch departments from the API
   const fetchDepartments = async () => {
     try {
-      const response = await fetch('http://192.168.10.5/FYPAPI/api/department/alldepartment');
+      const response = await fetch('http://192.168.121.86/FYPAPI/api/department/alldepartment');
       if (!response.ok) {
         throw new Error('Failed to fetch departments');
       }
