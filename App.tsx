@@ -24,6 +24,7 @@ import AddStudentBatch from './screens/AdminScreen/AddStudentBatch';
 import AddSingleStudent from './screens/AdminScreen/AddSingleStudent';
 import BooksManagementScreen from './screens/AdminScreen/BooksManagementScreen';
 import CourseManagementScreen from './screens/AdminScreen/CourseManagementScreen';
+import CourseComponent from './screens/AdminScreen/customcomponent/coursecomponent';
 import TeacherDepartmentScreen from './screens/AdminScreen/TeacherDepartmentScreen';
 import AdminProfileScreen from './screens/AdminScreen/AdminProfileScreen';
 import AddCourseScreen from './screens/AdminScreen/AddCourseScreen';

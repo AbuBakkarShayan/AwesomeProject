@@ -1,17 +1,62 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, FlatList } from 'react-native';
 import React from 'react';
 import { useNavigation } from '@react-navigation/core';
-import Icon from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/Ionicons';  
+import CourseComponent from './customcomponent/coursecomponent';
 
 const CourseManagementScreen = () => {
   const navigation = useNavigation();
+
+  if (!navigation) {
+    console.error("Navigation is undefined. Make sure CourseManagementScreen is inside a navigation container.");
+    return null; // Or render a fallback component
+  }
+
   const handleAddCourse = () => {
     navigation.navigate('AddCourseScreen');
   };
 
+  // Dummy data for course items
+  const courses = [
+    { id: 1, name: 'Programming Fundamental' },
+    { id: 2, name: 'ICT' },
+    // Add more course items as needed
+  ];
+
+  // Event handlers
+  const handleEditCourse = courseId => {
+    // Navigate to the EditCourseScreen, passing the courseId as a parameter
+    navigation.navigate('UpdateCourseScreen', { courseId });
+  };
+
+  const handleDeleteCourse = courseId => {
+    // Logic for handling delete course
+  };
+
+  const handleEnrollStudent = courseId => {
+    // Logic for handling enroll student
+  };
+
+  const handleEnrollTeacher = courseId => {
+    // Logic for handling enroll teacher
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>CourseManagementScreen</Text>
+      <FlatList
+        data={courses}
+        keyExtractor={item => item.id.toString()}
+        renderItem={({ item }) => (
+          <CourseComponent
+            courseName={item.name}
+            onEdit={() => handleEditCourse(item.id)}
+            onDelete={() => handleDeleteCourse(item.id)}
+            onEnrollStudent={() => handleEnrollStudent(item.id)}
+            onEnrollTeacher={() => handleEnrollTeacher(item.id)}
+            navigation={navigation}
+          />
+        )}
+      />
       <TouchableOpacity style={styles.addButton} onPress={handleAddCourse}>
         <Icon name="add-circle-outline" size={60} color="#5B5D8B" />
       </TouchableOpacity>
@@ -24,11 +69,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  text: {
-    fontSize: 20,
-    marginBottom: 10,
-    color:"black",
   },
   addButton: {
     position: 'absolute',

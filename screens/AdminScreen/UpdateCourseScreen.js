@@ -7,14 +7,6 @@ const UpdateCourseScreen = () => {
   const [creditHours, setCreditHours] = useState('');
   const [courseContentUri, setCourseContentUri] = useState('');
 
-  const handleChooseImage = () => {
-    ImagePicker.launchImageLibrary({}, response => {
-      if (response.uri) {
-        setCourseImage(response.uri);
-      }
-    });
-  };
-
   const handleEmbedURL = () => {
     console.log('Embed URL button pressed');
     // Add logic to handle embedding URL here
