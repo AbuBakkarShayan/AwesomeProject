@@ -1,40 +1,43 @@
-import { Alert, StyleSheet, TextInput, View, Button } from 'react-native';
+import { Alert, StyleSheet, TextInput, View, Button,TouchableOpacity ,Text } from 'react-native';
 import React from 'react';
-import FilePickerManager from 'react-native-file-picker';
-import { request, PERMISSIONS } from 'react-native-permissions';
+import { useState,useEffect } from 'react';
+import DocumentPicker from 'react-native-document-picker';
 
 const AddStudentBatch = () => {
-  const [filePath, setFilePath] = React.useState("");
 
-  const handlePickFile = async () => {
-    const permissionResult = await request(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE);
-    if (permissionResult !== 'granted') {
-      Alert.alert("Permission Required", "Please grant permission to access files");
-      return;
-    }
-    FilePickerManager.showFilePicker(null, async (response) => {
-      if (response.didCancel) {
-        Alert.alert("User Canceled File Picker");
-      } else if (response.error) {
-        console.log("Error", response.error);
-        Alert.alert("An error occurred while picking the file");
-      } else {
-        setFilePath(response.path);
-      }
-    });
-  };
+  const [selectedFile, setSelectedFile] = useState("");
 
+  useEffect(() => {
+  a
+  }, [selectedFile]);
+
+const selectDoc= async ()=>{
+  try{
+const doc = await DocumentPicker.pickSingle({
+  type:[DocumentPicker.types.xls],
+});
+setSelectedFile(doc.name);
+  }
+  catch(err){
+if(DocumentPicker.isCancel(err))
+console.log("User cancel the Upoad", err)
+else
+console.log(err);
+  }
+}
+  
   return (
     <View style={styles.container}>
       <TextInput
         style={styles.input}
-        value={filePath}
+        value={selectedFile}
         placeholder="Upload Excel File"
         placeholderTextColor="#7E7E7E"
         editable={false}
       />
-      <Button title="Upload Excel File" onPress={handlePickFile} />
-      {/* <TouchableOpacity style={styles.button} ><Text style={styles.buttonText}>Add Batch</Text></TouchableOpacity> */}
+
+       <TouchableOpacity style={styles.button} onPress={selectDoc}><Text style={styles.buttonText}>Upload Batch File</Text></TouchableOpacity>
+
     </View>
   );
 };
@@ -53,6 +56,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     width: '100%',
     color: "black",
+    color:"#7E7E7E"
   },
   button: {
     backgroundColor: '#5B5D8B',

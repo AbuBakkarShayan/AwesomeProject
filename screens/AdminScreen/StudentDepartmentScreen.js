@@ -1,3 +1,4 @@
+import config from '../../config';
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -9,10 +10,14 @@ const StudentDepartmentScreen = () => {
   const navigation = useNavigation();
   const [departments, setDepartments] = useState([]);
 
+  //Variable for API URL
+  const loginEndPoint =  '/department/alldepartment';
+  const fullUrl= config.baseURL+loginEndPoint;
+
   // Function to fetch departments from the API
   const fetchDepartments = async () => {
     try {
-      const response = await fetch('http://192.168.121.86/FYPAPI/api/department/alldepartment');
+      const response = await fetch(fullUrl);
       if (!response.ok) {
         throw new Error('Failed to fetch departments');
       }

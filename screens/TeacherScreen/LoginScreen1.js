@@ -1,3 +1,4 @@
+import config from '../../config';
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, Dimensions, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -13,9 +14,12 @@ const LoginScreen1 = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
+  //Variable for API URL
+  const loginEndPoint =  '/user/loginuser';
+  const fullUrl= config.baseURL+loginEndPoint;
   const handleLogin = async () => {
     try {
-      const response = await fetch('http://192.168.121.86/FYPAPI/api/user/loginuser', {
+      const response = await fetch(fullUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
