@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert,launchImageLibrary } from 'react-native';
-//import ImagePicker from 'react-native-image-picker'; // Import ImagePicker for selecting images from device
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native'; // Import useNavigation hook from React Navigation
 
 const AddBookScreen = () => {
+ const navigation = useNavigation(); // Initialize navigation
+
   const [bookTitle, setBookTitle] = useState('');
   const [bookCategory, setBookCategory] = useState('');
-  const [bookCoverPage, setBookCoverpage] = useState('');
   const [bookPdf, setBookPdf] = useState(null);
   const [bookAuthor, setBookAuthor] = useState('');
 
@@ -24,20 +25,23 @@ const AddBookScreen = () => {
 
   const handleAddCourse = () => {
     // Input validation
-    if (!bookTitle || !bookCategory || !bookCoverPage || !bookPdf) {
-      Alert.alert('All fields are required');
-      return;
-    }
+    // if (!bookTitle || !bookCategory || !bookCoverPage || !bookPdf) {
+    //   Alert.alert('All fields are required');
+    //   return;
+    // }
 
     // Implement logic to add course (e.g., call API)
     console.log('Add Book button pressed');
     console.log('Book Title:', bookTitle);
     console.log('Book Category:', bookCategory);
-    console.log('Book CoverPage:', bookCoverPage);
     console.log('Book Pdf:', bookPdf);
     console.log('Book Author:', bookAuthor);
     // Add your logic to call the API here
     Alert.alert('Book Added Successfully');
+
+    // Navigate to AddTOC screen after adding the book
+    navigation.navigate('AddTOC');
+
   };
 
   return (
@@ -56,17 +60,6 @@ const AddBookScreen = () => {
         onChangeText={text => setBookCategory(text)}
         value={bookCategory}
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Book Coverpage"
-        placeholderTextColor={"#7E7E7E"}
-        onChangeText={text => setBookCoverpage(text)}
-        value={bookCoverPage}
-        editable={false}
-      />
-      <TouchableOpacity style={styles.button} /*onPress={handleEmbedURL}*/>
-        <Text style={styles.buttonText}>Choose Image</Text>
-      </TouchableOpacity>
       <TextInput
         style={styles.input}
         placeholder="Book PDF"

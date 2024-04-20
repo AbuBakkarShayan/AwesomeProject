@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity, FlatList } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, FlatList, Alert } from 'react-native';
 import React from 'react';
 import { useNavigation } from '@react-navigation/core';
 import Icon from 'react-native-vector-icons/Ionicons';  
@@ -17,28 +17,49 @@ const CourseManagementScreen = () => {
   };
 
   // Dummy data for course items
-  const courses = [
+  const [courses, setCourses] = React.useState([
     { id: 1, name: 'Programming Fundamental' },
     { id: 2, name: 'ICT' },
     // Add more course items as needed
-  ];
+  ]);
 
   // Event handlers
   const handleEditCourse = courseId => {
     // Navigate to the EditCourseScreen, passing the courseId as a parameter
-    navigation.navigate('UpdateCourseScreen', { courseId });
+    navigation.navigate('UpdateCourse', { courseId });
   };
 
   const handleDeleteCourse = courseId => {
-    // Logic for handling delete course
+    Alert.alert(
+      'Confirm Deletion',
+      'Are you sure you want to delete this course?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          onPress: () => {
+            // Logic for handling delete course
+            setCourses(prevCourses => prevCourses.filter(course => course.id !== courseId));
+          },
+          style: 'destructive',
+        },
+      ],
+      { cancelable: false }
+    );
   };
 
   const handleEnrollStudent = courseId => {
     // Logic for handling enroll student
+    navigation.navigate('EnrollStudentScreen', { courseId });
   };
 
   const handleEnrollTeacher = courseId => {
     // Logic for handling enroll teacher
+    navigation.navigate('AssignTeacher', { courseId });
   };
 
   return (

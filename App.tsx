@@ -24,13 +24,17 @@ import AddStudentBatch from './screens/AdminScreen/AddStudentBatch';
 import AddSingleStudent from './screens/AdminScreen/AddSingleStudent';
 import BooksManagementScreen from './screens/AdminScreen/BooksManagementScreen';
 import CourseManagementScreen from './screens/AdminScreen/CourseManagementScreen';
+import AssignTeacher from './screens/AdminScreen/AssignTeacher';
+import EnrollStudent from './screens/AdminScreen/EnrollStudent';
 import CourseComponent from './screens/AdminScreen/customcomponent/coursecomponent';
 import TeacherDepartmentScreen from './screens/AdminScreen/TeacherDepartmentScreen';
 import AdminProfileScreen from './screens/AdminScreen/AdminProfileScreen';
 import AddCourseScreen from './screens/AdminScreen/AddCourseScreen';
 import UpdateCourseScreen from './screens/AdminScreen/UpdateCourseScreen';
 import AddBookScreen from './screens/AdminScreen/AddBookScreen';
+import AddTOC from './screens/AdminScreen/AddTOC';
 import MyBooksScreen from './screens/TeacherScreen/MyBooksScreen';
+
 
 const Stack = createStackNavigator();
 
@@ -72,9 +76,12 @@ const App = () => {
         <Stack.Screen name='TeacherDepartmentScreen' component={TeacherDepartmentScreen} />
         <Stack.Screen name='BooksManagementScreen' component={BooksManagementScreen} />
         <Stack.Screen name='CourseManagementScreen' component={CourseManagementScreen} />
+        <Stack.Screen name='AssignTeacher' component={AssignTeacher} />
+        <Stack.Screen name="EnrollStudent" component={EnrollStudent} />
         <Stack.Screen name='AddCourseScreen' component={AddCourseScreen} />
         <Stack.Screen name='UpdateCourseScreen' component={UpdateCourseScreen} />
         <Stack.Screen name='AddBookScreen' component={AddBookScreen} />
+        <Stack.Screen name='AddTOC' component={AddTOC} />
         <Stack.Screen name='AdminProfileScreen' component={AdminProfileScreen} />
       </Stack.Navigator>
     </NavigationContainer>

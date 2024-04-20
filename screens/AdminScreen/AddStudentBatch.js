@@ -8,7 +8,7 @@ const AddStudentBatch = () => {
   const [selectedFile, setSelectedFile] = useState("");
 
   useEffect(() => {
-  a
+  
   }, [selectedFile]);
 
 const selectDoc= async ()=>{

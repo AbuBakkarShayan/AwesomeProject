@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
 
-const UpdateCourseScreen = () => {
+const UpdateCourse = () => {
   const [courseCode, setCourseCode] = useState('');
   const [courseName, setCourseName] = useState('');
   const [creditHours, setCreditHours] = useState('');
@@ -98,4 +98,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default UpdateCourseScreen;
+export default UpdateCourse;

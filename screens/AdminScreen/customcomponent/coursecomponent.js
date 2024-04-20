@@ -10,17 +10,17 @@ const CourseComponent = ({ courseName, onEdit, onDelete, onEnrollStudent, onEnro
 
   const navigateToDeleteScreen = () => {
     // Navigate to the delete screen
-    navigation.navigate('DeleteCourseScreen');
+    //navigation.navigate('DeleteCourseScreen');
   };
 
   const navigateToEnrollStudentScreen = () => {
     // Navigate to the enroll student screen
-    navigation.navigate('EnrollStudentScreen');
+    navigation.navigate('EnrollStudent');
   };
 
   const navigateToEnrollTeacherScreen = () => {
     // Navigate to the enroll teacher screen
-    navigation.navigate('EnrollTeacherScreen');
+    navigation.navigate('AssignTeacher');
   };
 
   return (
