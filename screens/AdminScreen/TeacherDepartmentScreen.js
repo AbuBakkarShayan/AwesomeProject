@@ -1,18 +1,19 @@
-import config from '../../config';
+//import config from '../../config';
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, FlatList, StyleSheet } from 'react-native';
+import baseURL from '../../config';
 
 const TeacherDepartmentScreen = () => {
   const [departments, setDepartments] = useState([]);
 
   //Variable for API URL
   const loginEndPoint =  '/department/alldepartment';
-  const fullUrl= config.baseURL+loginEndPoint;
+  //const fullUrl= config.baseURL+loginEndPoint;
 
   // Function to fetch departments from the API
   const fetchDepartments = async () => {
     try {
-      const response = await fetch(fullUrl);
+      const response = await fetch(`${baseURL+loginEndPoint}`);
       if (!response.ok) {
         throw new Error('Failed to fetch departments');
       }

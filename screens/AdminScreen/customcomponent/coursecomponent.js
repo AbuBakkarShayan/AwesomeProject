@@ -1,42 +1,24 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet,Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const CourseComponent = ({ courseName, onEdit, onDelete, onEnrollStudent, onEnrollTeacher, navigation }) => {
-  const navigateToEditScreen = () => {
-    // Navigate to the edit screen
-    navigation.navigate('UpdateCourseScreen');
-  };
 
-  const navigateToDeleteScreen = () => {
-    // Navigate to the delete screen
-    //navigation.navigate('DeleteCourseScreen');
-  };
-
-  const navigateToEnrollStudentScreen = () => {
-    // Navigate to the enroll student screen
-    navigation.navigate('EnrollStudent');
-  };
-
-  const navigateToEnrollTeacherScreen = () => {
-    // Navigate to the enroll teacher screen
-    navigation.navigate('AssignTeacher');
-  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.courseName}>{courseName}</Text>
       <View style={styles.iconsContainer}>
-        <TouchableOpacity onPress={navigateToEditScreen}>
+        <TouchableOpacity onPress={onEdit}>
           <Icon name="create-outline" size={24} color="#C4C4C4" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={navigateToDeleteScreen}>
+        <TouchableOpacity onPress={onDelete}>
           <Icon name="trash-outline" size={24} color="#C4C4C4" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={navigateToEnrollStudentScreen}>
+        <TouchableOpacity onPress={onEnrollStudent}>
           <Icon name="person-outline" size={24} color="#C4C4C4" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={navigateToEnrollTeacherScreen}>
+        <TouchableOpacity onPress={onEnrollTeacher}>
           <Icon name="school-outline" size={24} color="#C4C4C4" />
         </TouchableOpacity>
       </View>

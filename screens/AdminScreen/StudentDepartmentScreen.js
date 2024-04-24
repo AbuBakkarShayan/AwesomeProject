@@ -2,6 +2,7 @@ import config from '../../config';
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import baseURL from '../../config';
 
 // Department context to manage state and provide update function
 const DepartmentContext = createContext();
@@ -11,13 +12,13 @@ const StudentDepartmentScreen = () => {
   const [departments, setDepartments] = useState([]);
 
   //Variable for API URL
-  const loginEndPoint =  '/department/alldepartment';
-  const fullUrl= config.baseURL+loginEndPoint;
+  const loginEndPoint =  `${baseURL}/department/alldepartment`;
+  //const fullUrl= config.baseURL+loginEndPoint;
 
   // Function to fetch departments from the API
   const fetchDepartments = async () => {
     try {
-      const response = await fetch(fullUrl);
+      const response = await fetch(loginEndPoint);
       if (!response.ok) {
         throw new Error('Failed to fetch departments');
       }

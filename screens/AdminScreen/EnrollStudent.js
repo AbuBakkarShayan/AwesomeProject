@@ -1,12 +1,21 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
-import DropDownPicker from 'react-native-dropdown-picker';
+import { SelectList } from 'react-native-dropdown-select-list'
 
 const EnrollStudent = () => {
   const [semester, setSemester] = useState('');
   const [session, setSession] = useState('');
-  const [selectedOption, setSelectedOption] = useState(null);
+  const [selected, setSelected] = React.useState("");
 
+  const data = [
+    {key:'1', value:'Awais'},
+    {key:'2', value:'Shayan'},
+    {key:'3', value:'Hani'},
+    {key:'4', value:'Sapna'},
+    {key:'5', value:'Mehran'},
+    {key:'6', value:'Maddy'},
+    {key:'7', value:'Umair'},
+]
   return (
     <View style={styles.container}>
       <TextInput
@@ -23,21 +32,17 @@ const EnrollStudent = () => {
         value={session}
         onChangeText={text => setSession(text)}
       />
-      <DropDownPicker
-        items={[
-          { label: 'Option 1', value: 'option1' },
-          { label: 'Option 2', value: 'option2' },
-          { label: 'Option 3', value: 'option3' },
-          { label: 'Option 4', value: 'option4' },
-          { label: 'Option 5', value: 'option5' },
-        ]}
-        defaultValue={selectedOption}
-        containerStyle={styles.dropdownContainer}
-        style={styles.dropdown}
-        dropDownStyle={styles.dropdownItems}
-        placeholder="Select an option..."
-        onChangeItem={item => setSelectedOption(item.value)}
-      />
+      <SelectList 
+        setSelected={(val) => setSelected(val)} 
+        data={data} 
+        save="value"
+        // onSelect={() => alert(selected)}
+        dropdownTextStyles={{color:"black"}}
+        placeholder='Select an option'
+        inputStyles={{ color:'black'}}
+        boxStyles={{marginBottom:15,width:383}}
+        dropdownStyles={{marginBottom:20}}
+    />
       <TouchableOpacity style={styles.button}>
         <Text style={styles.buttonText}>Enroll User</Text>
       </TouchableOpacity>

@@ -26,35 +26,37 @@ const CourseManagementScreen = () => {
   // Event handlers
   const handleEditCourse = courseId => {
     // Navigate to the EditCourseScreen, passing the courseId as a parameter
-    navigation.navigate('UpdateCourse', { courseId });
+    navigation.navigate('UpdateCourseScreen', { courseId });
   };
 
-  const handleDeleteCourse = courseId => {
-    Alert.alert(
-      'Confirm Deletion',
-      'Are you sure you want to delete this course?',
-      [
-        {
-          text: 'Cancel',
-          onPress: () => console.log('Cancel Pressed'),
-          style: 'cancel',
-        },
-        {
-          text: 'Delete',
-          onPress: () => {
-            // Logic for handling delete course
-            setCourses(prevCourses => prevCourses.filter(course => course.id !== courseId));
+  const handleDeleteCourse = (courseId) => {
+    const index = courses.findIndex((course) => course.id === courseId);
+    if (index !== -1) {
+      Alert.alert(
+        'Confirm Deletion',
+        'Are you sure you want to delete this course?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: () => {
+              // Remove the course from the list
+              const updatedCourses = [...courses];
+              updatedCourses.splice(index, 1);
+              setCourses(updatedCourses);
+            },
           },
-          style: 'destructive',
-        },
-      ],
-      { cancelable: false }
-    );
+        ],
+        { cancelable: false }
+      );
+    }
   };
+
 
   const handleEnrollStudent = courseId => {
     // Logic for handling enroll student
-    navigation.navigate('EnrollStudentScreen', { courseId });
+    navigation.navigate('EnrollStudent', { courseId });
   };
 
   const handleEnrollTeacher = courseId => {
