@@ -1,40 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Dimensions } from 'react-native';
+//import config from '../../config';
+import React, { useState } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, Alert, Dimensions, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Icon from 'react-native-vector-icons/Ionicons';
 import baseURL from '../../config';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
 const LoginScreen1 = () => {
   const halfScreenHeight = screenHeight / 2.5;
-  const navigation = useNavigation();
+  const navigation = useNavigation(); // Initialize navigation
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  // const [isLogin, setIsLogin]  = useState(false)
 
-  useEffect(() => {
-    checkIfLoggedIn();
-  }, []);
-
-  const checkIfLoggedIn = async () => {
-    const userToken = await AsyncStorage.getItem('userToken');
-    if (userToken) {
-      // User is already logged in, navigate to the appropriate screen based on role
-      const role = await AsyncStorage.getItem('userRole');
-      navigateToDashboard(role);
-    }
-  };
-
-  const togglePasswordVisibility = () => {
+  //Password toggle by eye icon
+  const [showPassword, setShowPassword]= useState(false);
+  const togglePasswordVisibility = ()=>{
     setShowPassword(!showPassword);
   };
 
-  const loginEndPoint = `${baseURL}/user/loginuser`;
-
+  //Variable for API URL
+  const loginEndPoint =  `${baseURL}/user/loginuser`;
+  //const fullUrl= config.baseURL+loginEndPoint;
   const handleLogin = async () => {
     try {
       const response = await fetch(loginEndPoint, {
@@ -45,49 +36,50 @@ const LoginScreen1 = () => {
         body: JSON.stringify({ username, password }),
       });
 
+      //console.log('response', response);
+
       if (response.ok) {
         const responseData = await response.json();
         if (responseData.status === 'Success') {
+          // Check if data is present and has length > 0
           if (responseData.data && responseData.data.length > 0) {
             const role = responseData.data[0].role;
-            await AsyncStorage.setItem('userToken', 'dummyToken'); // Store a dummy token for simplicity
-            await AsyncStorage.setItem('userRole', role);
-            navigateToDashboard(role);
+            // Save username and password to AsyncStorage
+            await AsyncStorage.setItem('username', username);
+            await AsyncStorage.setItem('password', password);
+            //await AsyncStorage.setItem('islogin', true);
+
+            if (role === 'Student') {
+              navigation.navigate('StudentDashboard');
+            } else if (role === 'Teacher') {
+              navigation.navigate('TeacherDashboard');
+            } else if (role === 'Admin') {
+              navigation.navigate('AdminDashboard');
+            }
           } else {
+            // No user data returned
             Alert.alert('Login Failed', 'Invalid username or password.');
           }
         } else {
+          // Failed status from the backend
           Alert.alert('Login Failed', 'Invalid username or password.');
         }
       } else {
+        // HTTP error (e.g., 404, 500)
         Alert.alert('Failed to login', 'Please try again later.');
       }
+      
     } catch (error) {
-      console.log('Error: ', error);
-      Alert.alert('An error occurred while logging in: ' + error.message);
+      console.log('Error: ', error); // Log the error to the console
+      Alert.alert('An error occurred while logging in: ' + error.message); // Display a detailed error message to the user
     }
-  };
-
-  const navigateToDashboard = (role) => {
-    switch (role) {
-      case 'Student':
-        navigation.navigate('StudentDashboard');
-        break;
-      case 'Teacher':
-        navigation.navigate('TeacherDashboard');
-        break;
-      case 'Admin':
-        navigation.navigate('AdminDashboard');
-        break;
-      default:
-        navigation.navigate('LoginScreen1');
-    }
+    
   };
 
   return (
     <View style={styles.container}>
-      <View style={{ height: halfScreenHeight, width: screenWidth, backgroundColor: '#5B5D8B', alignItems: "center", justifyContent: "center" }}>
-        <Text style={{ fontSize: 30, color: "white" }}>Welcome!</Text>
+      <View style={{ height: halfScreenHeight,width: screenWidth, backgroundColor: '#5B5D8B', alignItems: "center", justifyContent:"center"}}>
+        <Text style={{fontSize:30,color:"white"}}>Welcome!</Text>
       </View>
       <Text style={styles.title}>Please Sign in to Continue</Text>
       <TextInput
@@ -99,18 +91,18 @@ const LoginScreen1 = () => {
         autoCapitalize='none'
       />
       <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#7E7E7E"
-          onChangeText={setPassword}
-          value={password}
-          secureTextEntry={!showPassword}
-          autoCapitalize='none'
-        />
-        <TouchableOpacity onPress={togglePasswordVisibility} style={styles.iconContainer}><Icon name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={25} color='#7E7E7E' /></TouchableOpacity>
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        placeholderTextColor="#7E7E7E"
+        onChangeText={setPassword}
+        value={password}
+        secureTextEntry={!showPassword}
+        autoCapitalize='none'
+      />
+      <TouchableOpacity onPress={togglePasswordVisibility } style={styles.iconContainer}><Icon name={showPassword ? 'eye-off-outline' : 'eye-outline' }size={25} color='#7E7E7E'  /></TouchableOpacity>
       </View>
-
+      
       <TouchableOpacity onPress={handleLogin} style={styles.buttonStyle}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
@@ -119,18 +111,19 @@ const LoginScreen1 = () => {
 
 };
 
+
 const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
   },
-
+  
   title: {
-    marginTop: 25,
+    marginTop:25,
     fontSize: 24,
     marginBottom: 20,
-    color: "#7E7E7E"
+    color:"#7E7E7E"
   },
   input: {
     width: '100%',
@@ -138,32 +131,33 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 25,
-    color: "black",
-    marginBottom: 20,
-    fontSize: 18,
-    paddingHorizontal: 30,
-    paddingRight: 40,
+    color:"black",
+    marginBottom:20,
+    fontSize:18,
+    paddingHorizontal:30,
+    paddingRight:40,
   },
   inputContainer: {
-    flexDirection: 'row',
-    position: 'relative',
-    width: '100%'
+     flexDirection: 'row',
+    // alignItems: 'center',
+    position:'relative',
+    width:'100%'
   },
   iconContainer: {
-    position: 'absolute',
-    top: 12,
-    right: 30,
+   position:'absolute',
+   top:12,
+   right: 30,
   },
-  buttonStyle: {
+  buttonStyle:{
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 45,
-    width: 181,
-    height: 59,
-    backgroundColor: "#5B5D8B"
+    borderRadius:45,
+    width:181,
+    height:59,
+    backgroundColor:"#5B5D8B"
   },
-  buttonText: {
-    color: 'white',
+  buttonText:{
+    color: 'white', // Default text color
     fontSize: 16,
     fontWeight: 'bold',
   }

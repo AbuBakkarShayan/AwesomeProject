@@ -1,16 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet,TouchableOpacity} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-//import { navigate } from '@react-navigation/routers/lib/typescript/src/CommonActions';
 import { useNavigation } from '@react-navigation/core';
-import { navigate } from '@react-navigation/routers/lib/typescript/src/CommonActions';
-import LoginScreen1 from '../TeacherScreen/LoginScreen1';
-
 
 const AdminProfileScreen = () => {
-  const navigation=useNavigation();
+  const navigation = useNavigation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+
+  useEffect(() => {
+    checkIfLoggedIn();
+  }, []);
+
+  const checkIfLoggedIn = async () => {
+    const userToken = await AsyncStorage.getItem('userToken');
+    if (!userToken) {
+      await AsyncStorage.removeItem('lastScreen');
+      await AsyncStorage.removeItem('userRole');
+      navigation.navigate('LoginScreen1');
+    }
+  };
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -19,7 +29,7 @@ const AdminProfileScreen = () => {
         const storedPassword = await AsyncStorage.getItem('password');
         console.log('Stored Username:', storedUsername);
         console.log('Stored Password: ', storedPassword);
-        if (storedUsername && storedPassword !== null) {
+        if (storedUsername !== null && storedPassword !== null) {
           setUsername(storedUsername);
           setPassword(storedPassword);
         }
@@ -29,29 +39,28 @@ const AdminProfileScreen = () => {
     };
     fetchData();
   }, []);
-  
-  const handleLogout = async ()=>{
-    try{
+
+  const handleLogout = async () => {
+    try {
       await AsyncStorage.removeItem('username');
       await AsyncStorage.removeItem('password');
-      const username = await AsyncStorage.getItem('username');
+      const removedUsername = await AsyncStorage.getItem('username');
 
-      //Check if the username was removed from AsyncStorage
-      if(username==null){
+      // Check if the username was successfully removed from AsyncStorage
+      if (removedUsername === null) {
         console.log("Username is successfully removed from AsyncStorage");
-      }
-      else{
+        navigation.navigate('LoginScreen1');
+      } else {
         console.log('Failed to remove username from AsyncStorage');
       }
-    }
-    catch(error){
+    } catch (error) {
       console.log("Error cleaning AsyncStorage: ", error);
     }
-    navigation.navigate('LoginScreen1');
   };
+
   return (
     <View style={styles.container}>
-       <Text style={styles.label}>Username:</Text>
+      <Text style={styles.label}>Username:</Text>
       <Text style={styles.value}>{username}</Text>
       <Text style={styles.label}>Password:</Text>
       <Text style={styles.value}>{password}</Text>
@@ -77,19 +86,19 @@ const styles = StyleSheet.create({
   value: {
     fontSize: 16,
     marginBottom: 15,
-    color: '#666', // medium gray
+    color: 'black', // medium gray
   },
-  buttonText:{
+  buttonText: {
     color: '#fff', // white
     fontSize: 16,
     fontWeight: 'bold',
   },
-  buttonStyle:{
+  buttonStyle: {
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 45,
     marginTop: 20,
-    backgroundColor:"#5B5D8B"
+    backgroundColor: "#5B5D8B"
   }
 });
 
