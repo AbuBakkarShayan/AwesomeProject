@@ -4,25 +4,25 @@ import UserListComponent from './customcomponent/userComponent';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import baseURL from '../../config';
 
-const AddStudentScreen = () => {
+const TeachersScreen = () => {
   const navigation = useNavigation();
   const { departmentId } = useRoute().params; // Destructure departmentId directly
-  const [students, setStudents] = useState([]);
+  const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true); // Add loading state
 
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const response = await fetch(`${baseURL}/Student/getAllStudent?departmentid=${departmentId}`);
+        const response = await fetch(`${baseURL}/Teacher/getAllTeacher?departmentid=${departmentId}`);
         const data = await response.json();
         console.log('Fetched data:', data);
         if (data.status === 'Success') {
-          setStudents(data.data);
+          setTeachers(data.data);
         } else {
           throw new Error(data.message || 'Unknown error');
         }
       } catch (error) {
-        console.error('Error fetching students:', error.message);
+        console.error('Error fetching teachers:', error.message);
       } finally {
         setLoading(false);
       }
@@ -31,8 +31,8 @@ const AddStudentScreen = () => {
     fetchStudents();
   }, [departmentId]);
 
-  const handleDeleteStudent = (studentId) => {
-    setStudents(prevStudents => prevStudents.filter(student => student.id !== studentId));
+  const handleDeleteTeacher = (teacherId) => {
+    setTeachers(prevTeachers => prevTeachers.filter(teacher => teacher.id !== teacherId));
   };
 
   return (
@@ -41,13 +41,12 @@ const AddStudentScreen = () => {
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
         <UserListComponent
-        users={students}
-        onDeleteUser={handleDeleteStudent}
-        addButtonLabel="Add Student"
+        users={teachers}
+        onDeleteUser={handleDeleteTeacher}
+        addButtonLabel="Add Teacher"
         onAddOptionPress={() => navigation.navigate("AddSingleStudent")}
         onAddBatchPress={() => navigation.navigate("AddStudentBatch")}
       />
-      
 
       )}
     </View>
@@ -62,4 +61,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddStudentScreen;
+export default TeachersScreen;

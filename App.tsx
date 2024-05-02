@@ -28,6 +28,7 @@ import AssignTeacher from './screens/AdminScreen/AssignTeacher';
 import EnrollStudent from './screens/AdminScreen/EnrollStudent';
 import CourseComponent from './screens/AdminScreen/customcomponent/coursecomponent';
 import TeacherDepartmentScreen from './screens/AdminScreen/TeacherDepartmentScreen';
+import TeachersScreen from './screens/AdminScreen/TeachersScreen';
 import AdminProfileScreen from './screens/AdminScreen/AdminProfileScreen';
 import AddCourseScreen from './screens/AdminScreen/AddCourseScreen';
 import UpdateCourseScreen from './screens/AdminScreen/UpdateCourseScreen';
@@ -69,11 +70,12 @@ const App = () => {
         <Stack.Screen name='LibraryBooksScreen' component={LibraryBooksScreen} />
         <Stack.Screen name='MyCourseItemsScreen' component={MyCourseItemsScreen} />
         <Stack.Screen name='StudentProfileScreen' component={StudentProfileScreen} />
-        <Stack.Screen name='StudentDepartmentScreen' component={StudentDepartmentScreen} />
-        <Stack.Screen name='AddStudentScreen' component={AddStudentScreen} />
+        <Stack.Screen name='StudentDepartmentScreen' component={StudentDepartmentScreen} options={{title:'Student Departments'}}/>
+        <Stack.Screen name='AddStudentScreen' component={AddStudentScreen} options={{title:'Students'}}/>
         <Stack.Screen name='AddStudentBatch' component={AddStudentBatch} />
         <Stack.Screen name='AddSingleStudent' component={AddSingleStudent} />
-        <Stack.Screen name='TeacherDepartmentScreen' component={TeacherDepartmentScreen} />
+        <Stack.Screen name='TeacherDepartmentScreen' component={TeacherDepartmentScreen} options={{title:'Teacher Departments'}}/>
+        <Stack.Screen name='TeachersScreen' component={TeachersScreen} options={{title:'Teachers'}}/>
         <Stack.Screen name='BooksManagementScreen' component={BooksManagementScreen} />
         <Stack.Screen name='CourseManagementScreen' component={CourseManagementScreen} />
         <Stack.Screen name='AssignTeacher' component={AssignTeacher} />

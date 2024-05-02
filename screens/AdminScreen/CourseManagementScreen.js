@@ -1,68 +1,100 @@
 import { StyleSheet, Text, View, TouchableOpacity, FlatList, Alert } from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/core';
 import Icon from 'react-native-vector-icons/Ionicons';  
 import CourseComponent from './customcomponent/coursecomponent';
+import baseURL from '../../config';
 
 const CourseManagementScreen = () => {
   const navigation = useNavigation();
+  const [departments, setDepartments] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  if (!navigation) {
-    console.error("Navigation is undefined. Make sure CourseManagementScreen is inside a navigation container.");
-    return null; // Or render a fallback component
-  }
+  useEffect(() => {
+    fetchDepartments();
+    fetchCourses();
+  }, []);
+
+  const fetchDepartments = async () => {
+    try {
+      const response = await fetch(`${baseURL}/department/alldepartment`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch departments');
+      }
+      const data = await response.json();
+      setDepartments(data);
+    } catch (error) {
+      console.error('Error fetching departments:', error);
+      setError(error.message);
+    }
+  };
+
+  const fetchCourses = async () => {
+    try {
+      const response = await fetch(`${baseURL}/course/getall`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch courses');
+      }
+      const data = await response.json();
+      setCourses(data);
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddCourse = () => {
     navigation.navigate('AddCourseScreen');
   };
 
-  // Dummy data for course items
-  const [courses, setCourses] = React.useState([
-    { id: 1, name: 'Programming Fundamental' },
-    { id: 2, name: 'ICT' },
-    // Add more course items as needed
-  ]);
-
-  // Event handlers
   const handleEditCourse = courseId => {
-    // Navigate to the EditCourseScreen, passing the courseId as a parameter
     navigation.navigate('UpdateCourseScreen', { courseId });
   };
 
-  const handleDeleteCourse = (courseId) => {
-    const index = courses.findIndex((course) => course.id === courseId);
-    if (index !== -1) {
-      Alert.alert(
-        'Confirm Deletion',
-        'Are you sure you want to delete this course?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Delete',
-            style: 'destructive',
-            onPress: () => {
-              // Remove the course from the list
-              const updatedCourses = [...courses];
-              updatedCourses.splice(index, 1);
-              setCourses(updatedCourses);
-            },
-          },
-        ],
-        { cancelable: false }
-      );
+  const handleDeleteCourse = async courseId => {
+    try {
+      const response = await fetch(`${baseURL}/course/deletecourse/${courseId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete course');
+      }
+      setCourses(prevCourses => prevCourses.filter(course => course.id !== courseId));
+    } catch (error) {
+      console.error('Error deleting course:', error);
+      setError(error.message);
     }
   };
 
-
-  const handleEnrollStudent = courseId => {
-    // Logic for handling enroll student
+  const handleEnrollStudent = async courseId => {
+    // Logic for enrolling student
     navigation.navigate('EnrollStudent', { courseId });
   };
 
-  const handleEnrollTeacher = courseId => {
-    // Logic for handling enroll teacher
+  const handleEnrollTeacher = async courseId => {
+    // Logic for enrolling teacher
     navigation.navigate('AssignTeacher', { courseId });
   };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text>Error: {error}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -76,7 +108,6 @@ const CourseManagementScreen = () => {
             onDelete={() => handleDeleteCourse(item.id)}
             onEnrollStudent={() => handleEnrollStudent(item.id)}
             onEnrollTeacher={() => handleEnrollTeacher(item.id)}
-            navigation={navigation}
           />
         )}
       />
