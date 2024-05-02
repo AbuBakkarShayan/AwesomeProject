@@ -1,35 +1,20 @@
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, Alert } from 'react-native';
+// CourseManagementScreen.js
+import { StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/core';
 import Icon from 'react-native-vector-icons/Ionicons';  
-import CourseComponent from './customcomponent/coursecomponent';
+import CourseComponent from './customcomponent/coursecomponent'; // Adjust import path
 import baseURL from '../../config';
 
 const CourseManagementScreen = () => {
   const navigation = useNavigation();
-  const [departments, setDepartments] = useState([]);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchDepartments();
     fetchCourses();
   }, []);
-
-  const fetchDepartments = async () => {
-    try {
-      const response = await fetch(`${baseURL}/department/alldepartment`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch departments');
-      }
-      const data = await response.json();
-      setDepartments(data);
-    } catch (error) {
-      console.error('Error fetching departments:', error);
-      setError(error.message);
-    }
-  };
 
   const fetchCourses = async () => {
     try {
@@ -38,15 +23,15 @@ const CourseManagementScreen = () => {
         throw new Error('Failed to fetch courses');
       }
       const data = await response.json();
-      setCourses(data);
+      setCourses(data.data); // Assuming data structure is { data: [...courses], status: 'Success' }
     } catch (error) {
       console.error('Error fetching courses:', error);
       setError(error.message);
     } finally {
-      setLoading(false);
+      setLoading(false); // Set loading to false regardless of success or error
     }
   };
-
+  
   const handleAddCourse = () => {
     navigation.navigate('AddCourseScreen');
   };
@@ -55,20 +40,22 @@ const CourseManagementScreen = () => {
     navigation.navigate('UpdateCourseScreen', { courseId });
   };
 
-  const handleDeleteCourse = async courseId => {
+  const handleDeleteCourse = async courseCode => {
     try {
-      const response = await fetch(`${baseURL}/course/deletecourse/${courseId}`, {
+      const response = await fetch(`${baseURL}/Course/deleteCourse/${courseCode}`, {
         method: 'DELETE',
       });
+      const responseData = await response.json();
       if (!response.ok) {
-        throw new Error('Failed to delete course');
+        throw new Error(responseData.message || 'Failed to delete course');
       }
-      setCourses(prevCourses => prevCourses.filter(course => course.id !== courseId));
+      setCourses(prevCourses => prevCourses.filter(course => course.courseCode !== courseCode));
     } catch (error) {
       console.error('Error deleting course:', error);
       setError(error.message);
     }
-  };
+};
+
 
   const handleEnrollStudent = async courseId => {
     // Logic for enrolling student
@@ -96,20 +83,15 @@ const CourseManagementScreen = () => {
     );
   }
 
+
   return (
     <View style={styles.container}>
-      <FlatList
-        data={courses}
-        keyExtractor={item => item.id.toString()}
-        renderItem={({ item }) => (
-          <CourseComponent
-            courseName={item.name}
-            onEdit={() => handleEditCourse(item.id)}
-            onDelete={() => handleDeleteCourse(item.id)}
-            onEnrollStudent={() => handleEnrollStudent(item.id)}
-            onEnrollTeacher={() => handleEnrollTeacher(item.id)}
-          />
-        )}
+      <CourseComponent
+        courses={courses}
+        onEdit={handleEditCourse}
+        onDelete={handleDeleteCourse}
+        onEnrollStudent={handleEnrollStudent}
+        onEnrollTeacher={handleEnrollTeacher}
       />
       <TouchableOpacity style={styles.addButton} onPress={handleAddCourse}>
         <Icon name="add-circle-outline" size={60} color="#5B5D8B" />
