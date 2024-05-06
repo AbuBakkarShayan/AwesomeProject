@@ -114,8 +114,9 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: 16,
-    fontWeight: 'bold',
+    //fontWeight: 'bold',
     color: 'black',
+    
   },
   iconContainer: {
     flexDirection: 'row',

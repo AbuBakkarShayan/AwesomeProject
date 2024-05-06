@@ -19,6 +19,7 @@ import LibraryBooksScreen from './screens/LibraryBooksScreen';
 import MyCourseItemsScreen from './screens/StudentScreen/MyCourseItemsScreen';
 import StudentProfileScreen from './screens/StudentScreen/StudentProfileScreen';
 import StudentDepartmentScreen from './screens/AdminScreen/StudentDepartmentScreen';
+import UpdateDepartmentScreen from './screens/AdminScreen/UpdateDepartmentScreen';
 import AddStudentScreen from './screens/AdminScreen/AddStudentScreen';
 import AddStudentBatch from './screens/AdminScreen/AddStudentBatch';
 import AddSingleStudent from './screens/AdminScreen/AddSingleStudent';
@@ -29,6 +30,7 @@ import EnrollStudent from './screens/AdminScreen/EnrollStudent';
 import CourseComponent from './screens/AdminScreen/customcomponent/coursecomponent';
 import TeacherDepartmentScreen from './screens/AdminScreen/TeacherDepartmentScreen';
 import TeachersScreen from './screens/AdminScreen/TeachersScreen';
+import AddSingleTeacher from './screens/AdminScreen/AddSingleTeacher';
 import AdminProfileScreen from './screens/AdminScreen/AdminProfileScreen';
 import AddCourseScreen from './screens/AdminScreen/AddCourseScreen';
 import UpdateCourseScreen from './screens/AdminScreen/UpdateCourseScreen';
@@ -71,11 +73,13 @@ const App = () => {
         <Stack.Screen name='MyCourseItemsScreen' component={MyCourseItemsScreen} />
         <Stack.Screen name='StudentProfileScreen' component={StudentProfileScreen} />
         <Stack.Screen name='StudentDepartmentScreen' component={StudentDepartmentScreen} options={{title:'Student Departments'}}/>
+        <Stack.Screen name='UpdateDepartmentScreen' component={UpdateDepartmentScreen} options={{title:'Update Department'}}/>
         <Stack.Screen name='AddStudentScreen' component={AddStudentScreen} options={{title:'Students'}}/>
         <Stack.Screen name='AddStudentBatch' component={AddStudentBatch} />
-        <Stack.Screen name='AddSingleStudent' component={AddSingleStudent} />
+        <Stack.Screen name='AddSingleStudent' component={AddSingleStudent} options={{title:'Add Single Student'}}/>
         <Stack.Screen name='TeacherDepartmentScreen' component={TeacherDepartmentScreen} options={{title:'Teacher Departments'}}/>
         <Stack.Screen name='TeachersScreen' component={TeachersScreen} options={{title:'Teachers'}}/>
+        <Stack.Screen name='AddSingleTeacher' component={AddSingleTeacher} options={{title:'Add Teacher'}}/>
         <Stack.Screen name='BooksManagementScreen' component={BooksManagementScreen} />
         <Stack.Screen name='CourseManagementScreen' component={CourseManagementScreen} />
         <Stack.Screen name='AssignTeacher' component={AssignTeacher} />

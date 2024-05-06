@@ -46,6 +46,7 @@ const AddStudentScreen = () => {
         addButtonLabel="Add Student"
         onAddOptionPress={() => navigation.navigate("AddSingleStudent")}
         onAddBatchPress={() => navigation.navigate("AddStudentBatch")}
+        
       />
       
 

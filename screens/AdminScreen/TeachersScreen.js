@@ -44,7 +44,7 @@ const TeachersScreen = () => {
         users={teachers}
         onDeleteUser={handleDeleteTeacher}
         addButtonLabel="Add Teacher"
-        onAddOptionPress={() => navigation.navigate("AddSingleStudent")}
+        onAddOptionPress={() => navigation.navigate("AddSingleTeacher")}
         onAddBatchPress={() => navigation.navigate("AddStudentBatch")}
       />
 
