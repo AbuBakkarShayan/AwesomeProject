@@ -8,7 +8,7 @@ const EnrollStudent = () => {
   const [selected, setSelected] = React.useState("");
 
   const data = [
-    {key:'1', value:'Awais'},
+    {key:'1', value:'No option'},
     {key:'2', value:'Shayan'},
     {key:'3', value:'Hani'},
     {key:'4', value:'Sapna'},

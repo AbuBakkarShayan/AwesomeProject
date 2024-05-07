@@ -1,23 +1,17 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/Ionicons'; 
 import baseURL from '../../config';
 
-// Department context to manage state and provide update function
-const DepartmentContext = createContext();
-
-const TeacherDepartmentScreen = () => {
+const TeacherDepartmentScreen = ({ route }) => {
   const navigation = useNavigation();
   const [departments, setDepartments] = useState([]);
-
-  //Variable for API URL
-  const loginEndPoint =  `${baseURL}/department/alldepartment`;
-  //const fullUrl= config.baseURL+loginEndPoint;
 
   // Function to fetch departments from the API
   const fetchDepartments = async () => {
     try {
-      const response = await fetch(loginEndPoint);
+      const response = await fetch(`${baseURL}/department/alldepartment`);
       if (!response.ok) {
         throw new Error('Failed to fetch departments');
       }
@@ -28,29 +22,58 @@ const TeacherDepartmentScreen = () => {
     }
   };
 
-  // Fetch departments when component mounts
+  // Fetch departments when component mounts or when updatedDepartmentName param changes
   useEffect(() => {
     fetchDepartments();
-  }, []);
+  }, [route.params?.updatedDepartmentName]); // this line ensure to directly fetch the updated name of the department
 
-  // Render individual department item
+  const handleUpdateDepartment = (departmentId) => {
+    // Handle update logic, navigate to update screen with departmentId
+    navigation.navigate('UpdateDepartmentScreen', { departmentId, currentDepartmentName: departments.find(dep => dep.departmentId === departmentId).departmentName });
+  };
+
+  const handleDeleteDepartment = async (departmentId) => {
+    // Handle delete logic, send delete request to API
+    try {
+      const response = await fetch(`${baseURL}/department/deleteDepartment/${departmentId}`, {
+        method: 'DELETE',
+      });
+      const data = await response.json();
+      if (data.status === 'Success') {
+        // Remove deleted department from state
+        setDepartments(departments.filter(department => department.departmentId !== departmentId));
+      } else {
+        Alert.alert('Error', data.message);
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'Something went wrong. Please try again later.');
+    }
+  };
+
   const renderDepartmentItem = ({ item }) => (
     <TouchableOpacity onPress={() => navigation.navigate('TeachersScreen', { departmentId: item.departmentId })}>
       <View style={styles.itemContainer}>
         <Text style={styles.departmentName}>{item.departmentName}</Text>
+        <View style={styles.iconContainer}>
+          <TouchableOpacity onPress={() => handleUpdateDepartment(item.departmentId,'teacher')}>
+            <Icon name="create-outline" size={24} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleDeleteDepartment(item.departmentId)}>
+            <Icon name="trash-outline" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
       </View>
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
-      <DepartmentContext.Provider value={{ departments, setDepartments }}>
-        <FlatList
-          data={departments}
-          renderItem={renderDepartmentItem}
-          keyExtractor={(item) => item.departmentId.toString()}
-        />
-      </DepartmentContext.Provider>
+      <FlatList
+        data={departments}
+        renderItem={renderDepartmentItem}
+        keyExtractor={(item) => item.departmentId.toString()}
+      />
     </View>
   );
 };
@@ -62,6 +85,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   itemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 15,
     marginVertical: 5,
@@ -69,13 +95,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   departmentName: {
-    fontSize: 16,
+    fontSize: 18,
     color: 'white',
-    textAlign: 'center',
+  },
+  iconContainer: {
+    flexDirection: 'row',
   },
 });
 
 export default TeacherDepartmentScreen;
-
-// Outside the component, create a custom hook to access department context
-export const useDepartmentContext = () => useContext(DepartmentContext);

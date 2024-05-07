@@ -7,6 +7,7 @@ const AssignTeacher = () => {
 
   return (
     <View style={styles.container}>
+      
       <DropDownPicker
         items={[
           { label: 'Option 1', value: 'option1' },

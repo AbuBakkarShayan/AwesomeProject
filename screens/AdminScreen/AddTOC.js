@@ -83,6 +83,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
     width: '100%',
+    color:'#7E7E7E',
   },
   keywordsContainer: {
     flexDirection: 'row',
@@ -97,9 +98,11 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 10,
     marginRight: 10,
+    
   },
   keywordText: {
     marginRight: 5,
+    color:'#7E7E7E',
   },
   cancelButton: {
     marginLeft: 5,
@@ -116,6 +119,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginRight: 10,
     flex: 1,
+    color:'#7E7E7E',
   },
   addButton: {
     backgroundColor: '#5B5D8B',
@@ -130,9 +134,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#5B5D8B',
     padding: 10,
     borderRadius: 5,
-    width: '100%',
+    width: '50%',
     alignItems: 'center',
     marginBottom: 10,
+    alignSelf:'center'
   },
   buttonText: {
     color: 'white',

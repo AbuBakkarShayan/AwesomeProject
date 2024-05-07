@@ -59,11 +59,12 @@ const UserListComponent = ({ users, onDeleteUser, addButtonLabel, onAddOptionPre
     onAddBatchPress();
   }; 
 
-  const backgroundColor = user.shouldHaveBlueBackground ? '#ADD8E6' : 'white';
+  
 
-  const renderItem = ({ item }) => (
-    <View style={[styles.itemContainer, { backgroundColor }]}>
-      <Text style={styles.userName}>{item.name}</Text>
+  const renderItem = ({ item }) =>  (
+    <View style={[styles.itemContainer]}>
+      <Text style={styles.userName}>{item.teacherName}</Text>
+      <Text style={styles.userName}>{item.studentName}</Text>
       <View style={styles.iconContainer}>
         <Icon name="create-outline" style={styles.icon} onPress={() => navigation.navigate('EditUserScreen', { userId: item.id })} />
         <Icon name="trash" style={styles.icon} onPress={() => confirmDelete(item.id)} />

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation hook from React Navigation
+import DocumentPicker from 'react-native-document-picker';
 
 const AddBookScreen = () => {
  const navigation = useNavigation(); // Initialize navigation
@@ -10,20 +11,20 @@ const AddBookScreen = () => {
   const [bookPdf, setBookPdf] = useState(null);
   const [bookAuthor, setBookAuthor] = useState('');
 
-  const handleChooseImage = () => {
-    ImagePicker.launchImageLibrary({}, response => {
-      if (response.uri) {
-        setCourseImage(response.uri);
-      }
-    });
-  };
+  // const handleChooseImage = () => {
+  //   ImagePicker.launchImageLibrary({}, response => {
+  //     if (response.uri) {
+  //       setCourseImage(response.uri);
+  //     }
+  //   });
+  // };
 
   const handleEmbedURL = () => {
     console.log('Embed URL button pressed');
     // Add logic to handle embedding URL here
   };
 
-  const handleAddCourse = () => {
+  const handleAddBook = () => {
     // Input validation
     // if (!bookTitle || !bookCategory || !bookCoverPage || !bookPdf) {
     //   Alert.alert('All fields are required');
@@ -34,7 +35,7 @@ const AddBookScreen = () => {
     console.log('Add Book button pressed');
     console.log('Book Title:', bookTitle);
     console.log('Book Category:', bookCategory);
-    console.log('Book Pdf:', bookPdf);
+    console.log('Book Pdf:', setSelectedFile);
     console.log('Book Author:', bookAuthor);
     // Add your logic to call the API here
     Alert.alert('Book Added Successfully');
@@ -43,6 +44,27 @@ const AddBookScreen = () => {
     navigation.navigate('AddTOC');
 
   };
+
+  const [selectedFile, setSelectedFile] = useState("");
+
+  useEffect(() => {
+  
+  }, [selectedFile]);
+
+const selectDoc= async ()=>{
+  try{
+const doc = await DocumentPicker.pickSingle({
+  type:[DocumentPicker.types.pdf],
+});
+setSelectedFile(doc.name);
+  }
+  catch(err){
+if(DocumentPicker.isCancel(err))
+console.log("User cancel the Upoad", err)
+else
+console.log(err);
+  }
+}
 
   return (
     <View style={styles.container}>
@@ -64,21 +86,22 @@ const AddBookScreen = () => {
         style={styles.input}
         placeholder="Book PDF"
         placeholderTextColor={"#7E7E7E"}
-        value={bookPdf}
+        value={selectedFile}
+        
         editable={false} // Make the TextInput read-only
       />
-      <TouchableOpacity style={styles.button} /*onPress={handleChooseImage}*/>
+      <TouchableOpacity style={styles.button} onPress={selectDoc}>
         <Text style={styles.buttonText}>Choose File</Text>
       </TouchableOpacity>
       <TextInput
         style={styles.input}
         placeholder="Author"
         placeholderTextColor={"#7E7E7E"}
-        /*onChangeText={text => setCourseContentUri(text)}
-        value={bookAuthor}*/
+        onChangeText={text => setBookAuthor(text)}
+        value={bookAuthor}
       />
       
-      <TouchableOpacity style={styles.button} onPress={handleAddCourse}>
+      <TouchableOpacity style={styles.button} onPress={handleAddBook}>
         <Text style={styles.buttonText}>Add Book</Text>
       </TouchableOpacity>
     </View>
@@ -99,7 +122,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
     width: '100%',
-    color:"black",
+    color:"#7E7E7E",
   },
   button: {
     backgroundColor: '#5B5D8B',

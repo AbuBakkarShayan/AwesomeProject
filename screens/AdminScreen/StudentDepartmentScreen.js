@@ -56,7 +56,7 @@ const StudentDepartmentScreen = ({ route }) => {
       <View style={styles.itemContainer}>
         <Text style={styles.departmentName}>{item.departmentName}</Text>
         <View style={styles.iconContainer}>
-          <TouchableOpacity onPress={() => handleUpdateDepartment(item.departmentId)}>
+          <TouchableOpacity onPress={() => handleUpdateDepartment(item.departmentId,'student')}>
             <Icon name="create-outline" size={24} color="white" />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => handleDeleteDepartment(item.departmentId)}>

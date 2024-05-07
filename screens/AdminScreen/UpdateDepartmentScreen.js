@@ -8,7 +8,7 @@ const UpdateDepartmentScreen = ({ route }) => {
   const { departmentId, currentDepartmentName } = route.params;
   const [department, setDepartment] = useState(currentDepartmentName);
 
-  const updateDepartment = async () => {
+  const updateDepartment = async (departments,fromScreen) => {
     try {
       const response = await fetch(`${baseURL}/department/updateDepartment`, {
         method: 'PUT',
@@ -23,7 +23,14 @@ const UpdateDepartmentScreen = ({ route }) => {
       const data = await response.json();
       if (data.status === 'Success') {
         // Pass back the updated department name to StudentDepartmentScreen
+        if(fromScreen==='teacher')
+          {
+
+          }
+          else if(fromScreen==='student')
+            {
         navigation.navigate('StudentDepartmentScreen', { updatedDepartmentName: department });
+            }
         Alert.alert('Success', 'Department updated successfully');
       } else {
         Alert.alert('Error', data.message);
@@ -64,6 +71,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
     width: '100%',
+    color:"black",
   },
   button: {
     backgroundColor: '#5B5D8B',
