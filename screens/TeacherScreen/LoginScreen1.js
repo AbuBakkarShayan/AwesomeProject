@@ -79,7 +79,8 @@ const LoginScreen1 = () => {
   return (
     <View style={styles.container}>
       <View style={{ height: halfScreenHeight,width: screenWidth, backgroundColor: '#5B5D8B', alignItems: "center", justifyContent:"center"}}>
-        <Text style={{fontSize:30,color:"white"}}>Welcome!</Text>
+        <Text style={{fontSize:30,color:"white"}}>Digital Library & Lesson Plan</Text>
+        <Text>A project of Northern University, Nowshera (KPK, Pakistan)</Text>
       </View>
       <Text style={styles.title}>Please Sign in to Continue</Text>
       <TextInput

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Alert, StyleSheet } from 'react-native';
+import { View,Text, TextInput, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import baseURL from '../../config';
 
@@ -42,10 +42,9 @@ const UpdateDepartmentScreen = ({ route }) => {
         onChangeText={text => setDepartment(text)}
         value={department}
       />
-      <Button
-        title="Update Department"
-        onPress={updateDepartment}
-      />
+       <TouchableOpacity style={styles.button} onPress={updateDepartment}>
+        <Text style={styles.buttonText}>Update Department</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -59,13 +58,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   input: {
-    height: 40,
-    borderColor: 'gray',
     borderWidth: 1,
-    marginBottom: 20,
-    width: 300,
-    paddingHorizontal: 10,
-    color: "black"
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+    width: '100%',
+  },
+  button: {
+    backgroundColor: '#5B5D8B',
+    padding: 10,
+    borderRadius: 5,
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 10,
+    width:"50%",
+    height:45,
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 

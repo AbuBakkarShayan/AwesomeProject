@@ -4,6 +4,9 @@ import UserListComponent from './customcomponent/userComponent';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import baseURL from '../../config';
 
+
+const textColor = 'gray'; // Define a textColor variable
+
 const AddStudentScreen = () => {
   const navigation = useNavigation();
   const { departmentId } = useRoute().params; // Destructure departmentId directly
@@ -41,13 +44,14 @@ const AddStudentScreen = () => {
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
         <UserListComponent
-        users={students}
-        onDeleteUser={handleDeleteStudent}
-        addButtonLabel="Add Student"
-        onAddOptionPress={() => navigation.navigate("AddSingleStudent")}
-        onAddBatchPress={() => navigation.navigate("AddStudentBatch")}
-        
-      />
+  users={students}
+  onDeleteUser={handleDeleteStudent}
+  addButtonLabel="Add Student"
+  onAddOptionPress={() => navigation.navigate("AddSingleStudent")}
+  onAddBatchPress={() => navigation.navigate("AddStudentBatch")}
+  textColor={textColor} // Pass the textColor prop
+/>
+
       
 
       )}

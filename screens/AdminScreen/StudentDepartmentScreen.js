@@ -57,10 +57,10 @@ const StudentDepartmentScreen = ({ route }) => {
         <Text style={styles.departmentName}>{item.departmentName}</Text>
         <View style={styles.iconContainer}>
           <TouchableOpacity onPress={() => handleUpdateDepartment(item.departmentId)}>
-            <Icon name="create-outline" size={24} color="blue" />
+            <Icon name="create-outline" size={24} color="white" />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => handleDeleteDepartment(item.departmentId)}>
-            <Icon name="trash-outline" size={24} color="red" />
+            <Icon name="trash-outline" size={24} color="white" />
           </TouchableOpacity>
         </View>
       </View>
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   departmentName: {
-    fontSize: 16,
+    fontSize: 18,
     color: 'white',
   },
   iconContainer: {
