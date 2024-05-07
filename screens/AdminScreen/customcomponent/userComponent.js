@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 16,
     //fontWeight: 'bold',
-    color: 'black',
+    color: '#7E7E7E',
     
   },
   iconContainer: {
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
   icon: {
     marginLeft: 10,
     fontSize: 20,
-    color: '#007AFF', // Blue color for icons
+    color: '#7E7E7E', // Blue color for icons
   },
   addButton: {
     alignSelf: 'flex-end',
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   addButtonLabel: {
-    color: '#007AFF',
+    color: '#5B5D8B',
     fontSize: 16,
     fontWeight: 'bold',
   },

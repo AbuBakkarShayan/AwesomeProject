@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation hook from React Navigation
 import DocumentPicker from 'react-native-document-picker';
+import { FlatList } from 'react-native-gesture-handler';
 
 const AddBookScreen = () => {
  const navigation = useNavigation(); // Initialize navigation

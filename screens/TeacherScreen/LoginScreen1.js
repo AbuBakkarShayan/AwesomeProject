@@ -10,7 +10,7 @@ const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
 const LoginScreen1 = () => {
-  const halfScreenHeight = screenHeight / 2.5;
+  const halfScreenHeight = screenHeight / 2;
   const navigation = useNavigation(); // Initialize navigation
 
   const [username, setUsername] = useState('');
