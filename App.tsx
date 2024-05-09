@@ -15,7 +15,7 @@ import StudentLogsScreen from './screens/TeacherScreen/StudentsLogsScreen';
 import StudentDashboard from './screens/StudentScreen/StudentDashboard';
 import AdminDashboard from './screens/AdminScreen/AdminDashboard';
 import CoursesScreen from './screens/StudentScreen/CoursesScreen';
-import LibraryBooksScreen from './screens/LibraryBooksScreen';
+import LibraryScreen from './screens/LibraryScreen';
 import MyCourseItemsScreen from './screens/StudentScreen/MyCourseItemsScreen';
 import StudentProfileScreen from './screens/StudentScreen/StudentProfileScreen';
 import StudentDepartmentScreen from './screens/AdminScreen/StudentDepartmentScreen';
@@ -62,25 +62,26 @@ const App = () => {
         <Stack.Screen name="CounterScreen" component={CounterScreen} />
         <Stack.Screen name="ColorScreen" component={ColorScreen} />
         <Stack.Screen name="LoginScreen1" component={LoginScreen1} options={{ headerShown: false }} />
-        <Stack.Screen name="TeacherDashboard" component={TeacherDashboard} />
-        <Stack.Screen name="TeacherCoursesScreen" component={TeacherCoursesScreen} />
+        <Stack.Screen name="TeacherDashboard" component={TeacherDashboard} options={{title:'Teacher Dashboard'}} />
+        <Stack.Screen name="TeacherCoursesScreen" component={TeacherCoursesScreen} options={{title:'Teacher Courses'
+        }}/>
         <Stack.Screen name='MyBooksScreen' component={MyBooksScreen} />
         <Stack.Screen name='StudentLogsScreen' component={StudentLogsScreen} />
         <Stack.Screen name="StudentDashboard" component={StudentDashboard} />
-        <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
+        <Stack.Screen name="AdminDashboard" component={AdminDashboard} options={{title:'Admin Dashboard'}} />
         <Stack.Screen name="CoursesScreen" component={CoursesScreen} />
-        <Stack.Screen name='LibraryBooksScreen' component={LibraryBooksScreen} />
+        <Stack.Screen name='LibraryScreen' component={LibraryScreen} />
         <Stack.Screen name='MyCourseItemsScreen' component={MyCourseItemsScreen} />
         <Stack.Screen name='StudentProfileScreen' component={StudentProfileScreen} />
-        <Stack.Screen name='StudentDepartmentScreen' component={StudentDepartmentScreen} options={{title:'Student Departments'}}/>
+        <Stack.Screen name='StudentDepartmentScreen' component={StudentDepartmentScreen} options={{title:'Student Management'}}/>
         <Stack.Screen name='UpdateDepartmentScreen' component={UpdateDepartmentScreen} options={{title:'Update Department'}}/>
         <Stack.Screen name='AddStudentScreen' component={AddStudentScreen} options={{title:'Students'}}/>
-        <Stack.Screen name='AddStudentBatch' component={AddStudentBatch} />
+        <Stack.Screen name='AddStudentBatch' component={AddStudentBatch} options={{title:"Batch File"}}/>
         <Stack.Screen name='AddSingleStudent' component={AddSingleStudent} options={{title:'Add Single Student'}}/>
-        <Stack.Screen name='TeacherDepartmentScreen' component={TeacherDepartmentScreen} options={{title:'Teacher Departments'}}/>
+        <Stack.Screen name='TeacherDepartmentScreen' component={TeacherDepartmentScreen} options={{title:'Teacher Management'}}/>
         <Stack.Screen name='TeachersScreen' component={TeachersScreen} options={{title:'Teachers'}}/>
         <Stack.Screen name='AddSingleTeacher' component={AddSingleTeacher} options={{title:'Add Teacher'}}/>
-        <Stack.Screen name='BooksManagementScreen' component={BooksManagementScreen} />
+        <Stack.Screen name='BooksManagementScreen' component={BooksManagementScreen} options={{title:"Books Management"}}/>
         <Stack.Screen name='CourseManagementScreen' component={CourseManagementScreen} />
         <Stack.Screen name='AssignTeacher' component={AssignTeacher} />
         <Stack.Screen name="EnrollStudent" component={EnrollStudent} />
