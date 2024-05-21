@@ -2,8 +2,16 @@ import { Alert, StyleSheet, TextInput, View, Button,TouchableOpacity ,Text } fro
 import React from 'react';
 import { useState,useEffect } from 'react';
 import DocumentPicker from 'react-native-document-picker';
+import LogoutButton from './customcomponent/logoutComponent';
 
 const AddStudentBatch = () => {
+
+  //logout icon in header
+  React.useLayoutEffect(()=>{
+    navigation.setOptions({
+      headerRight:()=><LogoutButton />,
+    });
+  }, [navigation]);
 
   const [selectedFile, setSelectedFile] = useState("");
 

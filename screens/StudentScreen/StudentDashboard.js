@@ -1,8 +1,14 @@
 import React from 'react';
 import { StyleSheet, Text, View, FlatList,TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native'; // Importing useNavigation hook
-
+import LogoutButton from '../AdminScreen/customcomponent/logoutComponent';
 const StudentDashboard = () => {
+  //logout icon in header
+  React.useLayoutEffect(()=>{
+    navigation.setOptions({
+      headerRight:()=><LogoutButton />,
+    });
+  }, [navigation]);
   const navigation = useNavigation();
   const list = [
     {
@@ -13,8 +19,8 @@ const StudentDashboard = () => {
     },
     {
       index: '2',
-      name: 'Library Books',
-      screen: 'LibraryBooksScreen', // Define the corresponding screen name
+      name: 'Library Items',
+      screen: 'LibraryScreen', // Define the corresponding screen name
     
     },
     {

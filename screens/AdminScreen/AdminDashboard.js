@@ -1,8 +1,17 @@
 import React from 'react';
 import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native'; // Import navigation hook
+import LogoutButton from './customcomponent/logoutComponent';
 
 const AdminDashboard = () => {
+
+  //logout icon in header
+  React.useLayoutEffect(()=>{
+    navigation.setOptions({
+      headerRight:()=><LogoutButton />,
+    });
+  }, [navigation]);
+
   const navigation = useNavigation(); // Initialize navigation
 
   const list = [

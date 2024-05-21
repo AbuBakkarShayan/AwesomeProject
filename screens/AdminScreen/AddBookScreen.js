@@ -1,109 +1,152 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native'; // Import useNavigation hook from React Navigation
+import React, { useState } from 'react';
+import { View, TextInput, TouchableOpacity, Text, Alert, StyleSheet } from 'react-native';
 import DocumentPicker from 'react-native-document-picker';
-import { FlatList } from 'react-native-gesture-handler';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import LogoutButton from './customcomponent/logoutComponent';
+import baseURL from '../../config';
 
-const AddBookScreen = () => {
- const navigation = useNavigation(); // Initialize navigation
+const AddBookScreen = ({ navigation }) => {
 
-  const [bookTitle, setBookTitle] = useState('');
-  const [bookCategory, setBookCategory] = useState('');
-  const [bookPdf, setBookPdf] = useState(null);
-  const [bookAuthor, setBookAuthor] = useState('');
+  //logout icon in header
+  React.useLayoutEffect(()=>{
+    navigation.setOptions({
+      headerRight:()=><LogoutButton />,
+    });
+  }, [navigation]);
 
-  // const handleChooseImage = () => {
-  //   ImagePicker.launchImageLibrary({}, response => {
-  //     if (response.uri) {
-  //       setCourseImage(response.uri);
-  //     }
-  //   });
-  // };
+  const [title, setTitle] = useState('');
+  const [category, setCategory] = useState('');
+  const [coverImage, setCoverImage] = useState(null);
+  const [pdfFile, setPdfFile] = useState(null);
+  const [author, setAuthor] = useState('');
+  const [keywords, setKeywords] = useState('');
 
-  const handleEmbedURL = () => {
-    console.log('Embed URL button pressed');
-    // Add logic to handle embedding URL here
+  const handleCoverImagePick = async () => {
+    try {
+      const doc = await DocumentPicker.pickSingle({
+        type: [DocumentPicker.types.images],
+      });
+      setCoverImage(doc.uri); // Update state with file URI
+    } catch (err) {
+      if (DocumentPicker.isCancel(err))
+        console.log("User cancel the Upload", err)
+      else
+        console.log(err);
+    }
   };
 
-  const handleAddBook = () => {
-    // Input validation
-    // if (!bookTitle || !bookCategory || !bookCoverPage || !bookPdf) {
-    //   Alert.alert('All fields are required');
-    //   return;
-    // }
-
-    // Implement logic to add course (e.g., call API)
-    console.log('Add Book button pressed');
-    console.log('Book Title:', bookTitle);
-    console.log('Book Category:', bookCategory);
-    console.log('Book Pdf:', setSelectedFile);
-    console.log('Book Author:', bookAuthor);
-    // Add your logic to call the API here
-    Alert.alert('Book Added Successfully');
-
-    // Navigate to AddTOC screen after adding the book
-    navigation.navigate('AddTOC');
-
+  const handlePdfFilePick = async () => {
+    try {
+      const doc = await DocumentPicker.pickSingle({
+        type: [DocumentPicker.types.pdf],
+      });
+      setPdfFile(doc.uri); // Update state with file URI
+    } catch (err) {
+      if (DocumentPicker.isCancel(err))
+        console.log("User cancel the Upload", err)
+      else
+        console.log(err);
+    }
   };
 
-  const [selectedFile, setSelectedFile] = useState("");
-
-  useEffect(() => {
+  const handleUpload = async () => {
+    try {
+      // Retrieve uploaderId from AsyncStorage
+      const uploaderId = await AsyncStorage.getItem('uploaderId');
+      
+      if (!uploaderId) {
+        throw new Error('Uploader ID not found. Please login again.');
+      }
   
-  }, [selectedFile]);
-
-const selectDoc= async ()=>{
-  try{
-const doc = await DocumentPicker.pickSingle({
-  type:[DocumentPicker.types.pdf],
-});
-setSelectedFile(doc.name);
-  }
-  catch(err){
-if(DocumentPicker.isCancel(err))
-console.log("User cancel the Upoad", err)
-else
-console.log(err);
-  }
-}
+      // Ensure all required fields are filled
+      if (!title || !category || !coverImage || !pdfFile || !author || !keywords) {
+        throw new Error('Please fill in all fields');
+      }
+  
+      // Call your C# API to upload book data
+      const response = await fetch(`${baseURL}/Book/uploadBook`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title,
+          category,
+          coverImage,
+          pdfFile,
+          author,
+          keywords,
+          uploaderId,
+        }),
+      });
+  
+      if (!response.ok) {
+        const errorMessage = await response.text(); // Extract error message from response
+        throw new Error(`Failed to upload book: ${errorMessage}`);
+      }
+  
+      // Navigate to ADDTOC screen
+      navigation.navigate('ADDTOC');
+  
+    } catch (error) {
+      console.log('Error uploading book:', error);
+      Alert.alert('Error', error.message); // Display error message to the user
+    }
+  };
+   
 
   return (
     <View style={styles.container}>
       <TextInput
         style={styles.input}
         placeholder="Title"
-        placeholderTextColor={"#7E7E7E"}
-        onChangeText={text => setBookTitle(text)}
-        value={bookTitle}
+        placeholderTextColor={'black'}
+        value={title}
+        onChangeText={setTitle}
       />
       <TextInput
         style={styles.input}
         placeholder="Category"
-        placeholderTextColor={"#7E7E7E"}
-        onChangeText={text => setBookCategory(text)}
-        value={bookCategory}
+        placeholderTextColor={'black'}
+        value={category}
+        onChangeText={setCategory}
       />
       <TextInput
         style={styles.input}
-        placeholder="Book PDF"
-        placeholderTextColor={"#7E7E7E"}
-        value={selectedFile}
-        
-        editable={false} // Make the TextInput read-only
+        placeholder="Cover Image"
+        placeholderTextColor={'black'}
+        editable={false}
+        value={coverImage ? coverImage.split('/').pop() : ''}
       />
-      <TouchableOpacity style={styles.button} onPress={selectDoc}>
-        <Text style={styles.buttonText}>Choose File</Text>
+      <TouchableOpacity style={styles.button} onPress={handleCoverImagePick}>
+        <Text style={styles.buttonText}>Browse Cover Image</Text>
+      </TouchableOpacity>
+      <TextInput
+        style={styles.input}
+        placeholder="PDF File"
+        placeholderTextColor={'black'}
+        editable={false}
+        value={pdfFile ? pdfFile.split('/').pop() : ''}
+      />
+      <TouchableOpacity style={styles.button} onPress={handlePdfFilePick}>
+        <Text style={styles.buttonText}>Browse PDF File</Text>
       </TouchableOpacity>
       <TextInput
         style={styles.input}
         placeholder="Author"
-        placeholderTextColor={"#7E7E7E"}
-        onChangeText={text => setBookAuthor(text)}
-        value={bookAuthor}
+        placeholderTextColor={'black'}
+        value={author}
+        onChangeText={setAuthor}
       />
-      
-      <TouchableOpacity style={styles.button} onPress={handleAddBook}>
-        <Text style={styles.buttonText}>Add Book</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Keywords"
+        placeholderTextColor={'black'}
+        value={keywords}
+        onChangeText={setKeywords}
+      />
+      <TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
+        <Text style={styles.buttonText}>Upload Book</Text>
       </TouchableOpacity>
     </View>
   );
@@ -112,30 +155,33 @@ console.log(err);
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    //justifyContent: 'center',
+    justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
   },
   input: {
+    width: '80%',
+    marginBottom: 10,
+    padding: 10,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-    width: '100%',
-    color:"#7E7E7E",
+    color: 'black',
   },
   button: {
-    backgroundColor: '#5B5D8B',
+    backgroundColor: '#007bff',
     padding: 10,
     borderRadius: 5,
-    width: '100%',
-    alignItems: 'center',
+    marginBottom: 10,
+  },
+  uploadButton: {
+    backgroundColor: '#28a745',
+    padding: 10,
+    borderRadius: 5,
     marginBottom: 10,
   },
   buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'center',
   },
 });
 

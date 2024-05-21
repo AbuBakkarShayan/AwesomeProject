@@ -2,9 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons'; 
+import LogoutButton from './customcomponent/logoutComponent';
 import baseURL from '../../config';
 
 const TeacherDepartmentScreen = ({ route }) => {
+
+  //logout icon in header
+  React.useLayoutEffect(()=>{
+    navigation.setOptions({
+      headerRight:()=><LogoutButton />,
+    });
+  }, [navigation]);
+
   const navigation = useNavigation();
   const [departments, setDepartments] = useState([]);
 

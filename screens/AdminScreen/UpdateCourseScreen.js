@@ -1,7 +1,16 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
+import LogoutButton from './customcomponent/logoutComponent';
 
-const UpdateCourse = () => {
+const UpdateCourse = ({navigation}) => {
+
+  //logout icon in header
+  React.useLayoutEffect(()=>{
+    navigation.setOptions({
+      headerRight:()=><LogoutButton />,
+    });
+  }, [navigation]);
+
   const [courseCode, setCourseCode] = useState('');
   const [courseName, setCourseName] = useState('');
   const [creditHours, setCreditHours] = useState('');

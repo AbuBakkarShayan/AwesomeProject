@@ -1,9 +1,18 @@
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { useNavigation } from '@react-navigation/core';
+import LogoutButton from './customcomponent/logoutComponent';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const BooksManagementScreen = () => {
+
+  //logout icon in header
+  React.useLayoutEffect(()=>{
+    navigation.setOptions({
+      headerRight:()=><LogoutButton />,
+    });
+  }, [navigation]);
+
   const navigation = useNavigation();
   const handleAddCourse = () => {
     navigation.navigate('AddBookScreen');

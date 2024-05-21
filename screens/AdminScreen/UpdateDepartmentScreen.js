@@ -1,9 +1,18 @@
 import React, { useState } from 'react';
 import { View,Text, TextInput, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import LogoutButton from './customcomponent/logoutComponent';
 import baseURL from '../../config';
 
 const UpdateDepartmentScreen = ({ route }) => {
+
+  //logout icon in header
+  React.useLayoutEffect(()=>{
+    navigation.setOptions({
+      headerRight:()=><LogoutButton />,
+    });
+  }, [navigation]);
+
   const navigation = useNavigation();
   const { departmentId, currentDepartmentName } = route.params;
   const [department, setDepartment] = useState(currentDepartmentName);

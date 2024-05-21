@@ -1,8 +1,17 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import LogoutButton from './customcomponent/logoutComponent';
 import DropDownPicker from 'react-native-dropdown-picker';
 
-const AssignTeacher = () => {
+const AssignTeacher = ({navigation}) => {
+
+  //logout icon in header
+  React.useLayoutEffect(()=>{
+    navigation.setOptions({
+      headerRight:()=><LogoutButton />,
+    });
+  }, [navigation]);
+
   const [selectedOption, setSelectedOption] = useState(null);
 
   return (

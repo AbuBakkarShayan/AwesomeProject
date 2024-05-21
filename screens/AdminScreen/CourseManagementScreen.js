@@ -4,9 +4,18 @@ import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/core';
 import Icon from 'react-native-vector-icons/Ionicons';  
 import CourseComponent from './customcomponent/coursecomponent'; // Adjust import path
+import LogoutButton from './customcomponent/logoutComponent';
 import baseURL from '../../config';
 
 const CourseManagementScreen = () => {
+
+  //logout icon in header
+  React.useLayoutEffect(()=>{
+    navigation.setOptions({
+      headerRight:()=><LogoutButton />,
+    });
+  }, [navigation]);
+
   const navigation = useNavigation();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);

@@ -2,9 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import UserListComponent from './customcomponent/userComponent';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import LogoutButton from './customcomponent/logoutComponent';
 import baseURL from '../../config';
 
 const TeachersScreen = () => {
+
+  //logout icon in header
+  React.useLayoutEffect(()=>{
+    navigation.setOptions({
+      headerRight:()=><LogoutButton />,
+    });
+  }, [navigation]);
+
   const navigation = useNavigation();
   const { departmentId } = useRoute().params; // Destructure departmentId directly
   const [teachers, setTeachers] = useState([]);

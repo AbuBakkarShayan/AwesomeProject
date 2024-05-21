@@ -1,8 +1,16 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert,launchImageLibrary } from 'react-native';
 import ImagePicker from 'react-native-image-picker'; // Import ImagePicker for selecting images from device
+import LogoutButton from './customcomponent/logoutComponent';
 
-const AddCourseScreen = () => {
+const AddCourseScreen = ({navigation}) => {
+//logout icon in header
+  React.useLayoutEffect(()=>{
+    navigation.setOptions({
+      headerRight:()=><LogoutButton />,
+    });
+  }, [navigation]);
+
   const [courseCode, setCourseCode] = useState('');
   const [courseName, setCourseName] = useState('');
   const [creditHours, setCreditHours] = useState('');

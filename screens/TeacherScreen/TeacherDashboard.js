@@ -2,8 +2,17 @@ import React from 'react';
 import { StyleSheet, Text, View, FlatList } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/core';
+import LogoutButton from '../AdminScreen/customcomponent/logoutComponent';
 
 const TeacherDashboard = () => {
+
+  //logout icon in header
+  React.useLayoutEffect(()=>{
+    navigation.setOptions({
+      headerRight:()=><LogoutButton />,
+    });
+  }, [navigation]);
+
   const navigation=useNavigation();
   const list = [
     {

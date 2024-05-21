@@ -1,8 +1,17 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons'; // Import Ionicons for cancel icon
+import Icon from 'react-native-vector-icons/Ionicons'; // Import Ionicons for cancel icon'
+import LogoutButton from './customcomponent/logoutComponent';
 
-const AddTOC = () => {
+const AddTOC = ({navigation}) => {
+
+  //logout icon in header
+  React.useLayoutEffect(()=>{
+    navigation.setOptions({
+      headerRight:()=><LogoutButton />,
+    });
+  }, [navigation]);
+
   const [keywords, setKeywords] = useState([]); // State to store keywords
   const [keywordInput, setKeywordInput] = useState(''); // State to store the value of keyword input
 
