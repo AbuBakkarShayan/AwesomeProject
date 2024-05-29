@@ -1,118 +1,124 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert,launchImageLibrary } from 'react-native';
-import ImagePicker from 'react-native-image-picker'; // Import ImagePicker for selecting images from device
-import LogoutButton from './customcomponent/logoutComponent';
+import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
+import DocumentPicker from 'react-native-document-picker';
+import baseURL from '../../config';
 
-const AddCourseScreen = ({navigation}) => {
-//logout icon in header
-  React.useLayoutEffect(()=>{
-    navigation.setOptions({
-      headerRight:()=><LogoutButton />,
-    });
-  }, [navigation]);
-
+const AddCourseScreen = () => {
   const [courseCode, setCourseCode] = useState('');
   const [courseName, setCourseName] = useState('');
   const [creditHours, setCreditHours] = useState('');
-  const [courseContentUri, setCourseContentUri] = useState('');
+  const [courseContent, setCourseContent] = useState(null);
 
-  const handleChooseImage = () => {
-    ImagePicker.launchImageLibrary({}, response => {
-      if (response.uri) {
-        setCourseImage(response.uri);
-      }
-    });
-  };
-
-  const handleEmbedURL = () => {
-    console.log('Embed URL button pressed');
-    // Add logic to handle embedding URL here
-  };
-
-  const handleAddCourse = () => {
-    // Input validation
-    if (!courseCode || !courseName || !creditHours || !courseContentUri) {
-      Alert.alert('All fields are required');
+  const handleAddCourse = async () => {
+    if (!courseCode.trim()) {
+      Alert.alert('Error', 'Course Code is required');
       return;
     }
 
-    // Implement logic to add course (e.g., call API)
-    console.log('Add course button pressed');
-    console.log('Course Code:', courseCode);
-    console.log('Course Name:', courseName);
-    console.log('Credit Hours:', creditHours);
-    console.log('Course Content URI:', courseContentUri);
-    // Add your logic to call the API here
-    Alert.alert('Course Added Successfully');
+
+
+
+    const formData = new FormData();
+    formData.append('courseCode', courseCode);
+    formData.append('courseName', courseName);
+    formData.append('creditHours', creditHours);
+
+    if (courseContent) {
+      formData.append('courseContent', {
+        uri: courseContent.uri,
+        type: courseContent.type,
+        name: courseContent.name,
+      });
+    }
+
+    try {
+      const response = await fetch(`${baseURL}/Course/addCourse`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      const result = await response.json();
+      if (result.status === 'Success') {
+        Alert.alert('Success', 'Course added successfully');
+        // Optionally clear the form
+        setCourseCode('');
+        setCourseName('');
+        setCreditHours('');
+        setCourseContent(null);
+      } else {
+        Alert.alert('Error', result.message);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An error occurred while adding the course');
+    }
   };
 
   return (
     <View style={styles.container}>
+      <Text style={styles.label}>Course Code</Text>
       <TextInput
         style={styles.input}
-        placeholder="Course Code"
-        placeholderTextColor={"#7E7E7E"}
-        onChangeText={text => setCourseCode(text)}
         value={courseCode}
+        onChangeText={setCourseCode}
       />
+      <Text style={styles.label}>Course Name</Text>
       <TextInput
         style={styles.input}
-        placeholder="Course Name"
-        placeholderTextColor={"#7E7E7E"}
-        onChangeText={text => setCourseName(text)}
         value={courseName}
+        onChangeText={setCourseName}
       />
+      <Text style={styles.label}>Credit Hours</Text>
       <TextInput
         style={styles.input}
-        placeholder="Credit Hours"
-        placeholderTextColor={"#7E7E7E"}
-        onChangeText={text => setCreditHours(text)}
         value={creditHours}
+        onChangeText={setCreditHours}
       />
-      
-      <TextInput
-        style={styles.input}
-        placeholder="Course Content URI"
-        placeholderTextColor={"#7E7E7E"}
-        /*onChangeText={text => setCourseContentUri(text)}
-        value={courseContentUri}*/
-      />
-      <TouchableOpacity style={styles.button} /*onPress={handleEmbedURL}*/>
-        <Text style={styles.buttonText}>Embed URL</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={handleAddCourse}>
-        <Text style={styles.buttonText}>Add Course</Text>
-      </TouchableOpacity>
+      <Button title="Select Course Content" onPress={handleSelectFile} />
+      <Button title="Add Course" onPress={handleAddCourse} />
     </View>
   );
+};
+
+// const handleSelectFile = async () => {
+//   // Use a library like react-native-document-picker to select files
+//   // Example: const res = await DocumentPicker.pick({...});
+//   // setCourseContent(res);
+// };
+const handleSelectFile = async () => {
+  try {
+    const doc = await DocumentPicker.pickSingle({
+      type: [DocumentPicker.types.xls, DocumentPicker.types.pdf],
+    });
+    setSelectedFile(doc.name);
+    processFile(doc);
+  } catch (err) {
+    if (DocumentPicker.isCancel(err))
+      console.log("User canceled the upload", err);
+    else
+      console.log(err);
+  }
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    //justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
+    padding: 16,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 8,
+    color:"black"
   },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-    width: '100%',
-  },
-  button: {
-    backgroundColor: '#5B5D8B',
-    padding: 10,
-    borderRadius: 5,
-    width: '100%',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    padding: 8,
+    marginBottom: 16,
+    borderRadius: 4,
+    color:"black"
   },
 });
 

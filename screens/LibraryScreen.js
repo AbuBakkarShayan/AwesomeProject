@@ -50,6 +50,7 @@ const LibraryScreen = () => {
       <TextInput
         style={styles.input}
         placeholder="Enter keyword"
+        placeholderTextColor={'black'}
         value={searchTerm}
         onChangeText={text => setSearchTerm(text)}
       />
@@ -84,6 +85,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     marginBottom: 10,
+    color:'black',
   },
   bookItem: {
     flexDirection: 'row',

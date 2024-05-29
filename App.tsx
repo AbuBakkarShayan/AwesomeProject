@@ -3,18 +3,18 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import Home from './screens/Home';
-import ImageScreen from './screens/ImageScreen';
-import CounterScreen from './screens/CounterScreen';
-import ColorScreen from './screens/ColorScreen';
+import SplashScreen from './screens/SplashScreen';
 import LoginScreen1 from './screens/TeacherScreen/LoginScreen1';
-import TScreenComponent from './screens/Components/TScreenComponent';
 import TeacherDashboard from './screens/TeacherScreen/TeacherDashboard';
 import TeacherCoursesScreen from './screens/TeacherScreen/TeacherCoursesScreen';
 import StudentLogsScreen from './screens/TeacherScreen/StudentsLogsScreen';
 import StudentDashboard from './screens/StudentScreen/StudentDashboard';
 import AdminDashboard from './screens/AdminScreen/AdminDashboard';
 import CoursesScreen from './screens/StudentScreen/CoursesScreen';
+import CourseMaterial from './screens/StudentScreen/CourseMaterial';
+import BookmarkLessons from './screens/StudentScreen/BookmarkLessons';
+import BookmarkBooks from './screens/StudentScreen/BookmarkBooks';
+import Downloads from './screens/StudentScreen/Downloads/Downloads';
 import LibraryScreen from './screens/LibraryScreen';
 import MyCourseItemsScreen from './screens/StudentScreen/MyCourseItemsScreen';
 import StudentProfileScreen from './screens/StudentScreen/StudentProfileScreen';
@@ -24,10 +24,10 @@ import AddStudentScreen from './screens/AdminScreen/AddStudentScreen';
 import AddStudentBatch from './screens/AdminScreen/AddStudentBatch';
 import AddSingleStudent from './screens/AdminScreen/AddSingleStudent';
 import BooksManagementScreen from './screens/AdminScreen/BooksManagementScreen';
+import AssignBook from './screens/TeacherScreen/AssignBook';
 import CourseManagementScreen from './screens/AdminScreen/CourseManagementScreen';
 import AssignTeacher from './screens/AdminScreen/AssignTeacher';
 import EnrollStudent from './screens/AdminScreen/EnrollStudent';
-import CourseComponent from './screens/AdminScreen/customcomponent/coursecomponent';
 import TeacherDepartmentScreen from './screens/AdminScreen/TeacherDepartmentScreen';
 import TeachersScreen from './screens/AdminScreen/TeachersScreen';
 import AddSingleTeacher from './screens/AdminScreen/AddSingleTeacher';
@@ -39,12 +39,14 @@ import AddTOC from './screens/AdminScreen/AddTOC';
 import MyBooksScreen from './screens/TeacherScreen/MyBooksScreen';
 
 
+
 const Stack = createStackNavigator();
 
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="LoginScreen1" screenOptions={{
+      
+      <Stack.Navigator initialRouteName="Splash" screenOptions={{
         headerStyle: {
           height: 80,
           backgroundColor: '#5B5D8B', // Customize header background color
@@ -57,10 +59,16 @@ const App = () => {
         headerTintColor: 'white', // Customize header text color
         headerTitleAlign: "center"
       }}>
-        <Stack.Screen name="Home" component={Home} />
-        <Stack.Screen name="ImageScreen" component={ImageScreen} />
-        <Stack.Screen name="CounterScreen" component={CounterScreen} />
-        <Stack.Screen name="ColorScreen" component={ColorScreen} />
+        <Stack.Screen
+          name="Splash"
+          component={SplashScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Home"
+          component={LoginScreen1}
+          options={{ headerShown: false }}
+        />
         <Stack.Screen name="LoginScreen1" component={LoginScreen1} options={{ headerShown: false }} />
         <Stack.Screen name="TeacherDashboard" component={TeacherDashboard} options={{title:'Teacher Dashboard'}} />
         <Stack.Screen name="TeacherCoursesScreen" component={TeacherCoursesScreen} options={{title:'Teacher Courses'
@@ -70,9 +78,14 @@ const App = () => {
         <Stack.Screen name="StudentDashboard" component={StudentDashboard} />
         <Stack.Screen name="AdminDashboard" component={AdminDashboard} options={{title:'Admin Dashboard'}} />
         <Stack.Screen name="CoursesScreen" component={CoursesScreen} />
+        <Stack.Screen name='CourseMaterial' component={CourseMaterial} />
+        <Stack.Screen name='BookmarkLessons' component={BookmarkLessons} />
+        <Stack.Screen name='BookmarkBooks' component={BookmarkBooks} />
+        <Stack.Screen name='Downloads' component={Downloads} />
+
         <Stack.Screen name='LibraryScreen' component={LibraryScreen} />
         <Stack.Screen name='MyCourseItemsScreen' component={MyCourseItemsScreen} />
-        <Stack.Screen name='StudentProfileScreen' component={StudentProfileScreen} />
+        <Stack.Screen name='StudentProfileScreen' component={StudentProfileScreen} options={{title:"Profile"}} />
         <Stack.Screen name='StudentDepartmentScreen' component={StudentDepartmentScreen} options={{title:'Student Management'}}/>
         <Stack.Screen name='UpdateDepartmentScreen' component={UpdateDepartmentScreen} options={{title:'Update Department'}}/>
         <Stack.Screen name='AddStudentScreen' component={AddStudentScreen} options={{title:'Students'}}/>
@@ -82,6 +95,9 @@ const App = () => {
         <Stack.Screen name='TeachersScreen' component={TeachersScreen} options={{title:'Teachers'}}/>
         <Stack.Screen name='AddSingleTeacher' component={AddSingleTeacher} options={{title:'Add Teacher'}}/>
         <Stack.Screen name='BooksManagementScreen' component={BooksManagementScreen} options={{title:"Books Management"}}/>
+        <Stack.Screen name='AssignBook' component={AssignBook} options={{title:"Assign Book"}}/>
+
+
         <Stack.Screen name='CourseManagementScreen' component={CourseManagementScreen} />
         <Stack.Screen name='AssignTeacher' component={AssignTeacher} />
         <Stack.Screen name="EnrollStudent" component={EnrollStudent} />
