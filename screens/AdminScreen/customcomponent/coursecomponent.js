@@ -1,4 +1,3 @@
-// CourseComponent.js
 import React from 'react';
 import { FlatList, TouchableOpacity, StyleSheet, View, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -11,13 +10,13 @@ const CourseComponent = ({ courses, onEdit, onDelete, onEnrollStudent, onEnrollT
         <TouchableOpacity onPress={() => onEdit(item.id)}>
           <Icon name="create-outline" size={24} color="#C4C4C4" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => onDelete(item.id)}>
+        <TouchableOpacity onPress={() => onDelete(item.courseCode)}>
           <Icon name="trash-outline" size={24} color="#C4C4C4" />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => onEnrollStudent(item.id)}>
           <Icon name="person-outline" size={24} color="#C4C4C4" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => onEnrollTeacher(item.id)}>
+        <TouchableOpacity onPress={() => onEnrollTeacher(item.courseCode)}>
           <Icon name="school-outline" size={24} color="#C4C4C4" />
         </TouchableOpacity>
       </View>

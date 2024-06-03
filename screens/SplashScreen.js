@@ -13,7 +13,8 @@ const SplashScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Welcome to My App</Text>
+      <Text style={styles.text}>Welcome to Digital Library and Lesson Plan Project</Text>
+      <Text>Northern University, Nowshera</Text>
     </View>
   );
 };
@@ -23,10 +24,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#4CAF50', // Customize the background color
+    backgroundColor: '#5B5D8B', // Customize the background color
   },
   text: {
-    fontSize: 30,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#FFFFFF', // Customize the text color
   },

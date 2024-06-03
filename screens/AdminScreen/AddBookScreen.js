@@ -49,50 +49,63 @@ const AddBookScreen = ({ navigation }) => {
     }
   };
 
-  const handleUpload = async () => {
-    try {
-      // Retrieve uploaderId from AsyncStorage
-      const uploaderId = await AsyncStorage.getItem('uploaderId');
-      
-      if (!uploaderId) {
-        throw new Error('Uploader ID not found. Please login again.');
-      }
-  
-      // Ensure all required fields are filled
-      if (!title || !category || !coverImage || !pdfFile || !author || !keywords) {
-        throw new Error('Please fill in all fields');
-      }
-  
-      // Call your C# API to upload book data
-      const response = await fetch(`${baseURL}/Book/uploadBook`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title,
-          category,
-          coverImage,
-          pdfFile,
-          author,
-          keywords,
-          uploaderId,
-        }),
-      });
-  
-      if (!response.ok) {
-        const errorMessage = await response.text(); // Extract error message from response
-        throw new Error(`Failed to upload book: ${errorMessage}`);
-      }
-  
-      // Navigate to ADDTOC screen
-      navigation.navigate('ADDTOC');
-  
-    } catch (error) {
-      console.log('Error uploading book:', error);
-      Alert.alert('Error', error.message); // Display error message to the user
+  // When storing uploaderId (e.g., after login)
+const storeUploaderId = async (id) => {
+  try {
+    await AsyncStorage.setItem('uploaderId', id);
+    console.log('Uploader ID stored successfully:', id);
+  } catch (error) {
+    console.error('Error storing uploader ID:', error);
+  }
+};
+
+// When retrieving uploaderId in handleUpload function
+const handleUpload = async () => {
+  try {
+    // Retrieve uploaderId from AsyncStorage
+    const uploaderId = await AsyncStorage.getItem('uploaderId');
+    console.log('Retrieved uploader ID:', uploaderId);
+
+    if (!uploaderId) {
+      throw new Error('Uploader ID not found. Please login again.');
     }
-  };
+
+    // Ensure all required fields are filled
+    if (!title || !category || !coverImage || !pdfFile || !author || !keywords) {
+      throw new Error('Please fill in all fields');
+    }
+
+    // Call your C# API to upload book data
+    const response = await fetch(`${baseURL}/Book/uploadBook`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title,
+        category,
+        coverImage,
+        pdfFile,
+        author,
+        keywords,
+        uploaderId,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorMessage = await response.text(); // Extract error message from response
+      throw new Error(`Failed to upload book: ${errorMessage}`);
+    }
+
+    // Navigate to ADDTOC screen
+    navigation.navigate('ADDTOC');
+
+  } catch (error) {
+    console.log('Error uploading book:', error);
+    Alert.alert('Error', error.message); // Display error message to the user
+  }
+};
+
    
 
   return (

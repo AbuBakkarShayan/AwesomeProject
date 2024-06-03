@@ -1,4 +1,3 @@
-// CourseManagementScreen.js
 import { StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/core';
@@ -8,18 +7,17 @@ import LogoutButton from './customcomponent/logoutComponent';
 import baseURL from '../../config';
 
 const CourseManagementScreen = () => {
-
-  //logout icon in header
-  React.useLayoutEffect(()=>{
-    navigation.setOptions({
-      headerRight:()=><LogoutButton />,
-    });
-  }, [navigation]);
-
   const navigation = useNavigation();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  //logout icon in header
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
 
   useEffect(() => {
     fetchCourses();
@@ -40,40 +38,50 @@ const CourseManagementScreen = () => {
       setLoading(false); // Set loading to false regardless of success or error
     }
   };
-  
+
   const handleAddCourse = () => {
     navigation.navigate('AddCourseScreen');
   };
 
-  const handleEditCourse = courseId => {
-    navigation.navigate('UpdateCourseScreen', { courseId });
+  const handleEditCourse = (course) => {
+    navigation.navigate('UpdateCourseScreen', { course });
   };
 
-  const handleDeleteCourse = async courseCode => {
+  const handleDeleteCourse = async (courseCode) => {
     try {
-      const response = await fetch(`${baseURL}/Course/deleteCourse/${courseCode}`, {
-        method: 'DELETE',
+      const response = await fetch(`${baseURL}/Course/deleteCourse`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ courseCode }),
       });
       const responseData = await response.json();
-      if (!response.ok) {
-        throw new Error(responseData.message || 'Failed to delete course');
+      if (response.ok) {
+        // Course deleted successfully, update UI accordingly
+        Alert.alert('Success', 'Course Deleted Successfully');
+        // Optionally, you can remove the course from the state if you're using a state to manage courses
+        // Remove the course from the state or reload the course list
+      } else {
+        // Course deletion failed, show error message
+        console.log('Failed to delete course:', responseData);
+        Alert.alert('Error', responseData.message || 'Failed to delete course');
       }
-      setCourses(prevCourses => prevCourses.filter(course => course.courseCode !== courseCode));
     } catch (error) {
+      // An error occurred while deleting the course, show error message
       console.error('Error deleting course:', error);
-      setError(error.message);
+      Alert.alert('Error', 'Failed to delete course. Please try again later.');
     }
-};
+  };
 
-
-  const handleEnrollStudent = async courseId => {
+  const handleEnrollStudent = async (courseId) => {
     // Logic for enrolling student
     navigation.navigate('EnrollStudent', { courseId });
   };
 
-  const handleEnrollTeacher = async courseId => {
+  const handleEnrollTeacher = async (courseCode) => {
     // Logic for enrolling teacher
-    navigation.navigate('AssignTeacher', { courseId });
+    navigation.navigate('AssignTeacher', { courseCode });
   };
 
   if (loading) {
@@ -92,13 +100,12 @@ const CourseManagementScreen = () => {
     );
   }
 
-
   return (
     <View style={styles.container}>
       <CourseComponent
         courses={courses}
         onEdit={handleEditCourse}
-        onDelete={handleDeleteCourse}
+        onDelete={(courseCode) => handleDeleteCourse(courseCode)}
         onEnrollStudent={handleEnrollStudent}
         onEnrollTeacher={handleEnrollTeacher}
       />

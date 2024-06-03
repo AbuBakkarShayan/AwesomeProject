@@ -1,79 +1,108 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
+// UpdateCourse.js
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, Button } from 'react-native';
+import DocumentPicker from 'react-native-document-picker';
 import LogoutButton from './customcomponent/logoutComponent';
+import baseURL from '../../config';
 
-const UpdateCourse = ({navigation}) => {
+const UpdateCourse = ({ navigation, route }) => {
+  const { course } = route.params || {}; // Safely destructure course from route.params
 
-  //logout icon in header
-  React.useLayoutEffect(()=>{
+  // Logout icon in header
+  React.useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight:()=><LogoutButton />,
+      headerRight: () => <LogoutButton />,
     });
   }, [navigation]);
 
-  const [courseCode, setCourseCode] = useState('');
-  const [courseName, setCourseName] = useState('');
-  const [creditHours, setCreditHours] = useState('');
-  const [courseContentUri, setCourseContentUri] = useState('');
+  const [courseCode, setCourseCode] = useState(course?.courseCode || '');
+  const [courseName, setCourseName] = useState(course?.courseName || '');
+  const [creditHours, setCreditHours] = useState(course?.creditHours || '');
+  const [selectedFile, setSelectedFile] = useState(null);
 
-  const handleEmbedURL = () => {
-    console.log('Embed URL button pressed');
-    // Add logic to handle embedding URL here
-  };
-
-  const handleAddCourse = () => {
-    // Input validation
-    if (!courseCode || !courseName || !creditHours || !courseContentUri) {
-      Alert.alert('All fields are required');
+  const handleUpdateCourse = async () => {
+    if (!courseCode.trim() || !courseName.trim() || !creditHours.trim()) {
+      Alert.alert('Error', 'All fields are required');
       return;
     }
 
-    // Implement logic to add course (e.g., call API)
-    console.log('Add course button pressed');
-    console.log('Course Code:', courseCode);
-    console.log('Course Name:', courseName);
-    console.log('Credit Hours:', creditHours);
-    console.log('Course Content URI:', courseContentUri);
-    // Add your logic to call the API here
-    Alert.alert('Course Updated Successfully');
+    const formData = new FormData();
+    formData.append('courseCode', courseCode);
+    formData.append('courseName', courseName);
+    formData.append('creditHours', creditHours);
+
+    if (selectedFile) { // If a file is selected, append it to the form data
+      formData.append('courseContent', {
+        uri: selectedFile.uri,
+        type: selectedFile.type,
+        name: selectedFile.name,
+      });
+    }
+
+    try {
+      const response = await fetch(`${baseURL}/Course/updateCourse`, {
+        method: 'PUT',
+        body: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      const result = await response.json();
+      if (result.status === 'Success') {
+        Alert.alert('Success', 'Course updated successfully');
+        navigation.goBack(); // Go back to the previous screen
+      } else {
+        Alert.alert('Error', result.message);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An error occurred while updating the course');
+    }
+  };
+
+  const handleSelectFile = async () => {
+    try {
+      const doc = await DocumentPicker.pickSingle({
+        type: [DocumentPicker.types.xls, DocumentPicker.types.pdf],
+      });
+      setSelectedFile(doc); // Set the selected file
+    } catch (err) {
+      if (DocumentPicker.isCancel(err)) {
+        console.log("User canceled the upload", err);
+      } else {
+        console.log(err);
+      }
+    }
   };
 
   return (
     <View style={styles.container}>
+      <Text style={styles.label}>Course Code</Text>
       <TextInput
         style={styles.input}
-        placeholder="Course Code"
-        placeholderTextColor={"#7E7E7E"}
-        onChangeText={text => setCourseCode(text)}
         value={courseCode}
+        onChangeText={setCourseCode}
       />
+      <Text style={styles.label}>Course Name</Text>
       <TextInput
         style={styles.input}
-        placeholder="Course Name"
-        placeholderTextColor={"#7E7E7E"}
-        onChangeText={text => setCourseName(text)}
         value={courseName}
+        onChangeText={setCourseName}
       />
+      <Text style={styles.label}>Credit Hours</Text>
       <TextInput
         style={styles.input}
-        placeholder="Credit Hours"
-        placeholderTextColor={"#7E7E7E"}
-        onChangeText={text => setCreditHours(text)}
         value={creditHours}
+        onChangeText={setCreditHours}
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Course Content URI"
-        placeholderTextColor={"#7E7E7E"}
-        /*onChangeText={text => setCourseContentUri(text)}
-        value={courseContentUri}*/
-      />
-      <TouchableOpacity style={styles.button} /*onPress={handleEmbedURL}*/>
-        <Text style={styles.buttonText}>Update URL</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={handleAddCourse}>
-        <Text style={styles.buttonText}>Update</Text>
-      </TouchableOpacity>
+      <Button title="Select Course Content" onPress={handleSelectFile} />
+      {selectedFile && (
+        <View>
+          <Text>Selected File:</Text>
+          <Text>{selectedFile.name}</Text>
+        </View>
+      )}
+      <Button title="Update Course" onPress={handleUpdateCourse} />
     </View>
   );
 };
@@ -81,29 +110,20 @@ const UpdateCourse = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    //justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
+    padding: 16,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 8,
+    color: "black",
   },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-    width: '100%',
-  },
-  button: {
-    backgroundColor: '#5B5D8B',
-    padding: 10,
-    borderRadius: 5,
-    width: '100%',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    padding: 8,
+    marginBottom: 16,
+    borderRadius: 4,
+    color: "black",
   },
 });
 

@@ -59,6 +59,7 @@ const AddStudentScreen = () => {
   onAddOptionPress={() => navigation.navigate("AddSingleStudent")}
   onAddBatchPress={() => navigation.navigate("AddStudentBatch")}
   textColor={textColor} // Pass the textColor prop
+  
 />
 
       

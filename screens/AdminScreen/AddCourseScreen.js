@@ -7,7 +7,7 @@ const AddCourseScreen = () => {
   const [courseCode, setCourseCode] = useState('');
   const [courseName, setCourseName] = useState('');
   const [creditHours, setCreditHours] = useState('');
-  const [courseContent, setCourseContent] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null); // State to store the selected file
 
   const handleAddCourse = async () => {
     if (!courseCode.trim()) {
@@ -15,19 +15,16 @@ const AddCourseScreen = () => {
       return;
     }
 
-
-
-
     const formData = new FormData();
     formData.append('courseCode', courseCode);
     formData.append('courseName', courseName);
     formData.append('creditHours', creditHours);
-
-    if (courseContent) {
+    
+    if (selectedFile) { // If a file is selected, append it to the form data
       formData.append('courseContent', {
-        uri: courseContent.uri,
-        type: courseContent.type,
-        name: courseContent.name,
+        uri: selectedFile.uri,
+        type: selectedFile.type,
+        name: selectedFile.name,
       });
     }
 
@@ -47,12 +44,27 @@ const AddCourseScreen = () => {
         setCourseCode('');
         setCourseName('');
         setCreditHours('');
-        setCourseContent(null);
+        setSelectedFile(null); // Clear selected file state
       } else {
         Alert.alert('Error', result.message);
       }
     } catch (error) {
       Alert.alert('Error', 'An error occurred while adding the course');
+    }
+  };
+
+  const handleSelectFile = async () => {
+    try {
+      const doc = await DocumentPicker.pickSingle({
+        type: [DocumentPicker.types.xls, DocumentPicker.types.pdf],
+      });
+      setSelectedFile(doc); // Set the selected file
+    } catch (err) {
+      if (DocumentPicker.isCancel(err)) {
+        console.log("User canceled the upload", err);
+      } else {
+        console.log(err);
+      }
     }
   };
 
@@ -77,29 +89,15 @@ const AddCourseScreen = () => {
         onChangeText={setCreditHours}
       />
       <Button title="Select Course Content" onPress={handleSelectFile} />
+      {selectedFile && (
+        <View>
+          <Text>Selected File:</Text>
+          <Text>{selectedFile.name}</Text>
+        </View>
+      )}
       <Button title="Add Course" onPress={handleAddCourse} />
     </View>
   );
-};
-
-// const handleSelectFile = async () => {
-//   // Use a library like react-native-document-picker to select files
-//   // Example: const res = await DocumentPicker.pick({...});
-//   // setCourseContent(res);
-// };
-const handleSelectFile = async () => {
-  try {
-    const doc = await DocumentPicker.pickSingle({
-      type: [DocumentPicker.types.xls, DocumentPicker.types.pdf],
-    });
-    setSelectedFile(doc.name);
-    processFile(doc);
-  } catch (err) {
-    if (DocumentPicker.isCancel(err))
-      console.log("User canceled the upload", err);
-    else
-      console.log(err);
-  }
 };
 
 const styles = StyleSheet.create({
@@ -110,7 +108,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     marginBottom: 8,
-    color:"black"
+    color: "black",
   },
   input: {
     borderWidth: 1,
@@ -118,7 +116,7 @@ const styles = StyleSheet.create({
     padding: 8,
     marginBottom: 16,
     borderRadius: 4,
-    color:"black"
+    color: "black",
   },
 });
 

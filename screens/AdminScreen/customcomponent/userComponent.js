@@ -7,6 +7,7 @@ import baseURL from '../../../config';
 const UserListComponent = ({ users, onDeleteUser, addButtonLabel, onAddOptionPress, onAddBatchPress }) => {
   const navigation = useNavigation();
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const authToken = "your-auth-token"; // Replace with the actual auth token
 
   const confirmDelete = (userId) => {
     Alert.alert(
@@ -20,15 +21,21 @@ const UserListComponent = ({ users, onDeleteUser, addButtonLabel, onAddOptionPre
   };
 
   const deleteUser = (userId) => {
-    fetch(`${baseURL}/user/deleteUser/${userId}`, {
+    fetch(`${baseURL}/user/deleteUser`, {
       method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`, // Assuming you have an authToken
+      },
+      body: JSON.stringify({ id: userId }),
     })
-      .then(response => {
-        if (response.ok) {
+      .then(response => response.json())
+      .then(responseJson => {
+        if (responseJson.status === "Success") {
           Alert.alert('Success', 'User deleted successfully');
           onDeleteUser(userId); // Call the onDeleteUser function passed from the parent
         } else {
-          Alert.alert('Error', 'Failed to delete user');
+          Alert.alert('Error', responseJson.message || 'Failed to delete user');
         }
       })
       .catch(error => {
@@ -37,7 +44,7 @@ const UserListComponent = ({ users, onDeleteUser, addButtonLabel, onAddOptionPre
       });
   };
 
-   const renderAddOptions = () => (
+  const renderAddOptions = () => (
     <View style={styles.modalContent}>
       <TouchableOpacity style={styles.modalOption} onPress={handleAddOptionPress}>
         <Text style={styles.modalOptionText}>Add Single</Text>
@@ -48,7 +55,6 @@ const UserListComponent = ({ users, onDeleteUser, addButtonLabel, onAddOptionPre
     </View>
   );
 
-
   const handleAddOptionPress = (option) => {
     setIsModalVisible(false);
     onAddOptionPress(option);
@@ -57,16 +63,14 @@ const UserListComponent = ({ users, onDeleteUser, addButtonLabel, onAddOptionPre
   const handleAddBatchPress = () => {
     setIsModalVisible(false);
     onAddBatchPress();
-  }; 
+  };
 
-  
-
-  const renderItem = ({ item }) =>  (
+  const renderItem = ({ item }) => (
     <View style={[styles.itemContainer]}>
       <Text style={styles.userName}>{item.teacherName}</Text>
       <Text style={styles.userName}>{item.studentName}</Text>
       <View style={styles.iconContainer}>
-        <Icon name="create-outline" style={styles.icon} onPress={() => navigation.navigate('EditUserScreen', { userId: item.id })} />
+        <Icon name="create-outline" style={styles.icon} onPress={() => navigation.navigate('EditStudentScreen', { userId: item.id })} />
         <Icon name="trash" style={styles.icon} onPress={() => confirmDelete(item.id)} />
       </View>
     </View>
@@ -117,9 +121,7 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: 16,
-    //fontWeight: 'bold',
     color: '#7E7E7E',
-    
   },
   iconContainer: {
     flexDirection: 'row',
@@ -127,7 +129,7 @@ const styles = StyleSheet.create({
   icon: {
     marginLeft: 10,
     fontSize: 20,
-    color: '#7E7E7E', // Blue color for icons
+    color: '#7E7E7E',
   },
   addButton: {
     alignSelf: 'flex-end',

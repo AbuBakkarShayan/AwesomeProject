@@ -1,6 +1,8 @@
 // App.js
 
-import React from 'react';
+import React,{useEffect} from 'react';
+import { useNavigation } from '@react-navigation/native';
+//import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import SplashScreen from './screens/SplashScreen';
@@ -23,6 +25,7 @@ import UpdateDepartmentScreen from './screens/AdminScreen/UpdateDepartmentScreen
 import AddStudentScreen from './screens/AdminScreen/AddStudentScreen';
 import AddStudentBatch from './screens/AdminScreen/AddStudentBatch';
 import AddSingleStudent from './screens/AdminScreen/AddSingleStudent';
+import EditStudentScreen from './screens/AdminScreen/EditStudentScreen';
 import BooksManagementScreen from './screens/AdminScreen/BooksManagementScreen';
 import AssignBook from './screens/TeacherScreen/AssignBook';
 import CourseManagementScreen from './screens/AdminScreen/CourseManagementScreen';
@@ -37,12 +40,26 @@ import UpdateCourseScreen from './screens/AdminScreen/UpdateCourseScreen';
 import AddBookScreen from './screens/AdminScreen/AddBookScreen';
 import AddTOC from './screens/AdminScreen/AddTOC';
 import MyBooksScreen from './screens/TeacherScreen/MyBooksScreen';
+import { navigate } from '@react-navigation/routers/lib/typescript/src/CommonActions';
 
 
 
 const Stack = createStackNavigator();
 
 const App = () => {
+
+  // useEffect(() => {
+  //   const checkLoginStatus = async () => {
+  //     const uploaderId = await AsyncStorage.getItem('uploaderId');
+  //     if (!uploaderId) {
+  //       // Navigate to Login screen
+  //       //navigation.navigate('LoginScreen1');
+  //     }
+  //   };
+
+  //   checkLoginStatus();
+  // }, []);
+
   return (
     <NavigationContainer>
       
@@ -91,6 +108,7 @@ const App = () => {
         <Stack.Screen name='AddStudentScreen' component={AddStudentScreen} options={{title:'Students'}}/>
         <Stack.Screen name='AddStudentBatch' component={AddStudentBatch} options={{title:"Batch File"}}/>
         <Stack.Screen name='AddSingleStudent' component={AddSingleStudent} options={{title:'Add Single Student'}}/>
+        <Stack.Screen name='EditStudentScreen' component={EditStudentScreen} options={{title:'Edit Student'}}/>
         <Stack.Screen name='TeacherDepartmentScreen' component={TeacherDepartmentScreen} options={{title:'Teacher Management'}}/>
         <Stack.Screen name='TeachersScreen' component={TeachersScreen} options={{title:'Teachers'}}/>
         <Stack.Screen name='AddSingleTeacher' component={AddSingleTeacher} options={{title:'Add Teacher'}}/>

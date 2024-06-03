@@ -1,30 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
-import { SelectList } from 'react-native-dropdown-select-list'
+import { SelectList } from 'react-native-dropdown-select-list';
 import LogoutButton from './customcomponent/logoutComponent';
+import baseURL from '../../config';
 
-const EnrollStudent = ({navigation}) => {
-
-  //logout icon in header
-  React.useLayoutEffect(()=>{
+const EnrollStudent = ({ navigation }) => {
+  // logout icon in header
+  React.useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight:()=><LogoutButton />,
+      headerRight: () => <LogoutButton />,
     });
   }, [navigation]);
 
   const [semester, setSemester] = useState('');
   const [session, setSession] = useState('');
-  const [selected, setSelected] = React.useState("");
+  const [selectedStudent, setSelectedStudent] = useState('');
+  const [studentList, setStudentList] = useState([]);
+  const [loading, setLoading] = useState(true);
+const [error, setError] = useState(null);
 
-  const data = [
-    {key:'1', value:'No option'},
-    {key:'2', value:'Shayan'},
-    {key:'3', value:'Hani'},
-    {key:'4', value:'Sapna'},
-    {key:'5', value:'Mehran'},
-    {key:'6', value:'Maddy'},
-    {key:'7', value:'Umair'},
-]
+  
+  useEffect(() => {
+  const fetchStudentList = async () => {
+    try {
+      setLoading(true); // Set loading to true while fetching
+      const response = await fetch(`${baseURL}/Student/getAllStudent`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch student list: ${response.status} ${response.statusText}`);
+      }
+      const data = await response.json();
+      setStudentList(data);
+      setLoading(false); // Set loading to false after fetching
+    } catch (error) {
+      console.error('Error fetching student list:', error);
+      setError(error.message); // Set error message
+      setLoading(false); // Set loading to false in case of error
+    }
+  };
+
+  fetchStudentList();
+}, []); // Empty dependency array means this effect runs only once, similar to componentDidMount
+
+  const enrollStudent = () => {
+    // Implement your logic for enrolling the selected student
+    console.log('Enrolling student:', selectedStudent);
+  };
+
   return (
     <View style={styles.container}>
       <TextInput
@@ -32,27 +53,26 @@ const EnrollStudent = ({navigation}) => {
         placeholder="Semester No"
         placeholderTextColor="#7E7E7E"
         value={semester}
-        onChangeText={text => setSemester(text)}
+        onChangeText={(text) => setSemester(text)}
       />
       <TextInput
         style={styles.input}
         placeholder="Session"
         placeholderTextColor="#7E7E7E"
         value={session}
-        onChangeText={text => setSession(text)}
+        onChangeText={(text) => setSession(text)}
       />
-      <SelectList 
-        setSelected={(val) => setSelected(val)} 
-        data={data} 
-        save="value"
-        // onSelect={() => alert(selected)}
-        dropdownTextStyles={{color:"black"}}
-        placeholder='Select an option'
-        inputStyles={{ color:'black'}}
-        boxStyles={{marginBottom:15,width:383}}
-        dropdownStyles={{marginBottom:20}}
-    />
-      <TouchableOpacity style={styles.button}>
+      <SelectList
+  setSelected={(val) => setSelectedStudent(val)}
+  data={studentList && studentList.map((student) => ({ key: student.id, value: student.name }))}
+  save="value"
+  dropdownTextStyles={{ color: 'black' }}
+  placeholder="Select a student"
+  inputStyles={{ color: 'black' }}
+  boxStyles={{ marginBottom: 15, width: 383 }}
+  dropdownStyles={{ marginBottom: 20 }}
+/>
+      <TouchableOpacity style={styles.button} onPress={enrollStudent}>
         <Text style={styles.buttonText}>Enroll User</Text>
       </TouchableOpacity>
     </View>
@@ -72,7 +92,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
     width: '100%',
-    color: "black",
+    color: 'black',
   },
   button: {
     backgroundColor: '#5B5D8B',
@@ -85,23 +105,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontWeight: 'bold',
-  },
-  dropdownContainer: {
-    height: 50,
-    width: '100%',
-    marginBottom: 10,
-  },
-  dropdown: {
-    backgroundColor: '#fafafa',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-  },
-  dropdownItems: {
-    backgroundColor: '#fafafa',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
   },
 });
 
