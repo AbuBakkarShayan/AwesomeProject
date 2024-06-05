@@ -1,50 +1,62 @@
 import React from 'react';
 import { StyleSheet, Text, View, FlatList } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { useNavigation } from '@react-navigation/core';
+import { useNavigation, useRoute } from '@react-navigation/core';
 import LogoutButton from '../AdminScreen/customcomponent/logoutComponent';
 
 const TeacherDashboard = () => {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { teacherId } = route.params || {}; // Get teacherId from route params, use {} to prevent undefined error
+
+  // Ensure teacherId is available
+  if (!teacherId) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Teacher ID is not available</Text>
+      </View>
+    );
+  }
 
   //logout icon in header
-  React.useLayoutEffect(()=>{
+  React.useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight:()=><LogoutButton />,
+      headerRight: () => <LogoutButton />,
     });
   }, [navigation]);
 
-  const navigation=useNavigation();
   const list = [
     {
       index: '1',
       name: 'Courses',
-      screen:'TeacherCoursesScreen'
-      
+      screen: 'TeacherCoursesScreen'
     },
     {
       index: '2',
       name: 'Library Books',
-      screen:'LibraryBooksScreen',
+      screen: 'LibraryBooksScreen',
     },
     {
       index: '3',
       name: 'My Books List',
-      screen:'MyBooksScreen'
+      screen: 'MyBooksScreen'
     },
     {
       index: '4',
       name: 'Students Log',
-      screen:'StudentLogsScreen'  
+      screen: 'StudentLogsScreen'
     },
     {
       index: '5',
       name: 'Profile',
-      screen:'StudentProfileScreen'
+      screen: 'StudentProfileScreen'
     },
   ];
+
   const navigateToScreen = (screenName) => {
-    navigation.navigate(screenName); // Navigate to the screen based on screen name
+    navigation.navigate(screenName, { teacherId }); // Pass teacherId to the screen
   };
+
   return (
     <View>
       <FlatList
@@ -53,13 +65,12 @@ const TeacherDashboard = () => {
         data={list}
         renderItem={({ item }) => (
           <View style={styles.listItem}>
-            <TouchableOpacity onPress={()=>navigateToScreen(item.screen)}>
-            <Text style={styles.textStyle}>{item.name}</Text>
+            <TouchableOpacity onPress={() => navigateToScreen(item.screen)}>
+              <Text style={styles.textStyle}>{item.name}</Text>
             </TouchableOpacity>
           </View>
         )}
       />
-      
     </View>
   );
 };
@@ -67,7 +78,7 @@ const TeacherDashboard = () => {
 const styles = StyleSheet.create({
   listStyle: {
     marginTop: 20,
-    padding:8
+    padding: 8
   },
   listItem: {
     backgroundColor: '#5B5D8B',
@@ -79,6 +90,15 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: 'white',
     textAlign: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: {
+    fontSize: 18,
+    color: 'red',
   },
 });
 
