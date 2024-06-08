@@ -1,19 +1,20 @@
-import { Alert, StyleSheet, TextInput, View, Button, TouchableOpacity, Text } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import { Alert, StyleSheet, TextInput, View, TouchableOpacity, Text, ActivityIndicator, FlatList } from 'react-native';
+import React, { useState } from 'react';
 import DocumentPicker from 'react-native-document-picker';
 import XLSX from 'xlsx';
 import LogoutButton from './customcomponent/logoutComponent';
+import baseURL from '../../config';
 
 const AddStudentBatch = ({ navigation }) => {
-  // Logout icon in header
+  const [selectedFile, setSelectedFile] = useState("");
+  const [fileData, setFileData] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => <LogoutButton />,
     });
   }, [navigation]);
-
-  const [selectedFile, setSelectedFile] = useState("");
-  const [fileData, setFileData] = useState(null);
 
   const selectDoc = async () => {
     try {
@@ -31,6 +32,7 @@ const AddStudentBatch = ({ navigation }) => {
   };
 
   const processFile = async (file) => {
+    setIsLoading(true);
     const fileReader = new FileReader();
     fileReader.onload = (event) => {
       const binaryStr = event.target.result;
@@ -39,32 +41,33 @@ const AddStudentBatch = ({ navigation }) => {
       const sheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(sheet);
       setFileData(jsonData);
+      setIsLoading(false);
+      registerStudents(jsonData);
     };
     fileReader.readAsBinaryString(file);
   };
 
-  const uploadData = async () => {
-    if (!fileData) {
-      Alert.alert("No file selected", "Please select a file first.");
-      return;
-    }
+  const registerStudents = async (students) => {
+    setIsLoading(true);
     try {
-      const response = await fetch('YOUR_API_ENDPOINT', {
+      const response = await fetch(`${baseURL}/user/registerusers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ students: fileData }),
+        body: JSON.stringify(students),
       });
+      const responseData = await response.json();
       if (response.ok) {
         Alert.alert("Success", "Data uploaded successfully!");
       } else {
-        Alert.alert("Error", "Failed to upload data.");
+        Alert.alert("Error", "Failed to upload data. " + responseData.message);
       }
     } catch (error) {
       console.error(error);
-      Alert.alert("Error", "An error occurred while uploading data.");
+      Alert.alert("Error", "An error occurred while uploading data. " + error.message);
     }
+    setIsLoading(false);
   };
 
   return (
@@ -79,9 +82,19 @@ const AddStudentBatch = ({ navigation }) => {
       <TouchableOpacity style={styles.button} onPress={selectDoc}>
         <Text style={styles.buttonText}>Upload Batch File</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={uploadData}>
-        <Text style={styles.buttonText}>Submit Data</Text>
-      </TouchableOpacity>
+      {isLoading && <ActivityIndicator size="large" color="#5B5D8B" />}
+      {fileData && (
+        <FlatList
+          data={fileData}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => (
+            <View style={styles.item}>
+              <Text>{item.name}</Text>
+              {/* Render other details here */}
+            </View>
+          )}
+        />
+      )}
     </View>
   );
 };
@@ -112,6 +125,12 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  item: {
+    backgroundColor: '#f9c2ff',
+    padding: 20,
+    marginVertical: 8,
+    marginHorizontal: 16,
   },
 });
 

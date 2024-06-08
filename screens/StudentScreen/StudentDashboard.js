@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View, FlatList,TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native'; // Importing useNavigation hook
 import LogoutButton from '../AdminScreen/customcomponent/logoutComponent';
+import PDFReaderScreen from '../PDFReaderScreen'
 const StudentDashboard = () => {
   //logout icon in header
   React.useLayoutEffect(()=>{
@@ -41,7 +42,7 @@ const StudentDashboard = () => {
 
   return (
     <View>
-     
+     <PDFReaderScreen />
       <FlatList
         style={styles.listStyle}
         keyExtractor={(item) => item.index}

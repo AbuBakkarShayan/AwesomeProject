@@ -31,9 +31,13 @@ const BooksManagementScreen = () => {
         const formattedBooks = result.data.map(book => ({
           id: book.bookId,
           name: book.bookName,
-          author: book.bookAuthor,
-          image: `your-image-base-url/${book.bookImage}`, // Replace with your image base URL
-          uploaderId: 0, // Add appropriate uploaderId if available in your API response
+          author: book.bookAuthorName,
+          //image: `your-image-base-url/${book.bookCoverPagePath}`, // Replace with your image base UR
+          image: book.booCoverPagePath?`https://via.placeholder.com/150`
+          : 'https://via.placeholder.com/150', 
+          pdfUrl: `${baseURL}/BookPDFFolder/${book.bookPdfPath}`,
+          
+          uploaderId: book.uploaderId || 0, // Add appropriate uploaderId if available in your API response
         }));
         setBooks(formattedBooks);
       }
@@ -81,6 +85,7 @@ const BooksManagementScreen = () => {
   };
 
   const renderItem = ({ item }) => (
+    <TouchableOpacity onPress={() => navigation.navigate('PDFReaderScreen', { pdfUrl: item.pdfUrl })}>
     <View style={styles.bookItem}>
       <Image source={{ uri: item.image }} style={styles.bookImage} />
       <View style={styles.bookDetails}>
@@ -96,11 +101,11 @@ const BooksManagementScreen = () => {
         </TouchableOpacity>
       </View>
     </View>
+    </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Books Management</Text>
       {isLoading ? (
         <Text>Loading...</Text>
       ) : (
@@ -156,7 +161,8 @@ const styles = StyleSheet.create({
   },
   bookAuthor: {
     fontSize: 16,
-    color: 'gray',
+    color: 'black',
+
   },
   bookActions: {
     flexDirection: 'row',

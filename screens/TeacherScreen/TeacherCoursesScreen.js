@@ -1,116 +1,55 @@
-
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
-import LogoutButton from '../AdminScreen/customcomponent/logoutComponent';
-import { useNavigation, useRoute } from '@react-navigation/core';
+import { View, Text, FlatList } from 'react-native';
+import baseURL from '../../config';
 
-export default function TeacherCoursesScreen({ navigation }) {
+const TeacherCoursesScreen = () => {
   const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const route = useRoute();
-  const { teacherId } = route.params; // Get teacherId from route params
 
-  // Ensure teacherId is available
-  if (!teacherId) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Teacher ID is not available</Text>
-      </View>
-    );
-  }
-
-  // Logout icon in header
-  React.useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => <LogoutButton />,
-    });
-  }, [navigation]);
-
-  // Fetch courses from API
   useEffect(() => {
-    fetch(`${baseURL}/Course/getTeacherCourses?teacherId=${teacherId}`)
-      .then((response) => response.json())
-      .then((result) => {
-        if (result.status === 'Success') {
-          setCourses(result.data);
-        } else {
-          setError(result.message);
-        }
-      })
-      .catch((error) => setError(error.message))
-      .finally(() => setLoading(false));
-  }, [teacherId]);
+    fetchTeacherCourses();
+  }, []);
 
-  const navigateToScreen = (screenName) => {
-    navigation.navigate(screenName);
+  const fetchTeacherCourses = async () => {
+    try {
+      const response = await fetch(`${baseURL}/Course/getTeacherCourses?teacherId=1`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.status === 'Success') {
+          setCourses(data.data);
+        } else {
+          console.log(data.message);
+        }
+      } else {
+        console.log('Failed to fetch courses');
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  if (loading) {
-    return (
-      <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{error}</Text>
-      </View>
-    );
-  }
-
   return (
-    <View style={styles.container}>
+    <View>
+      <Text>Teacher Courses</Text>
       <FlatList
-        style={styles.listStyle}
-        keyExtractor={(item) => item.courseCode}
         data={courses}
+        keyExtractor={(item) => item.courseCode.toString()}
         renderItem={({ item }) => (
-          <View style={styles.listItem}>
-            <TouchableOpacity onPress={() => navigateToScreen('CourseMaterial')}>
-              <Text style={styles.textStyle}>{item.courseName}</Text>
-            </TouchableOpacity>
+          <View>
+            <Text>{item.courseName}</Text>
+            <Text>{item.creditHours}</Text>
+            <Text>{item.courseCode}</Text>
+            {/* Add more course details here */}
           </View>
         )}
       />
     </View>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 8,
-  },
-  listStyle: {
-    marginTop: 20,
-  },
-  listItem: {
-    backgroundColor: '#5B5D8B',
-    margin: 5,
-    padding: 20,
-    borderRadius: 10,
-  },
-  textStyle: {
-    fontSize: 20,
-    color: 'white',
-    textAlign: 'center',
-  },
-  loader: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  errorText: {
-    fontSize: 18,
-    color: 'red',
-  },
-});
+export default TeacherCoursesScreen;

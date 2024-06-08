@@ -27,6 +27,7 @@ import AddStudentBatch from './screens/AdminScreen/AddStudentBatch';
 import AddSingleStudent from './screens/AdminScreen/AddSingleStudent';
 import EditStudentScreen from './screens/AdminScreen/EditStudentScreen';
 import BooksManagementScreen from './screens/AdminScreen/BooksManagementScreen';
+import PDFReaderScreen from './screens/PDFReaderScreen';
 import AssignBook from './screens/TeacherScreen/AssignBook';
 import CourseManagementScreen from './screens/AdminScreen/CourseManagementScreen';
 import AssignTeacher from './screens/AdminScreen/AssignTeacher';
@@ -113,6 +114,7 @@ const App = () => {
         <Stack.Screen name='TeachersScreen' component={TeachersScreen} options={{title:'Teachers'}}/>
         <Stack.Screen name='AddSingleTeacher' component={AddSingleTeacher} options={{title:'Add Teacher'}}/>
         <Stack.Screen name='BooksManagementScreen' component={BooksManagementScreen} options={{title:"Books Management"}}/>
+        <Stack.Screen name='PDFReaderscreen' component={PDFReaderScreen} options={{title:"PDF Reader"}} />
         <Stack.Screen name='AssignBook' component={AssignBook} options={{title:"Assign Book"}}/>
 
 

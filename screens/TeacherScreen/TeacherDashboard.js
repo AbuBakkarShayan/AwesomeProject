@@ -1,24 +1,12 @@
 import React from 'react';
 import { StyleSheet, Text, View, FlatList } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { useNavigation, useRoute } from '@react-navigation/core';
+import { useNavigation } from '@react-navigation/core';
 import LogoutButton from '../AdminScreen/customcomponent/logoutComponent';
 
-const TeacherDashboard = () => {
+const TeacherDashboard = ({ teacherId }) => {
   const navigation = useNavigation();
-  const route = useRoute();
-  const { teacherId } = route.params || {}; // Get teacherId from route params, use {} to prevent undefined error
 
-  // Ensure teacherId is available
-  if (!teacherId) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Teacher ID is not available</Text>
-      </View>
-    );
-  }
-
-  //logout icon in header
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => <LogoutButton />,
@@ -54,7 +42,7 @@ const TeacherDashboard = () => {
   ];
 
   const navigateToScreen = (screenName) => {
-    navigation.navigate(screenName, { teacherId }); // Pass teacherId to the screen
+    navigation.navigate(screenName, { teacherId });
   };
 
   return (
@@ -90,15 +78,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: 'white',
     textAlign: 'center',
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  errorText: {
-    fontSize: 18,
-    color: 'red',
   },
 });
 
