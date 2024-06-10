@@ -1,113 +1,147 @@
-// import { StyleSheet, Text, View, TextInput  } from 'react-native'
-// import React from 'react'
-// import {Ionicons} from 'react-native-vector-icons'
+import React from 'react';
+import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity, Image } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 
-// const LibraryScreen = () => {
-//   return (
-//     <View>
-//       <Text>LibraryScreen</Text>
-//       <View style={styles.searchBar}>
-//       <Ionicons name="search" size={30} />
-//       <TextInput placeholder='Search'  />
-//       </View>
-//     </View>
-//   )
-// }
+const books = [
+    {
+        id: 1,
+        title: 'Artificial Intelligence',
+        author: 'Robert Witalk',
+        //cover: 'https://linktoimage.com/ai-cover.jpg' // Replace with actual image URL
+    },
+    {
+        id: 2,
+        title: 'C++ 9th Edition',
+        author: 'Robert Witalk',
+        //cover: 'https://linktoimage.com/cpp9-cover.jpg' // Replace with actual image URL
+    },
+    {
+        id: 3,
+        title: 'C++ 6th Edition',
+        author: 'Robert Witalk',
+        //cover: 'https://linktoimage.com/cpp6-cover.jpg' // Replace with actual image URL
+    },
+];
 
-// const styles = StyleSheet.create({
-//     searchBar:{
-//         backgroundColor:'#F0EEEE',
-//         height:50,
-//         borderRadius:5,
-//         marginHorizontal:15,
-//         flexDirection:'row'
-//     }
-// })
-
-// export default LibraryScreen
-
-
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, FlatList, Image, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/core';
-
-const LibraryScreen = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [books, setBooks] = useState([]);
-  const searchBooks = async () => {
-    try {
-      // Call your backend API here with the searchTerm
-      const response = await fetch(`YOUR_BACKEND_API_ENDPOINT?q=${searchTerm}`);
-      const data = await response.json();
-      setBooks(data); // Assuming your API returns an array of books
-    } catch (error) {
-      console.error('Error searching books:', error);
-    }
-  };
-
-  return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter keyword"
-        placeholderTextColor={'black'}
-        value={searchTerm}
-        onChangeText={text => setSearchTerm(text)}
-      />
-      <Button title="Search" onPress={searchBooks} />
-      <FlatList
-        data={books}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.bookItem}>
-            <Image source={{ uri: item.imageUrl }} style={styles.bookImage} />
-            <View style={styles.bookInfo}>
-              <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.author}>Author: {item.author}</Text>
+const LibraryScreen = ({ navigation }) => {
+    return (
+        <View style={styles.container}>
+            <TextInput style={styles.searchInput} placeholder="Search" placeholderTextColor={"black"} />
+            <View style={styles.tabContainer}>
+                <TouchableOpacity style={styles.tabButton}>
+                    <Text style={styles.tabButtonText}>Downloaded Books</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabButton}>
+                    <Text style={styles.tabButtonText}>My Books List</Text>
+                </TouchableOpacity>
             </View>
-          </View>
-        )}
-      />
-    </View>
-  );
+            <ScrollView>
+                {books.map(book => (
+                    <View key={book.id} style={styles.bookContainer}>
+                        <Image source={{ uri: book.cover }} style={styles.bookCover} />
+                        <View style={styles.bookDetails}>
+                            <Text style={styles.bookTitle}>{book.title}</Text>
+                            <Text style={styles.bookAuthor}>{book.author}</Text>
+                        </View>
+                        <View style={styles.bookActions}>
+                            <Icon name="download"  size={30} color="#5B5D8B"/>
+                            <Icon name="bookmark"  size={30} color="#5B5D8B"/>
+                            <Icon name="list" size={30} color="#5B5D8B"/>
+                        </View>
+                    </View>
+                ))}
+            </ScrollView>
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    alignItems: 'center',
-  },
-  input: {
-    width: '100%',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-    color:'black',
-  },
-  bookItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  bookImage: {
-    width: 100,
-    height: 150,
-    marginRight: 10,
-  },
-  bookInfo: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  author: {
-    fontSize: 14,
-  },
+    container: {
+        flex: 1,
+        backgroundColor: '#f8f9fa',
+    },
+    header: {
+        padding: 15,
+        backgroundColor: '#5a67d8',
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    headerTitle: {
+        flex: 1,
+        fontSize: 18,
+        color: '#fff',
+        fontWeight: 'bold',
+        marginLeft: 10,
+    },
+    headerSubtitle: {
+        color: '#e2e8f0',
+        fontSize: 14,
+    },
+    searchInput: {
+        backgroundColor: '#fff',
+        padding: 15,
+        margin: 20,
+        borderRadius: 10,
+        borderColor: '#e2e8f0',
+        borderWidth: 1,
+        color:'black',
+    },
+    tabContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        paddingVertical: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#e2e8f0',
+    },
+    tabButton: {
+        paddingVertical: 10,
+        borderRadius: 10,
+        borderColor: 'black',
+      
+        backgroundColor:"white"
+    },
+    tabButtonText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#5a67d8',
+        
+
+    },
+    bookContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 15,
+        backgroundColor: '#fff',
+        marginVertical: 5,
+        marginHorizontal: 10,
+        borderRadius: 10,
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 2,
+    },
+    bookCover: {
+        width: 50,
+        height: 70,
+        marginRight: 15,
+    },
+    bookDetails: {
+        flex: 1,
+    },
+    bookTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color:'black'
+    },
+    bookAuthor: {
+        color: '#718096',
+    },
+    bookActions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-around',
+        width: 100,
+    },
 });
 
 export default LibraryScreen;

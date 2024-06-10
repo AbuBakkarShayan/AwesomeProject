@@ -9,6 +9,7 @@ import SplashScreen from './screens/SplashScreen';
 import LoginScreen1 from './screens/TeacherScreen/LoginScreen1';
 import TeacherDashboard from './screens/TeacherScreen/TeacherDashboard';
 import TeacherCoursesScreen from './screens/TeacherScreen/TeacherCoursesScreen';
+import CourseScreen from './screens/TeacherScreen/Courses';
 import StudentLogsScreen from './screens/TeacherScreen/StudentsLogsScreen';
 import StudentDashboard from './screens/StudentScreen/StudentDashboard';
 import AdminDashboard from './screens/AdminScreen/AdminDashboard';
@@ -91,6 +92,7 @@ const App = () => {
         <Stack.Screen name="TeacherDashboard" component={TeacherDashboard} options={{title:'Teacher Dashboard'}} />
         <Stack.Screen name="TeacherCoursesScreen" component={TeacherCoursesScreen} options={{title:'Teacher Courses'
         }}/>
+        <Stack.Screen name='CourseScreen' component={CourseScreen} options={{title:'Course'}}/>
         <Stack.Screen name='MyBooksScreen' component={MyBooksScreen} />
         <Stack.Screen name='StudentLogsScreen' component={StudentLogsScreen} />
         <Stack.Screen name="StudentDashboard" component={StudentDashboard} />
@@ -114,7 +116,7 @@ const App = () => {
         <Stack.Screen name='TeachersScreen' component={TeachersScreen} options={{title:'Teachers'}}/>
         <Stack.Screen name='AddSingleTeacher' component={AddSingleTeacher} options={{title:'Add Teacher'}}/>
         <Stack.Screen name='BooksManagementScreen' component={BooksManagementScreen} options={{title:"Books Management"}}/>
-        <Stack.Screen name='PDFReaderscreen' component={PDFReaderScreen} options={{title:"PDF Reader"}} />
+       <Stack.Screen name='PDFReaderScreen' component={PDFReaderScreen}/>
         <Stack.Screen name='AssignBook' component={AssignBook} options={{title:"Assign Book"}}/>
 
 

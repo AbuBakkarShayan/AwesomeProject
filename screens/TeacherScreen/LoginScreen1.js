@@ -1,6 +1,6 @@
 //import config from '../../config';
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Alert, Dimensions, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import baseURL from '../../config';
@@ -10,9 +10,9 @@ const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
 const LoginScreen1 = () => {
+
   const halfScreenHeight = screenHeight / 2.2;
   const navigation = useNavigation(); // Initialize navigation
-
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   // const [isLogin, setIsLogin]  = useState(false)
@@ -37,7 +37,8 @@ const LoginScreen1 = () => {
       });
 
       //console.log('response', response);
-
+      // const {teacherId}= response.data;
+      // setTeacherId(teacherId);
       if (response.ok) {
         const responseData = await response.json();
         if (responseData.status === 'Success') {

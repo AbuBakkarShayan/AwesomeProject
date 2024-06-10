@@ -22,7 +22,7 @@ const TeacherDashboard = ({ teacherId }) => {
     {
       index: '2',
       name: 'Library Books',
-      screen: 'LibraryBooksScreen',
+      screen: 'LibraryScreen',
     },
     {
       index: '3',
