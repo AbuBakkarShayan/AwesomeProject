@@ -1,8 +1,7 @@
-import { StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Alert, FlatList } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/core';
-import Icon from 'react-native-vector-icons/Ionicons';  
-import CourseComponent from './customcomponent/coursecomponent'; // Adjust import path
+import Icon from 'react-native-vector-icons/Ionicons';
 import LogoutButton from './customcomponent/logoutComponent';
 import baseURL from '../../config';
 
@@ -48,30 +47,57 @@ const CourseManagementScreen = () => {
   };
 
   const handleDeleteCourse = async (courseCode) => {
+    if (!courseCode || courseCode.trim() === '') {
+      Alert.alert("Failed", "Course Code required");
+      return;
+    }
+  
+    console.log('Initiating delete request for course:', courseCode);
+  
     try {
-      const response = await fetch(`${baseURL}/Course/deleteCourse`, {
+      const response = await fetch(`${baseURL}/Course/deleteCourse?courseCode=${courseCode}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ courseCode }),
+        }
       });
+  
       const responseData = await response.json();
+  
+      console.log('Response status:', response.status);
+      console.log('Response data:', responseData);
+  
       if (response.ok) {
-        // Course deleted successfully, update UI accordingly
         Alert.alert('Success', 'Course Deleted Successfully');
-        // Optionally, you can remove the course from the state if you're using a state to manage courses
-        // Remove the course from the state or reload the course list
+        setCourses(courses.filter(course => course.courseCode !== courseCode));
       } else {
-        // Course deletion failed, show error message
         console.log('Failed to delete course:', responseData);
         Alert.alert('Error', responseData.message || 'Failed to delete course');
       }
     } catch (error) {
-      // An error occurred while deleting the course, show error message
       console.error('Error deleting course:', error);
       Alert.alert('Error', 'Failed to delete course. Please try again later.');
     }
+  };
+  
+  const confirmDeleteCourse = (courseCode) => {
+    Alert.alert(
+      'Confirm Delete',
+      'Are you sure you want to delete this course?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Delete Cancelled'),
+          style: 'cancel'
+        },
+        {
+          text: 'Delete',
+          onPress: () => handleDeleteCourse(courseCode),
+          style: 'destructive'
+        }
+      ],
+      { cancelable: false }
+    );
   };
 
   const handleEnrollStudent = async (courseId) => {
@@ -83,6 +109,26 @@ const CourseManagementScreen = () => {
     // Logic for enrolling teacher
     navigation.navigate('AssignTeacher', { courseCode });
   };
+
+  const renderCourseItem = ({ item }) => (
+    <View style={styles.courseContainer}>
+      <Text style={styles.courseName}>{item.courseName}</Text>
+      <View style={styles.iconsContainer}>
+        <TouchableOpacity onPress={() => handleEditCourse(item)}>
+          <Icon name="create-outline" size={24} color="#C4C4C4" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => confirmDeleteCourse(item.courseCode)}>
+          <Icon name="trash-outline" size={24} color="#C4C4C4" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleEnrollStudent(item.id)}>
+          <Icon name="person-outline" size={24} color="#C4C4C4" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleEnrollTeacher(item.courseCode)}>
+          <Icon name="school-outline" size={24} color="#C4C4C4" />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 
   if (loading) {
     return (
@@ -102,12 +148,10 @@ const CourseManagementScreen = () => {
 
   return (
     <View style={styles.container}>
-      <CourseComponent
-        courses={courses}
-        onEdit={handleEditCourse}
-        onDelete={(courseCode) => handleDeleteCourse(courseCode)}
-        onEnrollStudent={handleEnrollStudent}
-        onEnrollTeacher={handleEnrollTeacher}
+      <FlatList
+        data={courses}
+        keyExtractor={(item, index) => item?.id?.toString() || index.toString()}
+        renderItem={renderCourseItem}
       />
       <TouchableOpacity style={styles.addButton} onPress={handleAddCourse}>
         <Icon name="add-circle-outline" size={60} color="#5B5D8B" />
@@ -126,6 +170,21 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 20,
     right: 20,
+  },
+  courseContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  courseName: {
+    fontSize: 16,
+    color: "#C4C4C4",
+  },
+  iconsContainer: {
+    flexDirection: 'row',
   },
 });
 

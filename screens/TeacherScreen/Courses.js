@@ -1,18 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Platform } from 'react-native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import DocumentPicker from 'react-native-document-picker';
+import RNFS from 'react-native-fs';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import baseURL from '../../config';
 
 const CourseScreen = ({ route }) => {
-  const { course } = route.params;
+  const { course, teacherId } = route.params; // Assume teacherId is passed as a param
+  const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState('Weekly LP');
   const [weekNo, setWeekNo] = useState('');
   const [lessonPlan, setLessonPlan] = useState(null);
   const [lessonPlans, setLessonPlans] = useState([]);
+  const [storagePermissionGranted, setStoragePermissionGranted] = useState(false);
 
   useEffect(() => {
-    fetchLessonPlans();
-  }, [course]);
+    if (Platform.OS === 'android') {
+      requestStoragePermission();
+    }
+  }, []);
+
+  const requestStoragePermission = async () => {
+    try {
+      const result = await request(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE);
+      if (result === RESULTS.GRANTED) {
+        setStoragePermissionGranted(true);
+      } else {
+        Alert.alert('Permission Denied', 'You need to give storage permission to select files');
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  };
 
   const fetchLessonPlans = async () => {
     try {
@@ -22,7 +43,8 @@ const CourseScreen = ({ route }) => {
       }
       const result = await response.json();
       if (result.status === 'Success') {
-        setLessonPlans(result.data);
+        const filteredPlans = result.data.filter(plan => plan.creatorId === teacherId);
+        setLessonPlans(filteredPlans);
       } else {
         Alert.alert('Error', result.message);
       }
@@ -32,44 +54,65 @@ const CourseScreen = ({ route }) => {
     }
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchLessonPlans();
+    }, [course.courseCode])
+  );
+
   const handleBrowseFile = async () => {
+    if (!storagePermissionGranted) {
+      Alert.alert('Permission Denied', 'You need to give storage permission to select files');
+      return;
+    }
+
     try {
       const res = await DocumentPicker.pick({
         type: [DocumentPicker.types.pdf],
       });
-      setLessonPlan(res);
+      setLessonPlan(res[0]);
     } catch (err) {
       if (DocumentPicker.isCancel(err)) {
         console.log('User cancelled the picker');
       } else {
         console.error('Document Picker Error: ', err);
+        Alert.alert('Unknown Error: ' + JSON.stringify(err));
         throw err;
       }
     }
   };
 
   const handleAddLessonPlan = async () => {
-    if (weekNo && lessonPlan) {
+    if (weekNo && lessonPlan && lessonPlan.uri) {
       try {
         const formData = new FormData();
         formData.append('lessonPlanTitle', weekNo);
+
+        // Handling content URI using RNFS
+        const fileUri = lessonPlan.uri;
+
+        let realPath = fileUri;
+        if (fileUri.startsWith('content://')) {
+          const stat = await RNFS.stat(fileUri);
+          realPath = stat.path;
+        }
+
         formData.append('lessonPlanPdf', {
-          uri: lessonPlan.uri,
+          uri: 'file://' + realPath,
           type: lessonPlan.type,
           name: lessonPlan.name,
         });
-        formData.append('creatorId', '1'); // Adjust accordingly
-        formData.append('creatorType', 'teacher'); // Adjust accordingly
+        formData.append('creatorId', teacherId);
+        formData.append('creatorType', 'teacher');
         formData.append('courseCode', course.courseCode);
-
-        console.log('FormData:', formData); // Log FormData for debugging
 
         const response = await fetch(`${baseURL}/LessonPlan/addLessonPlan`, {
           method: 'POST',
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
           body: formData,
         });
-
-        console.log('Response:', response); // Log response for debugging
 
         if (!response.ok) {
           const errorData = await response.text();
@@ -77,11 +120,8 @@ const CourseScreen = ({ route }) => {
         }
 
         const result = await response.json();
-        console.log('Result:', result); // Log the result for debugging
-
         if (result.status === 'Success') {
-          // Add the new lesson plan to the list
-          setLessonPlans([...lessonPlans, { weekNo, lessonPlan }]);
+          setLessonPlans([...lessonPlans, { ...result.data, weekNo }]);
           setWeekNo('');
           setLessonPlan(null);
           Alert.alert('Success', 'Lesson Plan Added');
@@ -89,7 +129,7 @@ const CourseScreen = ({ route }) => {
           Alert.alert('Error', result.message);
         }
       } catch (error) {
-        console.error('Add Lesson Plan Error: ', error); // Log the error for debugging
+        console.error('Add Lesson Plan Error: ', error);
         Alert.alert('Error', `Failed to add lesson plan: ${error.message}`);
       }
     } else {
@@ -108,7 +148,6 @@ const CourseScreen = ({ route }) => {
 
       const result = await response.json();
       if (result.status === 'Success') {
-        // Remove the lesson plan from the list
         setLessonPlans(lessonPlans.filter(plan => plan.lessonPlanId !== lessonPlanId));
         Alert.alert('Success', 'Lesson Plan Removed');
       } else {
@@ -118,6 +157,10 @@ const CourseScreen = ({ route }) => {
       console.error('Delete Lesson Plan Error: ', error);
       Alert.alert('Error', 'Failed to remove lesson plan');
     }
+  };
+
+  const handleEditLessonPlan = (lessonPlanId) => {
+    navigation.navigate('EditLessonPlan', { lessonPlanId });
   };
 
   return (
@@ -174,7 +217,7 @@ const CourseScreen = ({ route }) => {
             <View key={index} style={styles.lessonPlanContainer}>
               <Text style={styles.lessonPlanText}>Week {plan.weekNo}</Text>
               <View style={styles.lessonPlanActions}>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => handleEditLessonPlan(plan.lessonPlanId)}>
                   <Text style={styles.editText}>Edit</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => handleDeleteLessonPlan(plan.lessonPlanId)}>

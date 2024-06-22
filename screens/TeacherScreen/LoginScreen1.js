@@ -1,4 +1,3 @@
-//import config from '../../config';
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Alert, Dimensions, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -10,22 +9,18 @@ const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
 const LoginScreen1 = () => {
-
   const halfScreenHeight = screenHeight / 2.2;
-  const navigation = useNavigation(); // Initialize navigation
+  const navigation = useNavigation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  // const [isLogin, setIsLogin]  = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
 
-  //Password toggle by eye icon
-  const [showPassword, setShowPassword]= useState(false);
-  const togglePasswordVisibility = ()=>{
+  const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  //Variable for API URL
-  const loginEndPoint =  `${baseURL}/user/loginuser`;
-  //const fullUrl= config.baseURL+loginEndPoint;
+  const loginEndPoint = `${baseURL}/user/loginuser`;
+
   const handleLogin = async () => {
     try {
       const response = await fetch(loginEndPoint, {
@@ -36,51 +31,58 @@ const LoginScreen1 = () => {
         body: JSON.stringify({ username, password }),
       });
 
-      //console.log('response', response);
-      // const {teacherId}= response.data;
-      // setTeacherId(teacherId);
       if (response.ok) {
         const responseData = await response.json();
+        console.log('API Response:', responseData);
+
         if (responseData.status === 'Success') {
-          // Check if data is present and has length > 0
           if (responseData.data && responseData.data.length > 0) {
-            const role = responseData.data[0].role;
-            // Save username and password to AsyncStorage
+            const user = responseData.data[0];
+            const role = user.role;
+
+            await AsyncStorage.setItem('userRole', role);
             await AsyncStorage.setItem('username', username);
             await AsyncStorage.setItem('password', password);
-            //await AsyncStorage.setItem('islogin', true);
 
             if (role === 'Student') {
+              if (!user.id || !user.department) {
+                throw new Error('Missing studentId or department');
+              }
+              await AsyncStorage.setItem('studentId', user.id.toString());
+              await AsyncStorage.setItem('departmentId', user.department);
+              console.log("StudentId: ",user.id.toString(),"StudentDepartmentId:",user.department)
               navigation.navigate('StudentDashboard');
             } else if (role === 'Teacher') {
+              if (!user.id) {
+                throw new Error('Missing teacherId');
+              }
+              await AsyncStorage.setItem('teacherId', user.id.toString());
+              console.log("teacherId", user.id.toString())
               navigation.navigate('TeacherDashboard');
             } else if (role === 'Admin') {
               navigation.navigate('AdminDashboard');
+            } else {
+              throw new Error('Invalid role');
             }
           } else {
-            // No user data returned
             Alert.alert('Login Failed', 'Invalid username or password.');
           }
         } else {
-          // Failed status from the backend
-          Alert.alert('Login Failed', 'Invalid username or password.');
+          Alert.alert('Login Failed', responseData.message || 'Invalid username or password.');
         }
       } else {
-        // HTTP error (e.g., 404, 500)
         Alert.alert('Failed to login', 'Please try again later.');
       }
-      
     } catch (error) {
-      console.log('Error: ', error); // Log the error to the console
-      Alert.alert('An error occurred while logging in: ' + error.message); // Display a detailed error message to the user
+      console.log('Error:', error);
+      Alert.alert('An error occurred while logging in:', error.message);
     }
-    
   };
 
   return (
     <View style={styles.container}>
-      <View style={{ height: halfScreenHeight,width: screenWidth, backgroundColor: '#5B5D8B', alignItems: "center", justifyContent:"center"}}>
-        <Text style={{fontSize:30,color:"white"}}>Digital Library & Lesson Plan</Text>
+      <View style={{ height: halfScreenHeight, width: screenWidth, backgroundColor: '#5B5D8B', alignItems: "center", justifyContent: "center" }}>
+        <Text style={{ fontSize: 30, color: "white" }}>Digital Library & Lesson Plan</Text>
         <Text>A project of Northern University, Nowshera (KPK, Pakistan)</Text>
       </View>
       <Text style={styles.title}>Please Sign in to Continue</Text>
@@ -93,16 +95,18 @@ const LoginScreen1 = () => {
         autoCapitalize='none'
       />
       <View style={styles.inputContainer}>
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        placeholderTextColor="#7E7E7E"
-        onChangeText={setPassword}
-        value={password}
-        secureTextEntry={!showPassword}
-        autoCapitalize='none'
-      />
-      <TouchableOpacity onPress={togglePasswordVisibility } style={styles.iconContainer}><Icon name={showPassword ? 'eye-off-outline' : 'eye-outline' }size={25} color='#7E7E7E'  /></TouchableOpacity>
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          placeholderTextColor="#7E7E7E"
+          onChangeText={setPassword}
+          value={password}
+          secureTextEntry={!showPassword}
+          autoCapitalize='none'
+        />
+        <TouchableOpacity onPress={togglePasswordVisibility} style={styles.iconContainer}>
+          <Icon name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={25} color='#7E7E7E' />
+        </TouchableOpacity>
       </View>
       
       <TouchableOpacity onPress={handleLogin} style={styles.buttonStyle}>
@@ -110,9 +114,7 @@ const LoginScreen1 = () => {
       </TouchableOpacity>
     </View>
   );
-
 };
-
 
 const styles = StyleSheet.create({
   container: {
@@ -120,12 +122,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
   },
-  
   title: {
-    marginTop:25,
+    marginTop: 25,
     fontSize: 24,
     marginBottom: 20,
-    color:"#7E7E7E"
+    color: "#7E7E7E"
   },
   input: {
     width: '100%',
@@ -133,33 +134,32 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 25,
-    color:"black",
-    marginBottom:20,
-    fontSize:18,
-    paddingHorizontal:30,
-    paddingRight:40,
+    color: "black",
+    marginBottom: 20,
+    fontSize: 18,
+    paddingHorizontal: 30,
+    paddingRight: 40,
   },
   inputContainer: {
-     flexDirection: 'row',
-    // alignItems: 'center',
-    position:'relative',
-    width:'100%'
+    flexDirection: 'row',
+    position: 'relative',
+    width: '100%'
   },
   iconContainer: {
-   position:'absolute',
-   top:12,
-   right: 30,
+    position: 'absolute',
+    top: 12,
+    right: 30,
   },
-  buttonStyle:{
+  buttonStyle: {
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius:45,
-    width:181,
-    height:59,
-    backgroundColor:"#5B5D8B"
+    borderRadius: 45,
+    width: 181,
+    height: 59,
+    backgroundColor: "#5B5D8B"
   },
-  buttonText:{
-    color: 'white', // Default text color
+  buttonText: {
+    color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
   }

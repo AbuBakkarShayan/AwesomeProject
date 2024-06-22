@@ -49,7 +49,7 @@ const StudentDepartmentScreen = ({ route }) => {
       });
       const data = await response.json();
       if (data.status === 'Success') {
-        // Remove deleted department from state
+        // Remove deleted department from stat
         setDepartments(departments.filter(department => department.departmentId !== departmentId));
       } else {
         Alert.alert('Error', data.message);

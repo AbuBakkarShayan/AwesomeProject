@@ -8,8 +8,10 @@ import { createStackNavigator } from '@react-navigation/stack';
 import SplashScreen from './screens/SplashScreen';
 import LoginScreen1 from './screens/TeacherScreen/LoginScreen1';
 import TeacherDashboard from './screens/TeacherScreen/TeacherDashboard';
+import EditTeacherScreen from './screens/AdminScreen/EditTeacherScreen';
 import TeacherCoursesScreen from './screens/TeacherScreen/TeacherCoursesScreen';
 import CourseScreen from './screens/TeacherScreen/Courses';
+import EditLessonPlan from './screens/TeacherScreen/EditLessonPlan';
 import StudentLogsScreen from './screens/TeacherScreen/StudentsLogsScreen';
 import StudentDashboard from './screens/StudentScreen/StudentDashboard';
 import AdminDashboard from './screens/AdminScreen/AdminDashboard';
@@ -90,8 +92,11 @@ const App = () => {
         />
         <Stack.Screen name="LoginScreen1" component={LoginScreen1} options={{ headerShown: false }} />
         <Stack.Screen name="TeacherDashboard" component={TeacherDashboard} options={{title:'Teacher Dashboard'}} />
+        <Stack.Screen name="EditTeacherScreen" component={EditTeacherScreen} options={{title:'Edit Teacher Details'
+        }}/>
         <Stack.Screen name="TeacherCoursesScreen" component={TeacherCoursesScreen} options={{title:'Teacher Courses'
         }}/>
+        <Stack.Screen name='EditLessonPlan' component={EditLessonPlan} options={{title:'EditLessonPlan'}} />
         <Stack.Screen name='CourseScreen' component={CourseScreen} options={{title:'Course'}}/>
         <Stack.Screen name='MyBooksScreen' component={MyBooksScreen} />
         <Stack.Screen name='StudentLogsScreen' component={StudentLogsScreen} />
@@ -106,8 +111,8 @@ const App = () => {
         <Stack.Screen name='LibraryScreen' component={LibraryScreen} />
         <Stack.Screen name='MyCourseItemsScreen' component={MyCourseItemsScreen} />
         <Stack.Screen name='StudentProfileScreen' component={StudentProfileScreen} options={{title:"Profile"}} />
-        <Stack.Screen name='StudentDepartmentScreen' component={StudentDepartmentScreen} options={{title:'Student Management'}}/>
-        <Stack.Screen name='UpdateDepartmentScreen' component={UpdateDepartmentScreen} options={{title:'Update Department'}}/>
+        <Stack.Screen name='StudentDepartmentScreen' component={StudentDepartmentScreen} options={{title:'Student Departments'}}/>
+        <Stack.Screen name='UpdateDepartmentScreen' component={UpdateDepartmentScreen} options={{title:'Update Department Name'}}/>
         <Stack.Screen name='AddStudentScreen' component={AddStudentScreen} options={{title:'Students'}}/>
         <Stack.Screen name='AddStudentBatch' component={AddStudentBatch} options={{title:"Batch File"}}/>
         <Stack.Screen name='AddSingleStudent' component={AddSingleStudent} options={{title:'Add Single Student'}}/>

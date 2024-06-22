@@ -6,25 +6,22 @@ import LogoutButton from './customcomponent/logoutComponent';
 import baseURL from '../../config';
 
 const TeachersScreen = () => {
+  const navigation = useNavigation();
+  const { departmentId } = useRoute().params;
+  const [teachers, setTeachers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  //logout icon in header
-  React.useLayoutEffect(()=>{
+  React.useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight:()=><LogoutButton />,
+      headerRight: () => <LogoutButton />,
     });
   }, [navigation]);
 
-  const navigation = useNavigation();
-  const { departmentId } = useRoute().params; // Destructure departmentId directly
-  const [teachers, setTeachers] = useState([]);
-  const [loading, setLoading] = useState(true); // Add loading state
-
   useEffect(() => {
-    const fetchStudents = async () => {
+    const fetchTeachers = async () => {
       try {
         const response = await fetch(`${baseURL}/Teacher/getAllTeacher?departmentid=${departmentId}`);
         const data = await response.json();
-        console.log('Fetched data:', data);
         if (data.status === 'Success') {
           setTeachers(data.data);
         } else {
@@ -37,11 +34,11 @@ const TeachersScreen = () => {
       }
     };
 
-    fetchStudents();
+    fetchTeachers();
   }, [departmentId]);
 
   const handleDeleteTeacher = (teacherId) => {
-    setTeachers(prevTeachers => prevTeachers.filter(teacher => teacher.id !== teacherId));
+    setTeachers((prevTeachers) => prevTeachers.filter((teacher) => teacher.id !== teacherId));
   };
 
   return (
@@ -50,13 +47,13 @@ const TeachersScreen = () => {
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
         <UserListComponent
-        users={teachers}
-        onDeleteUser={handleDeleteTeacher}
-        addButtonLabel="Add Teacher"
-        onAddOptionPress={() => navigation.navigate("AddSingleTeacher")}
-        onAddBatchPress={() => navigation.navigate("AddStudentBatch")}
-      />
-
+          users={teachers}
+          onDeleteUser={handleDeleteTeacher}
+          addButtonLabel="Add Teacher"
+          onAddOptionPress={() => navigation.navigate('AddSingleTeacher')}
+          onAddBatchPress={() => navigation.navigate('AddTeacherBatch')}
+          userRole="Teacher"
+        />
       )}
     </View>
   );

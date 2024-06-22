@@ -1,13 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Modal, Text, FlatList, TouchableOpacity, Alert, StyleSheet, TouchableWithoutFeedback } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import baseURL from '../../../config';
 
-const UserListComponent = ({ users, onDeleteUser, addButtonLabel, onAddOptionPress, onAddBatchPress }) => {
+const UserListComponent = ({ users, onDeleteUser, addButtonLabel, onAddOptionPress, onAddBatchPress, userRole }) => {
   const navigation = useNavigation();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const authToken = "your-auth-token"; // Replace with the actual auth token
+  const [authToken, setAuthToken] = useState(null); // State for authToken
+  const [role, setRole] = useState(null);
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const getAuthToken = async () => {
+      const token = await AsyncStorage.getItem('authToken');
+      setAuthToken(token);
+    };
+
+    const getRoleAndId = async () => {
+      const storedRole = await AsyncStorage.getItem('role');
+      const storedId = await AsyncStorage.getItem('studentId');
+      setRole(storedRole);
+      setUserId(storedId);
+    };
+
+    getAuthToken();
+    getRoleAndId();
+  }, []);
+
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`${baseURL}/user/deleteUser`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ role, studentId }),
+      });
+
+      const result = await response.json();
+
+      if (result.status === 'Success') {
+        Alert.alert('Success', result.message);
+        onDeleteUser(id); // Update the state in parent component
+      } else {
+        Alert.alert('Error', result.message);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Something went wrong');
+    }
+  };
 
   const confirmDelete = (userId) => {
     Alert.alert(
@@ -15,45 +58,10 @@ const UserListComponent = ({ users, onDeleteUser, addButtonLabel, onAddOptionPre
       'Are you sure you want to delete this user?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', onPress: () => deleteUser(userId) },
+        { text: 'Delete', onPress: () => handleDelete(userId) },
       ]
     );
   };
-
-  const deleteUser = (userId) => {
-    fetch(`${baseURL}/user/deleteUser`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`, // Assuming you have an authToken
-      },
-      body: JSON.stringify({ id: userId }),
-    })
-      .then(response => response.json())
-      .then(responseJson => {
-        if (responseJson.status === "Success") {
-          Alert.alert('Success', 'User deleted successfully');
-          onDeleteUser(userId); // Call the onDeleteUser function passed from the parent
-        } else {
-          Alert.alert('Error', responseJson.message || 'Failed to delete user');
-        }
-      })
-      .catch(error => {
-        console.error('Error deleting user:', error);
-        Alert.alert('Error', 'Failed to delete user');
-      });
-  };
-
-  const renderAddOptions = () => (
-    <View style={styles.modalContent}>
-      <TouchableOpacity style={styles.modalOption} onPress={handleAddOptionPress}>
-        <Text style={styles.modalOptionText}>Add Single</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.modalOption} onPress={handleAddBatchPress}>
-        <Text style={styles.modalOptionText}>Add Batch</Text>
-      </TouchableOpacity>
-    </View>
-  );
 
   const handleAddOptionPress = (option) => {
     setIsModalVisible(false);
@@ -65,12 +73,22 @@ const UserListComponent = ({ users, onDeleteUser, addButtonLabel, onAddOptionPre
     onAddBatchPress();
   };
 
+  const renderAddOptions = () => (
+    <View style={styles.modalContent}>
+      <TouchableOpacity style={styles.modalOption} onPress={() => handleAddOptionPress('Single')}>
+        <Text style={styles.modalOptionText}>Add Single</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.modalOption} onPress={handleAddBatchPress}>
+        <Text style={styles.modalOptionText}>Add Batch</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
   const renderItem = ({ item }) => (
-    <View style={[styles.itemContainer]}>
-      <Text style={styles.userName}>{item.teacherName}</Text>
-      <Text style={styles.userName}>{item.studentName}</Text>
+    <View style={styles.itemContainer}>
+      <Text style={styles.userName}>{userRole === 'Teacher' ? item.teacherName : item.studentName}</Text>
       <View style={styles.iconContainer}>
-        <Icon name="create-outline" style={styles.icon} onPress={() => navigation.navigate('EditStudentScreen', { userId: item.id })} />
+        <Icon name="create-outline" style={styles.icon} onPress={() => navigation.navigate('EditTeacherScreen', { teacher: item })} />
         <Icon name="trash" style={styles.icon} onPress={() => confirmDelete(item.id)} />
       </View>
     </View>

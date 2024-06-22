@@ -3,29 +3,17 @@ import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import baseURL from '../../config';
 
-const EditStudentScreen = () => {
+const EditTeacherScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { student } = route.params;
+  const { teacher } = route.params;
 
-  const [name, setName] = useState(student.studentName);
-  const [department, setDepartment] = useState(student.departmentName);
-  const [phoneNo, setPhoneNo] = useState(student.studentPhoneNo);
+  const [name, setName] = useState(teacher.teacherName);
+  const [department, setDepartment] = useState(teacher.departmentName);
+  const [phoneNo, setPhoneNo] = useState(teacher.teacherPhoneNo);
   const [password, setPassword] = useState('');
 
   const handleUpdate = async () => {
-    const updatedFields = {};
-
-    if (name !== student.studentName) updatedFields.name = name;
-    if (department !== student.departmentName) updatedFields.department = department;
-    if (phoneNo !== student.studentPhoneNo) updatedFields.phoneNo = phoneNo;
-    if (password) updatedFields.password = password;
-
-    if (Object.keys(updatedFields).length === 0) {
-      Alert.alert('No Changes', 'No fields have been changed.');
-      return;
-    }
-
     try {
       const response = await fetch(`${baseURL}/user/updateuser`, {
         method: 'PUT',
@@ -33,9 +21,12 @@ const EditStudentScreen = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          role: 'Student',
-          id: student.studentId,
-          ...updatedFields,
+          role: 'Teacher',
+          id: teacher.teacherId,
+          name,
+          department,
+          phoneNo,
+          password,
         }),
       });
 
@@ -47,38 +38,38 @@ const EditStudentScreen = () => {
         Alert.alert('Failed', result.message);
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to update student');
+      Alert.alert('Error', 'Failed to update teacher');
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Edit Student</Text>
+      <Text style={styles.title}>Edit Teacher</Text>
       <TextInput
         style={styles.input}
         placeholder="Name"
-        placeholderTextColor="#7E7E7E"
+        placeholderTextColor={'#7E7E7E'}
         value={name}
         onChangeText={setName}
       />
       <TextInput
         style={styles.input}
         placeholder="Department"
-        placeholderTextColor="#7E7E7E"
+        placeholderTextColor={'#7E7E7E'}
         value={department}
         onChangeText={setDepartment}
       />
       <TextInput
         style={styles.input}
         placeholder="Phone Number"
-        placeholderTextColor="#7E7E7E"
+        placeholderTextColor={'#7E7E7E'}
         value={phoneNo}
         onChangeText={setPhoneNo}
       />
       <TextInput
         style={styles.input}
         placeholder="Password"
-        placeholderTextColor="#7E7E7E"
+        placeholderTextColor={'#7E7E7E'}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -98,7 +89,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     marginBottom: 16,
     textAlign: 'center',
-    color: '#7E7E7E',
+    color:'#7E7E7E',
   },
   input: {
     height: 40,
@@ -106,9 +97,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 12,
     paddingHorizontal: 8,
-    color: '#7E7E7E',
+    color:'#7E7E7E',
   },
 });
 
-export default EditStudentScreen;
- 
+export default EditTeacherScreen;

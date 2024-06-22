@@ -1,41 +1,76 @@
-// screens/TeacherCoursesScreen.js
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import baseURL from '../../config';
 
-const TeacherCoursesScreen = ({route}) => {
-  const { teacherId } = route.params;
-  const [courses, setCourses] = useState([]);
+const TeacherCoursesScreen = () => {
   const navigation = useNavigation();
+  const route = useRoute();
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchTeacherCourses();
-  }, []);
+    const fetchTeacherCourses = async () => {
+      try {
+        // Fetch teacherId from route params or AsyncStorage
+        let teacherId = route.params?.teacherId;
 
-  const fetchTeacherCourses = async () => {
-    try {
-      const response = await fetch(`${baseURL}/Course/getTeacherCourses?teacherId=1`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.status === 'Success') {
-          setCourses(data.data);
-        } else {
-          console.log(data.message);
+        if (!teacherId) {
+          teacherId = await AsyncStorage.getItem('teacherId');
         }
-      } else {
-        console.log('Failed to fetch courses');
+
+        if (!teacherId) {
+          throw new Error('Teacher ID is missing');
+        }
+
+        console.log(`Fetching courses for teacherId: ${teacherId}`);
+
+        // API call to fetch courses
+        const response = await fetch(`${baseURL}/Course/getTeacherCourses?teacherId=${teacherId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        console.log(`API Response Status: ${response.status}`);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('API Response Data:', data);
+
+          if (data.status === 'Success') {
+            setCourses(data.data); // Ensure this matches the structure of your response
+            console.log('Courses set to state:', data.data);
+          } else {
+            console.log('API Error Message:', data.message);
+            setError(data.message || 'Failed to fetch courses');
+          }
+        } else {
+          const errorText = await response.text();
+          console.log('Response not OK:', errorText);
+          setError(`Failed to fetch courses: ${response.status} ${response.statusText}`);
+        }
+      } catch (error) {
+        console.error('Fetch Error:', error);
+        setError(error.message || 'An error occurred while fetching courses');
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    };
+
+    fetchTeacherCourses();
+  }, [route.params]);
+
+  if (loading) {
+    return <Text>Loading...</Text>;
+  }
+
+  if (error) {
+    return <Text>Error: {error}</Text>;
+  }
 
   return (
     <View style={styles.container}>
@@ -45,7 +80,7 @@ const TeacherCoursesScreen = ({route}) => {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.courseContainer}
-            onPress={() => navigation.navigate('Course', { course: item })}
+            onPress={() => navigation.navigate('CourseScreen', { course: item })}
           >
             <Text style={styles.courseName}>{item.courseName}</Text>
             <Text style={styles.creditHour}>Credit Hours: {item.creditHours}</Text>
