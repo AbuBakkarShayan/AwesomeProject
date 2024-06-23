@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, Text, Alert, StyleSheet } from 'react-native';
 import DocumentPicker from 'react-native-document-picker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import LogoutButton from './customcomponent/logoutComponent';
 import baseURL from '../../config';
 
 const AddBookScreen = ({ navigation }) => {
 
-  //logout icon in header
-  React.useLayoutEffect(()=>{
+  React.useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight:()=><LogoutButton />,
+      headerRight: () => <LogoutButton />,
     });
   }, [navigation]);
 
@@ -21,17 +19,24 @@ const AddBookScreen = ({ navigation }) => {
   const [author, setAuthor] = useState('');
   const [keywords, setKeywords] = useState('');
 
+  const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
+
   const handleCoverImagePick = async () => {
     try {
       const doc = await DocumentPicker.pickSingle({
         type: [DocumentPicker.types.images],
       });
-      setCoverImage(doc.uri); // Update state with file URI
+      if (doc.size > MAX_FILE_SIZE) {
+        Alert.alert('Error', 'Cover image file size exceeds the maximum limit of 50 MB');
+        return;
+      }
+      setCoverImage(doc);
     } catch (err) {
-      if (DocumentPicker.isCancel(err))
-        console.log("User cancel the Upload", err)
-      else
+      if (DocumentPicker.isCancel(err)) {
+        console.log('User canceled the upload', err);
+      } else {
         console.log(err);
+      }
     }
   };
 
@@ -40,96 +45,99 @@ const AddBookScreen = ({ navigation }) => {
       const doc = await DocumentPicker.pickSingle({
         type: [DocumentPicker.types.pdf],
       });
-      setPdfFile(doc.uri); // Update state with file URI
+      if (doc.size > MAX_FILE_SIZE) {
+        Alert.alert('Error', 'PDF file size exceeds the maximum limit of 50 MB');
+        return;
+      }
+      setPdfFile(doc);
     } catch (err) {
-      if (DocumentPicker.isCancel(err))
-        console.log("User cancel the Upload", err)
-      else
+      if (DocumentPicker.isCancel(err)) {
+        console.log('User canceled the upload', err);
+      } else {
         console.log(err);
+      }
     }
   };
 
-  // When storing uploaderId (e.g., after login)
-const storeUploaderId = async (id) => {
-  try {
-    await AsyncStorage.setItem('uploaderId', id);
-    console.log('Uploader ID stored successfully:', id);
-  } catch (error) {
-    console.error('Error storing uploader ID:', error);
-  }
-};
-
-// When retrieving uploaderId in handleUpload function
-const handleUpload = async () => {
-  try {
-    // Retrieve uploaderId from AsyncStorage
-    const uploaderId = await AsyncStorage.getItem('uploaderId');
-    console.log('Retrieved uploader ID:', uploaderId);
-
-    if (!uploaderId) {
-      throw new Error('Uploader ID not found. Please login again.');
+  const handleUpload = async () => {
+    try {
+      const uploaderId = 0; // Default uploader ID for admin
+  
+      if (!title || !category || !coverImage || !pdfFile || !author || !keywords) {
+        throw new Error('Please fill in all fields');
+      }
+  
+      const formData = new FormData();
+      formData.append('bookName', title);
+      formData.append('category', category);
+      formData.append('bookImage', {
+        uri: coverImage.uri,
+        type: coverImage.type,
+        name: coverImage.name,
+      });
+      formData.append('bookPdf', {
+        uri: pdfFile.uri,
+        type: pdfFile.type,
+        name: pdfFile.name,
+      });
+      formData.append('bookAuthor', author);
+      formData.append('keywords', keywords);
+      formData.append('uploaderId', uploaderId);
+  
+      const response = await fetch(`${baseURL}/book/uploadBook`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        body: formData,
+      });
+  
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(`Failed to upload book: ${errorMessage}`);
+      }
+  
+      const result = await response.json();
+      console.log('Upload result:', result);
+  
+      if (result.status !== 'Success') {
+        throw new Error(result.message);
+      }
+  
+      if (!result.bookId) {
+        throw new Error('Book ID not returned from the server');
+      }
+  
+      // Navigate to AddTOC screen with bookId
+      navigation.navigate('AddTOC', { bookId: result.bookId });
+    } catch (error) {
+      console.log('Error uploading book:', error);
+      Alert.alert('Error', error.message);
     }
-
-    // Ensure all required fields are filled
-    if (!title || !category || !coverImage || !pdfFile || !author || !keywords) {
-      throw new Error('Please fill in all fields');
-    }
-
-    // Call your C# API to upload book data
-    const response = await fetch(`${baseURL}/Book/uploadBook`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        title,
-        category,
-        coverImage,
-        pdfFile,
-        author,
-        keywords,
-        uploaderId,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorMessage = await response.text(); // Extract error message from response
-      throw new Error(`Failed to upload book: ${errorMessage}`);
-    }
-
-    // Navigate to ADDTOC screen
-    navigation.navigate('ADDTOC');
-
-  } catch (error) {
-    console.log('Error uploading book:', error);
-    Alert.alert('Error', error.message); // Display error message to the user
-  }
-};
-
-   
+  };
 
   return (
     <View style={styles.container}>
       <TextInput
         style={styles.input}
         placeholder="Title"
-        placeholderTextColor={'black'}
+        placeholderTextColor="black"
         value={title}
         onChangeText={setTitle}
       />
       <TextInput
         style={styles.input}
         placeholder="Category"
-        placeholderTextColor={'black'}
+        placeholderTextColor="black"
         value={category}
         onChangeText={setCategory}
       />
       <TextInput
         style={styles.input}
         placeholder="Cover Image"
-        placeholderTextColor={'black'}
+        placeholderTextColor="black"
         editable={false}
-        value={coverImage ? coverImage.split('/').pop() : ''}
+        value={coverImage ? coverImage.name : ''}
       />
       <TouchableOpacity style={styles.button} onPress={handleCoverImagePick}>
         <Text style={styles.buttonText}>Browse Cover Image</Text>
@@ -137,9 +145,9 @@ const handleUpload = async () => {
       <TextInput
         style={styles.input}
         placeholder="PDF File"
-        placeholderTextColor={'black'}
+        placeholderTextColor="black"
         editable={false}
-        value={pdfFile ? pdfFile.split('/').pop() : ''}
+        value={pdfFile ? pdfFile.name : ''}
       />
       <TouchableOpacity style={styles.button} onPress={handlePdfFilePick}>
         <Text style={styles.buttonText}>Browse PDF File</Text>
@@ -147,14 +155,14 @@ const handleUpload = async () => {
       <TextInput
         style={styles.input}
         placeholder="Author"
-        placeholderTextColor={'black'}
+        placeholderTextColor="black"
         value={author}
         onChangeText={setAuthor}
       />
       <TextInput
         style={styles.input}
         placeholder="Keywords"
-        placeholderTextColor={'black'}
+        placeholderTextColor="black"
         value={keywords}
         onChangeText={setKeywords}
       />

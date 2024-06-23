@@ -7,9 +7,15 @@ const AdminProfileScreen = () => {
   const navigation = useNavigation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    checkIfLoggedIn();
+    const initialize = async () => {
+      await checkIfLoggedIn();
+      await fetchData();
+      setIsLoading(false);
+    };
+    initialize();
   }, []);
 
   const checkIfLoggedIn = async () => {
@@ -17,46 +23,52 @@ const AdminProfileScreen = () => {
     if (!userToken) {
       await AsyncStorage.removeItem('lastScreen');
       await AsyncStorage.removeItem('userRole');
-      navigation.navigate('LoginScreen1');
+      //navigation.navigate('LoginScreen1');
     }
   };
-  
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const storedUsername = await AsyncStorage.getItem('username');
-        const storedPassword = await AsyncStorage.getItem('password');
-        console.log('Stored Username:', storedUsername);
-        console.log('Stored Password: ', storedPassword);
-        if (storedUsername !== null && storedPassword !== null) {
-          setUsername(storedUsername);
-          setPassword(storedPassword);
-        }
-      } catch (error) {
-        console.log('Error retrieving data:', error);
+  const fetchData = async () => {
+    try {
+      const storedUsername = await AsyncStorage.getItem('username');
+      const storedPassword = await AsyncStorage.getItem('password');
+      console.log('Stored Username:', storedUsername);
+      console.log('Stored Password:', storedPassword);
+      if (storedUsername !== null && storedPassword !== null) {
+        setUsername(storedUsername);
+        setPassword(storedPassword);
       }
-    };
-    fetchData();
-  }, []);
+    } catch (error) {
+      console.log('Error retrieving data:', error);
+    }
+  };
 
   const handleLogout = async () => {
     try {
       await AsyncStorage.removeItem('username');
       await AsyncStorage.removeItem('password');
+      await AsyncStorage.removeItem('userToken'); // Ensure userToken is removed as well
       const removedUsername = await AsyncStorage.getItem('username');
+      const removedToken = await AsyncStorage.getItem('userToken');
 
-      // Check if the username was successfully removed from AsyncStorage
-      if (removedUsername === null) {
-        console.log("Username is successfully removed from AsyncStorage");
+      // Check if the username and userToken were successfully removed from AsyncStorage
+      if (removedUsername === null && removedToken === null) {
+        console.log('Username and userToken are successfully removed from AsyncStorage');
         navigation.navigate('LoginScreen1');
       } else {
-        console.log('Failed to remove username from AsyncStorage');
+        console.log('Failed to remove username or userToken from AsyncStorage');
       }
     } catch (error) {
-      console.log("Error cleaning AsyncStorage: ", error);
+      console.log('Error clearing AsyncStorage:', error);
     }
   };
+
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>

@@ -53,7 +53,10 @@ const BooksManagementScreen = () => {
   };
 
   const handleEditBook = (book) => {
-    navigation.navigate('EditBookScreen', { book });
+    navigation.navigate('EditBookScreen', {
+      bookId: book.id,
+      onBookUpdated: fetchBooks, // Pass the fetchBooks function as a callback
+    });
   };
 
   const handleDeleteBook = async (bookId, uploaderId) => {

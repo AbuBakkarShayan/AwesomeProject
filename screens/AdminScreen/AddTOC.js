@@ -1,80 +1,150 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons'; // Import Ionicons for cancel icon'
+import React, { useState, useEffect } from 'react';
+import { View, TextInput, TouchableOpacity, Text, Alert, StyleSheet, FlatList } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import LogoutButton from './customcomponent/logoutComponent';
+import baseURL from '../../config';
 
-const AddTOC = ({navigation}) => {
+const AddTOC = ({ route, navigation }) => {
+  const [nameOfContent, setNameOfContent] = useState('');
+  const [pageNo, setPageNo] = useState('');
+  const [keywords, setKeywords] = useState('');
+  const [tocItems, setTocItems] = useState([]);
+  const [bookId, setBookId] = useState(null);
 
-  //logout icon in header
-  React.useLayoutEffect(()=>{
-    navigation.setOptions({
-      headerRight:()=><LogoutButton />,
-    });
-  }, [navigation]);
+  useEffect(() => {
+    if (route.params?.bookId) {
+      setBookId(route.params.bookId);
+      fetchTOCItems(route.params.bookId);
+    }
+  }, [route.params?.bookId]);
 
-  const [keywords, setKeywords] = useState([]); // State to store keywords
-  const [keywordInput, setKeywordInput] = useState(''); // State to store the value of keyword input
-
-  // Function to add a keyword
-  const addKeyword = () => {
-    if (keywordInput.trim() !== '') {
-      if (keywords.length < 5) { // Limit keywords to 5
-        setKeywords([...keywords, keywordInput.trim()]);
-        setKeywordInput('');
+  // Fetch TOC items for the book
+  const fetchTOCItems = async (bookId) => {
+    try {
+      const response = await fetch(`${baseURL}/book/getTOC?bookId=${bookId}`);
+      const result = await response.json();
+      if (result.status === 'Success') {
+        setTocItems(result.data);
       } else {
-        alert('You can only add up to 5 keywords.');
+        console.log('Error fetching TOC items:', result.message);
       }
+    } catch (error) {
+      console.log('Error fetching TOC items:', error);
     }
   };
 
-  // Function to remove a keyword
-  const removeKeyword = (indexToRemove) => {
-    setKeywords(keywords.filter((_, index) => index !== indexToRemove));
+  // Logout icon in header
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
+
+  const handleAddTOC = async () => {
+    if (!nameOfContent || !pageNo || !keywords) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${baseURL}/book/addTOC`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bookId,
+          tocContent: nameOfContent,
+          pageNo,
+          keywords: keywords.split(',').map(keyword => keyword.trim()),
+        }),
+      });
+
+      const result = await response.json();
+      if (result.status !== 'Success') {
+        throw new Error(result.message);
+      }
+
+      const newTOCItem = {
+        id: result.tocid,
+        tocContent: nameOfContent,
+        pageNo,
+        keywords: keywords.split(',').map(keyword => keyword.trim())
+      };
+
+      setTocItems([...tocItems, newTOCItem]);
+      setNameOfContent('');
+      setPageNo('');
+      setKeywords('');
+    } catch (error) {
+      console.log('Error adding TOC:', error);
+      Alert.alert('Error', error.message);
+    }
   };
+
+  const handleDeleteTOC = async (id) => {
+    try {
+      const response = await fetch(`${baseURL}/book/deleteTOC?tocId=${id}`, {
+        method: 'DELETE',
+      });
+
+      const result = await response.json();
+      if (result.status !== 'Success') {
+        throw new Error(result.message);
+      }
+
+      setTocItems(tocItems.filter(item => item.id !== id));
+    } catch (error) {
+      console.log('Error deleting TOC:', error);
+      Alert.alert('Error', error.message);
+    }
+  };
+
+  const renderTOCItem = ({ item }) => (
+    <View style={styles.tocItemContainer}>
+      <View>
+        <Text>{item.tocContent} (Page: {item.tocPageNo})</Text>
+        <Text>{item.keywords.join(', ')}</Text>
+      </View>
+      <TouchableOpacity onPress={() => handleDeleteTOC(item.tocId)}>
+        <Icon name="trash-outline" size={24} color="#C4C4C4" />
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
-      {/* TextInput for Name of Content */}
       <TextInput
         style={styles.input}
-        placeholder="Name of Content"
-        placeholderTextColor="#7E7E7E"
+        placeholder="Name Of Content"
+        placeholderTextColor={'black'}
+        value={nameOfContent}
+        onChangeText={setNameOfContent}
       />
-      {/* TextInput for Page No */}
       <TextInput
         style={styles.input}
         placeholder="Page No"
-        placeholderTextColor="#7E7E7E"
+        placeholderTextColor={'black'}
+        value={pageNo}
+        onChangeText={setPageNo}
       />
-      {/* Keywords Input */}
-      <View style={styles.keywordsContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {keywords.map((keyword, index) => (
-            <View key={index} style={styles.keywordBox}>
-              <Text style={styles.keywordText}>{keyword}</Text>
-              <TouchableOpacity onPress={() => removeKeyword(index)} style={styles.cancelButton}>
-                <Icon name="close-circle" size={20} color="#5B5D8B" />
-              </TouchableOpacity>
-            </View>
-          ))}
-        </ScrollView>
-      </View>
-      {/* Keyword Input */}
-      <View style={styles.keywordInputContainer}>
-        <TextInput
-          style={styles.keywordInput}
-          placeholder="Enter keyword"
-          placeholderTextColor="#7E7E7E"
-          value={keywordInput}
-          onChangeText={(text) => setKeywordInput(text)}
-          onSubmitEditing={addKeyword}
-        />
-        <TouchableOpacity style={styles.addButton} onPress={addKeyword}>
-          <Text style={styles.addButtonText}>Add</Text>
-        </TouchableOpacity>
-      </View>
-      <TouchableOpacity style={styles.button}>
+      <TextInput
+        style={styles.input}
+        placeholder="Keywords (comma separated)"
+        placeholderTextColor={'black'}
+        value={keywords}
+        onChangeText={setKeywords}
+      />
+      <TouchableOpacity style={styles.addButton} onPress={handleAddTOC}>
         <Text style={styles.buttonText}>Add TOC</Text>
+      </TouchableOpacity>
+      <FlatList
+        data={tocItems}
+        keyExtractor={(item) => item.tocId.toString()}
+        renderItem={renderTOCItem}
+      />
+      <TouchableOpacity style={styles.submitButton} onPress={() => navigation.goBack()}>
+        <Text style={styles.buttonText}>Finish</Text>
       </TouchableOpacity>
     </View>
   );
@@ -84,73 +154,44 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor: '#f8f9fa',
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
     width: '100%',
-    color:'#7E7E7E',
-  },
-  keywordsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
     marginBottom: 10,
-  },
-  keywordBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
-    borderRadius: 20,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    marginRight: 10,
-    
-  },
-  keywordText: {
-    marginRight: 5,
-    color:'#7E7E7E',
-  },
-  cancelButton: {
-    marginLeft: 5,
-  },
-  keywordInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  keywordInput: {
+    padding: 10,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
-    padding: 10,
-    marginRight: 10,
-    flex: 1,
-    color:'#7E7E7E',
+    color: 'black',
   },
   addButton: {
     backgroundColor: '#5B5D8B',
     padding: 10,
     borderRadius: 5,
+    alignItems: 'center',
+    marginBottom: 20,
   },
-  addButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  button: {
-    backgroundColor: '#5B5D8B',
+  submitButton: {
+    backgroundColor: '#28a745',
     padding: 10,
     borderRadius: 5,
-    width: '50%',
     alignItems: 'center',
-    marginBottom: 10,
-    alignSelf:'center'
+    marginTop: 20,
   },
   buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: '#fff',
+  },
+  tocItemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    backgroundColor: '#e9ecef',
+    borderRadius: 5,
+    marginBottom: 5,
   },
 });
 

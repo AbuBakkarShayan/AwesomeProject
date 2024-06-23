@@ -1,111 +1,199 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
-import { SelectList } from 'react-native-dropdown-select-list';
-import LogoutButton from './customcomponent/logoutComponent';
+import { StyleSheet, View, ActivityIndicator, TouchableOpacity, Text, TextInput, Alert } from 'react-native';
+import { Dropdown } from 'react-native-element-dropdown';
 import baseURL from '../../config';
 
-const EnrollStudent = ({ navigation }) => {
-  // logout icon in header
-  React.useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => <LogoutButton />,
-    });
-  }, [navigation]);
+const EnrollStudent = ({ route, navigation }) => {
+  const { courseCode } = route.params;
+  const [departments, setDepartments] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [selectedDepartment, setSelectedDepartment] = useState(null);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [semesterNumber, setSemesterNumber] = useState('');
+  const [loadingDepartments, setLoadingDepartments] = useState(true);
+  const [loadingStudents, setLoadingStudents] = useState(false);
 
-  const [semester, setSemester] = useState('');
-  const [session, setSession] = useState('');
-  const [selectedStudent, setSelectedStudent] = useState('');
-  const [studentList, setStudentList] = useState([]);
-  const [loading, setLoading] = useState(true);
-const [error, setError] = useState(null);
-
-  
   useEffect(() => {
-  const fetchStudentList = async () => {
-    try {
-      setLoading(true); // Set loading to true while fetching
-      const response = await fetch(`${baseURL}/Student/getAllStudent`);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch student list: ${response.status} ${response.statusText}`);
-      }
-      const data = await response.json();
-      setStudentList(data);
-      setLoading(false); // Set loading to false after fetching
-    } catch (error) {
-      console.error('Error fetching student list:', error);
-      setError(error.message); // Set error message
-      setLoading(false); // Set loading to false in case of error
-    }
+    fetchDepartments();
+  }, []);
+
+  const fetchDepartments = () => {
+    fetch(`${baseURL}/department/allDepartment`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data && Array.isArray(data.data)) {
+          const formattedData = data.data.map(department => ({
+            label: department.departmentName,
+            value: department.departmentId,
+          }));
+          setDepartments(formattedData);
+        } else {
+          console.error('Error: Data is not an array', data);
+        }
+        setLoadingDepartments(false);
+      })
+      .catch(error => {
+        console.error('Error fetching departments:', error);
+        setLoadingDepartments(false);
+      });
   };
 
-  fetchStudentList();
-}, []); // Empty dependency array means this effect runs only once, similar to componentDidMount
+  useEffect(() => {
+    if (selectedDepartment) {
+      fetchStudents(selectedDepartment);
+    }
+  }, [selectedDepartment]);
+
+  const fetchStudents = (departmentId) => {
+    setLoadingStudents(true);
+    fetch(`${baseURL}/student/getAllStudent?departmentId=${departmentId}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data && Array.isArray(data.data)) {
+          const formattedData = data.data.map(student => ({
+            label: student.studentName,
+            value: student.studentId,
+          }));
+          setStudents(formattedData);
+        } else {
+          console.error('Error: Data is not an array', data);
+        }
+        setLoadingStudents(false);
+      })
+      .catch(error => {
+        console.error('Error fetching students:', error);
+        setLoadingStudents(false);
+      });
+  };
 
   const enrollStudent = () => {
-    // Implement your logic for enrolling the selected student
-    console.log('Enrolling student:', selectedStudent);
+    if (!selectedStudent || !semesterNumber) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    const payload = {
+      studentId: selectedStudent,
+      smesterNo: semesterNumber,
+      courseCode: [courseCode], // Wrap courseCode in an array
+    };
+
+    fetch(`${baseURL}/enrollment/enroll`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.status === 'Success') {
+          Alert.alert('Success', 'Enrollment successful');
+          navigation.goBack(); 
+        } else {
+          Alert.alert('Error', data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error enrolling student:', error);
+        Alert.alert('Error', 'Failed to enroll student');
+      });
   };
 
   return (
     <View style={styles.container}>
       <TextInput
         style={styles.input}
-        placeholder="Semester No"
-        placeholderTextColor="#7E7E7E"
-        value={semester}
-        onChangeText={(text) => setSemester(text)}
+        placeholder="Semester Number"
+        value={semesterNumber}
+        onChangeText={setSemesterNumber}
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Session"
-        placeholderTextColor="#7E7E7E"
-        value={session}
-        onChangeText={(text) => setSession(text)}
-      />
-      <SelectList
-  setSelected={(val) => setSelectedStudent(val)}
-  data={studentList && studentList.map((student) => ({ key: student.id, value: student.name }))}
-  save="value"
-  dropdownTextStyles={{ color: 'black' }}
-  placeholder="Select a student"
-  inputStyles={{ color: 'black' }}
-  boxStyles={{ marginBottom: 15, width: 383 }}
-  dropdownStyles={{ marginBottom: 20 }}
-/>
+      {loadingDepartments ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <Dropdown
+          style={styles.dropdown}
+          data={departments}
+          labelField="label"
+          valueField="value"
+          placeholder="Select Department"
+          value={selectedDepartment}
+          onChange={item => {
+            setSelectedDepartment(item.value);
+            setSelectedStudent(null); 
+          }}
+        />
+      )}
+      {loadingStudents ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <Dropdown
+          style={styles.dropdown}
+          data={students}
+          labelField="label"
+          valueField="value"
+          placeholder="Select Student"
+          value={selectedStudent}
+          onChange={item => {
+            setSelectedStudent(item.value);
+          }}
+        />
+      )}
       <TouchableOpacity style={styles.button} onPress={enrollStudent}>
-        <Text style={styles.buttonText}>Enroll User</Text>
+        <Text style={styles.buttonText}>Enroll</Text>
       </TouchableOpacity>
     </View>
   );
 };
 
+export default EnrollStudent;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
   },
   input: {
+    width: '80%',
+    margin: 16,
+    height: 50,
+    borderColor: 'gray',
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-    width: '100%',
-    color: 'black',
+    paddingLeft: 8,
+  },
+  dropdown: {
+    width: '80%',
+    margin: 16,
+    height: 50,
+    borderColor: 'gray',
+    borderWidth: 1,
+    paddingLeft: 8,
   },
   button: {
-    backgroundColor: '#5B5D8B',
+    backgroundColor: '#007BFF',
     padding: 10,
+    margin: 16,
     borderRadius: 5,
-    width: '100%',
     alignItems: 'center',
-    marginBottom: 10,
   },
   buttonText: {
     color: 'white',
-    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
-
-export default EnrollStudent;
