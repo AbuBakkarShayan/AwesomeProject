@@ -1,39 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Platform } from 'react-native';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, FlatList } from 'react-native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import DocumentPicker from 'react-native-document-picker';
-import RNFS from 'react-native-fs';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import baseURL from '../../config';
 
-const CourseScreen = ({ route }) => {
-  const { course, teacherId } = route.params; // Assume teacherId is passed as a param
+const CourseScreen = () => {
   const navigation = useNavigation();
+  const route = useRoute();
+  const { course, teacherId } = route.params; // Ensure teacherId and course are received from route params
   const [activeTab, setActiveTab] = useState('Weekly LP');
   const [weekNo, setWeekNo] = useState('');
   const [lessonPlan, setLessonPlan] = useState(null);
   const [lessonPlans, setLessonPlans] = useState([]);
-  const [storagePermissionGranted, setStoragePermissionGranted] = useState(false);
-
-  useEffect(() => {
-    if (Platform.OS === 'android') {
-      requestStoragePermission();
-    }
-  }, []);
-
-  const requestStoragePermission = async () => {
-    try {
-      const result = await request(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE);
-      if (result === RESULTS.GRANTED) {
-        setStoragePermissionGranted(true);
-      } else {
-        Alert.alert('Permission Denied', 'You need to give storage permission to select files');
-      }
-    } catch (err) {
-      console.warn(err);
-    }
-  };
 
   const fetchLessonPlans = async () => {
     try {
@@ -42,9 +20,9 @@ const CourseScreen = ({ route }) => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const result = await response.json();
+      console.log('API Response:', result); // Debugging log
       if (result.status === 'Success') {
-        const filteredPlans = result.data.filter(plan => plan.creatorId === teacherId);
-        setLessonPlans(filteredPlans);
+        setLessonPlans(result.data);
       } else {
         Alert.alert('Error', result.message);
       }
@@ -61,16 +39,11 @@ const CourseScreen = ({ route }) => {
   );
 
   const handleBrowseFile = async () => {
-    if (!storagePermissionGranted) {
-      Alert.alert('Permission Denied', 'You need to give storage permission to select files');
-      return;
-    }
-
     try {
-      const res = await DocumentPicker.pick({
+      const res = await DocumentPicker.pickSingle({
         type: [DocumentPicker.types.pdf],
       });
-      setLessonPlan(res[0]);
+      setLessonPlan(res);
     } catch (err) {
       if (DocumentPicker.isCancel(err)) {
         console.log('User cancelled the picker');
@@ -83,57 +56,56 @@ const CourseScreen = ({ route }) => {
   };
 
   const handleAddLessonPlan = async () => {
-    if (weekNo && lessonPlan && lessonPlan.uri) {
-      try {
-        const formData = new FormData();
-        formData.append('lessonPlanTitle', weekNo);
-
-        // Handling content URI using RNFS
-        const fileUri = lessonPlan.uri;
-
-        let realPath = fileUri;
-        if (fileUri.startsWith('content://')) {
-          const stat = await RNFS.stat(fileUri);
-          realPath = stat.path;
-        }
-
-        formData.append('lessonPlanPdf', {
-          uri: 'file://' + realPath,
-          type: lessonPlan.type,
-          name: lessonPlan.name,
-        });
-        formData.append('creatorId', teacherId);
-        formData.append('creatorType', 'teacher');
-        formData.append('courseCode', course.courseCode);
-
-        const response = await fetch(`${baseURL}/LessonPlan/addLessonPlan`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-          body: formData,
-        });
-
-        if (!response.ok) {
-          const errorData = await response.text();
-          throw new Error(`HTTP error! status: ${response.status}, data: ${errorData}`);
-        }
-
-        const result = await response.json();
-        if (result.status === 'Success') {
-          setLessonPlans([...lessonPlans, { ...result.data, weekNo }]);
-          setWeekNo('');
-          setLessonPlan(null);
-          Alert.alert('Success', 'Lesson Plan Added');
-        } else {
-          Alert.alert('Error', result.message);
-        }
-      } catch (error) {
-        console.error('Add Lesson Plan Error: ', error);
-        Alert.alert('Error', `Failed to add lesson plan: ${error.message}`);
-      }
-    } else {
+    if (!weekNo || !lessonPlan) {
       Alert.alert('Error', 'Week number and lesson plan PDF are required');
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('lessonPlanTitle', weekNo);
+      formData.append('lessonPlanPdf', {
+        uri: lessonPlan.uri,
+        type: lessonPlan.type,
+        name: lessonPlan.name,
+      });
+
+      // Ensure teacherId is defined and convert it to string
+      if (!teacherId) {
+        throw new Error('Teacher ID is undefined');
+      }
+      formData.append('creatorId', String(teacherId));
+      formData.append('creatorType', 'teacher');
+      formData.append('courseCode', course.courseCode);
+
+      console.log('FormData before sending:', formData); // Debugging log
+
+      const response = await fetch(`${baseURL}/LessonPlan/addLessonPlan`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, data: ${errorData}`);
+      }
+
+      const result = await response.json();
+      console.log('Add Lesson Plan Result:', result); // Debugging log
+      if (result.status === 'Success') {
+        fetchLessonPlans(); // Refresh lesson plans list
+        setWeekNo('');
+        setLessonPlan(null);
+        Alert.alert('Success', 'Lesson Plan Added');
+      } else {
+        Alert.alert('Error', result.message);
+      }
+    } catch (error) {
+      console.error('Add Lesson Plan Error: ', error);
+      Alert.alert('Error', `Failed to add lesson plan: ${error.message}`);
     }
   };
 
@@ -147,8 +119,9 @@ const CourseScreen = ({ route }) => {
       });
 
       const result = await response.json();
+      console.log('Delete Lesson Plan Result:', result); // Debugging log
       if (result.status === 'Success') {
-        setLessonPlans(lessonPlans.filter(plan => plan.lessonPlanId !== lessonPlanId));
+        fetchLessonPlans(); // Refresh lesson plans list
         Alert.alert('Success', 'Lesson Plan Removed');
       } else {
         Alert.alert('Error', result.message);
@@ -213,19 +186,24 @@ const CourseScreen = ({ route }) => {
             <Text style={styles.buttonText}>Add Lesson Plan</Text>
           </TouchableOpacity>
 
-          {lessonPlans.map((plan, index) => (
-            <View key={index} style={styles.lessonPlanContainer}>
-              <Text style={styles.lessonPlanText}>Week {plan.weekNo}</Text>
-              <View style={styles.lessonPlanActions}>
-                <TouchableOpacity onPress={() => handleEditLessonPlan(plan.lessonPlanId)}>
-                  <Text style={styles.editText}>Edit</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => handleDeleteLessonPlan(plan.lessonPlanId)}>
-                  <Text style={styles.deleteText}>Delete</Text>
-                </TouchableOpacity>
+          <FlatList
+            data={lessonPlans}
+            keyExtractor={(item) => item.lessonPlanId.toString()}
+            renderItem={({ item }) => (
+              <View style={styles.lessonPlanContainer}>
+                <Text style={styles.lessonPlanText}>Week {item.lessonPlanTitle}</Text>
+                <View style={styles.lessonPlanActions}>
+                  <TouchableOpacity onPress={() => handleEditLessonPlan(item.lessonPlanId)}>
+                    <Text style={styles.editText}>Edit</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => handleDeleteLessonPlan(item.lessonPlanId)}>
+                    <Text style={styles.deleteText}>Delete</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
-          ))}
+            )}
+            ListEmptyComponent={<Text>No lesson plans available.</Text>}
+          />
         </View>
       )}
 
@@ -268,21 +246,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 16,
     borderRadius: 5,
+    flex: 1,
   },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
     padding: 10,
-    borderRadius: 5,
-    marginVertical: 10,
-    backgroundColor: '#fff',
+    marginBottom: 10,
   },
   button: {
     backgroundColor: '#7d6dc1',
-    padding: 12,
+    padding: 10,
     borderRadius: 5,
     alignItems: 'center',
-    marginVertical: 5,
+    marginBottom: 10,
   },
   buttonText: {
     color: '#fff',
@@ -291,24 +268,23 @@ const styles = StyleSheet.create({
   lessonPlanContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     padding: 10,
     borderBottomWidth: 1,
-    borderColor: '#ccc',
+    borderBottomColor: '#ccc',
   },
   lessonPlanText: {
     fontSize: 16,
-    color: '#000',
+    color:'black',
   },
   lessonPlanActions: {
     flexDirection: 'row',
   },
   editText: {
+    color: '#007bff',
     marginRight: 10,
-    color: '#007BFF',
   },
   deleteText: {
-    color: '#FF0000',
+    color: '#ff0000',
   },
 });
 
