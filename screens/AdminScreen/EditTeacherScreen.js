@@ -2,8 +2,14 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import baseURL from '../../config';
+import LogoutButton from './customcomponent/logoutComponent';
 
 const EditTeacherScreen = () => {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
   const navigation = useNavigation();
   const route = useRoute();
   const { teacher } = route.params;
@@ -44,7 +50,6 @@ const EditTeacherScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Edit Teacher</Text>
       <TextInput
         style={styles.input}
         placeholder="Name"
@@ -74,7 +79,7 @@ const EditTeacherScreen = () => {
         onChangeText={setPassword}
         secureTextEntry
       />
-      <Button title="Update" onPress={handleUpdate} />
+      <Button title="Update" onPress={handleUpdate} color="#5B5D8B" />
     </View>
   );
 };
@@ -84,12 +89,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 16,
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 16,
-    textAlign: 'center',
-    color:'#7E7E7E',
   },
   input: {
     height: 40,

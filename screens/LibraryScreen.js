@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity, Image, Pressable } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const books = [
@@ -36,6 +36,7 @@ const LibraryScreen = ({ navigation }) => {
                 </TouchableOpacity>
             </View>
             <ScrollView>
+                
                 {books.map(book => (
                     <View key={book.id} style={styles.bookContainer}>
                         <Image source={{ uri: book.cover }} style={styles.bookCover} />
@@ -97,13 +98,12 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         borderRadius: 10,
         borderColor: 'black',
-      
         backgroundColor:"white"
     },
     tabButtonText: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#5a67d8',
+        color: '#5B5D8B',
         
 
     },
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
         color:'black'
     },
     bookAuthor: {
-        color: '#718096',
+        color: '#7E7E7E',
     },
     bookActions: {
         flexDirection: 'row',

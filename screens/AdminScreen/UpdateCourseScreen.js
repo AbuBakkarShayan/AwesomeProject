@@ -95,14 +95,14 @@ const UpdateCourse = ({ navigation, route }) => {
         value={creditHours}
         onChangeText={setCreditHours}
       />
-      <Button title="Select Course Content" onPress={handleSelectFile} />
+      <Button title="Select Course Content" onPress={handleSelectFile} color="#5B5D8B"/>
       {selectedFile && (
         <View>
-          <Text>Selected File:</Text>
-          <Text>{selectedFile.name}</Text>
+          <Text style={styles.Text}>Selected File:</Text>
+          <Text style={styles.Text}>{selectedFile.name}</Text>
         </View>
       )}
-      <Button title="Update Course" onPress={handleUpdateCourse} />
+      <Button title="Update Course" onPress={handleUpdateCourse} color="#5B5D8B"/>
     </View>
   );
 };
@@ -125,6 +125,9 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     color: "black",
   },
+  Text:{
+    color:'#7E7E7E',
+  }
 });
 
 export default UpdateCourse;

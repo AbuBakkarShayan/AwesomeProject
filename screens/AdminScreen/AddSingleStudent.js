@@ -51,12 +51,14 @@ const AddSingleStudent = () => {
       <TextInput
         style={styles.input}
         placeholder="Username"
+        placeholderTextColor="#7E7E7E"
         value={username}
         onChangeText={setUsername}
       />
       <TextInput
         style={styles.input}
         placeholder="Password"
+        placeholderTextColor="#7E7E7E"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -64,28 +66,32 @@ const AddSingleStudent = () => {
       <TextInput
         style={styles.input}
         placeholder="Name"
+        placeholderTextColor="#7E7E7E"
         value={name}
         onChangeText={setName}
       />
       <TextInput
         style={styles.input}
         placeholder="Registration Number"
+        placeholderTextColor="#7E7E7E"
         value={regNo}
         onChangeText={setRegNo}
       />
       <TextInput
         style={styles.input}
         placeholder="Phone Number"
+        placeholderTextColor="#7E7E7E"
         value={phoneNo}
         onChangeText={setPhoneNo}
       />
       <TextInput
         style={styles.input}
         placeholder="Department"
+        placeholderTextColor="#7E7E7E"
         value={department}
         onChangeText={setDepartment}
       />
-      <Button title="Register" onPress={handleRegister} />
+      <Button title="Register" onPress={handleRegister} color="#5B5D8B"/>
     </View>
   );
 };
@@ -96,17 +102,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 16,
   },
-  title: {
-    fontSize: 24,
-    marginBottom: 16,
-    textAlign: 'center',
-  },
   input: {
     height: 40,
     borderColor: 'gray',
     borderWidth: 1,
     marginBottom: 12,
     paddingHorizontal: 8,
+    color:"#7E7E7E"
   },
 });
 export default AddSingleStudent;

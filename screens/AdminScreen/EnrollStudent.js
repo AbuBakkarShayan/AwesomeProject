@@ -120,6 +120,7 @@ const EnrollStudent = ({ route, navigation }) => {
       <TextInput
         style={styles.input}
         placeholder="Semester Number"
+        placeholderTextColor="#7E7E7E"
         value={semesterNumber}
         onChangeText={setSemesterNumber}
       />
@@ -132,11 +133,13 @@ const EnrollStudent = ({ route, navigation }) => {
           labelField="label"
           valueField="value"
           placeholder="Select Department"
+          placeholderStyle={styles.placeholder}
           value={selectedDepartment}
           onChange={item => {
             setSelectedDepartment(item.value);
             setSelectedStudent(null); 
           }}
+          
         />
       )}
       {loadingStudents ? (
@@ -148,6 +151,7 @@ const EnrollStudent = ({ route, navigation }) => {
           labelField="label"
           valueField="value"
           placeholder="Select Student"
+          placeholderStyle={styles.placeholder}
           value={selectedStudent}
           onChange={item => {
             setSelectedStudent(item.value);
@@ -176,6 +180,7 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderWidth: 1,
     paddingLeft: 8,
+    color:'black'
   },
   dropdown: {
     width: '80%',
@@ -186,7 +191,7 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
   },
   button: {
-    backgroundColor: '#007BFF',
+    backgroundColor: '#5B5D8B',
     padding: 10,
     margin: 16,
     borderRadius: 5,
@@ -196,4 +201,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
   },
+  placeholder:{
+    color:"#7E7E7E"
+  }
 });

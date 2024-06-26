@@ -232,14 +232,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 10,
     borderRadius: 5,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#fff',
     marginHorizontal: 4,
+    
   },
   activeTab: {
-    backgroundColor: '#7d6dc1',
+    backgroundColor: '#5B5D8B',
   },
   tabText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontWeight: 'bold',
   },
   contentContainer: {
@@ -253,9 +254,10 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     padding: 10,
     marginBottom: 10,
+    color:'black'
   },
   button: {
-    backgroundColor: '#7d6dc1',
+    backgroundColor: '#5B5D8B',
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',
@@ -280,7 +282,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   editText: {
-    color: '#007bff',
+    color: '#5B5D8B',
     marginRight: 10,
   },
   deleteText: {

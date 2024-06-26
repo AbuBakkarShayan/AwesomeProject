@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   creditHour: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: 'black',
+    color: '#7E7E7E',
   },
   courseName: {
     fontSize: 16,

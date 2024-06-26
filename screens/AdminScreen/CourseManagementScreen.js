@@ -115,16 +115,16 @@ const CourseManagementScreen = () => {
       <Text style={styles.courseName}>{item.courseName}</Text>
       <View style={styles.iconsContainer}>
         <TouchableOpacity onPress={() => handleEditCourse(item)}>
-          <Icon name="create-outline" size={24} color="#C4C4C4" />
+          <Icon name="create-outline" size={24} color="#7E7E7E" />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => confirmDeleteCourse(item.courseCode)}>
-          <Icon name="trash-outline" size={24} color="#C4C4C4" />
+          <Icon name="trash-outline" size={24} color="#7E7E7E" />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => handleEnrollStudent(item.id)}>
-          <Icon name="person-outline" size={24} color="#C4C4C4" />
+          <Icon name="person-outline" size={24} color="#7E7E7E" />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => handleEnrollTeacher(item.courseCode)}>
-          <Icon name="school-outline" size={24} color="#C4C4C4" />
+          <Icon name="school-outline" size={24} color="#7E7E7E" />
         </TouchableOpacity>
       </View>
     </View>
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
   },
   courseName: {
     fontSize: 16,
-    color: "#C4C4C4",
+    color: "#7E7E7E",
   },
   iconsContainer: {
     flexDirection: 'row',

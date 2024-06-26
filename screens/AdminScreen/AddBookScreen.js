@@ -121,21 +121,21 @@ const AddBookScreen = ({ navigation }) => {
       <TextInput
         style={styles.input}
         placeholder="Title"
-        placeholderTextColor="black"
+        placeholderTextColor="#7E7E7E"
         value={title}
         onChangeText={setTitle}
       />
       <TextInput
         style={styles.input}
         placeholder="Category"
-        placeholderTextColor="black"
+        placeholderTextColor="#7E7E7E"
         value={category}
         onChangeText={setCategory}
       />
       <TextInput
         style={styles.input}
         placeholder="Cover Image"
-        placeholderTextColor="black"
+        placeholderTextColor="#7E7E7E"
         editable={false}
         value={coverImage ? coverImage.name : ''}
       />
@@ -145,7 +145,7 @@ const AddBookScreen = ({ navigation }) => {
       <TextInput
         style={styles.input}
         placeholder="PDF File"
-        placeholderTextColor="black"
+        placeholderTextColor="#7E7E7E"
         editable={false}
         value={pdfFile ? pdfFile.name : ''}
       />
@@ -155,18 +155,18 @@ const AddBookScreen = ({ navigation }) => {
       <TextInput
         style={styles.input}
         placeholder="Author"
-        placeholderTextColor="black"
+        placeholderTextColor="#7E7E7E"
         value={author}
         onChangeText={setAuthor}
       />
       <TextInput
         style={styles.input}
         placeholder="Keywords"
-        placeholderTextColor="black"
+        placeholderTextColor="#7E7E7E"
         value={keywords}
         onChangeText={setKeywords}
       />
-      <TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
+      <TouchableOpacity  style={styles.button} onPress={handleUpload}>
         <Text style={styles.buttonText}>Upload Book</Text>
       </TouchableOpacity>
     </View>
@@ -193,12 +193,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     marginBottom: 10,
-  },
-  uploadButton: {
-    backgroundColor: '#28a745',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 10,
+    backgroundColor:"#5B5D8B"
   },
   buttonText: {
     color: '#fff',

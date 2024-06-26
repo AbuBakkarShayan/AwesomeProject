@@ -125,6 +125,7 @@ const AssignTeacher = ({ route, navigation }) => {
           labelField="label"
           valueField="value"
           placeholder="Select department"
+          placeholderStyle={styles.placeholder}
           value={selectedDepartment}
           onChange={item => {
             setSelectedDepartment(item.value);
@@ -142,6 +143,7 @@ const AssignTeacher = ({ route, navigation }) => {
           labelField="label"
           valueField="value"
           placeholder="Select teacher"
+          placeholderStyle={styles.placeholder}
           value={selectedTeacher}
           onChange={item => {
             setSelectedTeacher(item.value);
@@ -172,7 +174,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
   },
   button: {
-    backgroundColor: '#007BFF',
+    backgroundColor: '#5B5D8B',
     padding: 10,
     margin: 16,
     borderRadius: 5,
@@ -182,4 +184,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
   },
+  placeholder:{
+    color:'#7E7E7E'
+  }
 });
