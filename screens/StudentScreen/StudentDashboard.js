@@ -36,7 +36,7 @@ const StudentDashboard = () => {
     { index: '1', name: 'Courses', screen: 'CoursesScreen' },
     { index: '2', name: 'Library Books', screen: 'LibraryScreen' },
     { index: '3', name: 'My Books List', screen: 'MyCourseItemsScreen' },
-    { index: '4', name: 'Students Log', screen: 'StudentProfileScreen' },
+    { index: '4', name: 'Profile', screen: 'StudentProfileScreen' },
   ];
 
   const navigateToScreen = (screenName) => {

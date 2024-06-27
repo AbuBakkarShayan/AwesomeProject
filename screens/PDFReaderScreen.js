@@ -38,20 +38,20 @@
 // });
 
 // export default PDFReaderScreen;
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+// import { StyleSheet, Text, View } from 'react-native'
+// import React from 'react'
 
-const PDFReaderScreen = () => {
-  return (
-    <View>
-      <Text>PDF</Text>
-    </View>
-  )
-}
+// const PDFReaderScreen = () => {
+//   return (
+//     <View>
+//       <Text>PDF</Text>
+//     </View>
+//   )
+// }
 
-export default PDFReaderScreen
+// export default PDFReaderScreen
 
-const styles = StyleSheet.create({})
+// const styles = StyleSheet.create({})
 
 /**
  * Copyright (c) 2017-present, Wonday (@wonday.org)
@@ -104,3 +104,32 @@ const styles = StyleSheet.create({})
 //         height:Dimensions.get('window').height,
 //     }
 // });
+import React from 'react';
+import { View } from 'react-native';
+import RNFS from 'react-native-fs';
+import Pdf from 'react-native-pdf';
+
+const PDFReaderScreen = ({ route }) => {
+    const { bookId } = route.params;
+    const pdfSource = `${RNFS.DocumentDirectoryPath}/${bookId}.pdf`;
+
+    return (
+        <View style={{ flex: 1 }}>
+            <Pdf
+                source={{ uri: pdfSource, cache: true }}
+                onLoadComplete={(numberOfPages, filePath) => {
+                    console.log(`Number of pages: ${numberOfPages}`);
+                }}
+                onPageChanged={(page, numberOfPages) => {
+                    console.log(`Current page: ${page}`);
+                }}
+                onError={(error) => {
+                    console.log(error);
+                }}
+                style={{ flex: 1 }}
+            />
+        </View>
+    );
+};
+
+export default PDFReaderScreen;

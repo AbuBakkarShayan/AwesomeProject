@@ -1,100 +1,169 @@
-import { Alert, StyleSheet, TextInput, View, TouchableOpacity, Text, ActivityIndicator, FlatList } from 'react-native';
 import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  Button,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+} from 'react-native';
 import DocumentPicker from 'react-native-document-picker';
 import XLSX from 'xlsx';
-import LogoutButton from './customcomponent/logoutComponent';
+import RNFS from 'react-native-fs';
 import baseURL from '../../config';
 
-const AddStudentBatch = ({ navigation }) => {
-  const [selectedFile, setSelectedFile] = useState("");
-  const [fileData, setFileData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+const AddMultipleUsers = () => {
+  const [file, setFile] = useState("No File Selected");
+  const [filePath, setFilePath] = useState(null);
+  const [users, setUsers] = useState([]);
 
-  React.useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => <LogoutButton />,
-    });
-  }, [navigation]);
-
-  const selectDoc = async () => {
+  const selectFile = async () => {
     try {
-      const doc = await DocumentPicker.pickSingle({
-        type: [DocumentPicker.types.xls, DocumentPicker.types.xlsx],
+      const res = await DocumentPicker.pick({
+        type: [DocumentPicker.types.allFiles],
       });
-      setSelectedFile(doc.name);
-      processFile(doc);
+      setFile(res[0].name);
+      setFilePath(res[0].uri);
     } catch (err) {
-      if (DocumentPicker.isCancel(err))
-        console.log("User canceled the upload", err);
-      else
-        console.log(err);
+      if (DocumentPicker.isCancel(err)) {
+        // User cancelled the picker
+      } else {
+        Alert.alert("Error", "Failed to select file");
+      }
     }
   };
 
-  const processFile = async (file) => {
-    setIsLoading(true);
-    const fileReader = new FileReader();
-    fileReader.onload = (event) => {
-      const binaryStr = event.target.result;
-      const workbook = XLSX.read(binaryStr, { type: 'binary' });
-      const sheetName = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(sheet);
-      setFileData(jsonData);
-      setIsLoading(false);
-      registerStudents(jsonData);
-    };
-    fileReader.readAsBinaryString(file);
+  const readExcelFile = async (filePath) => {
+    try {
+      const fileUri = filePath.replace("file://", "");
+      const data = await RNFS.readFile(fileUri, 'base64');
+      const workbook = XLSX.read(data, { type: 'base64' });
+
+      const sheetName = workbook.SheetNames[2]; // Assuming data is in the third sheet
+      const worksheet = workbook.Sheets[sheetName];
+      const json = XLSX.utils.sheet_to_json(worksheet);
+
+      const parsedUsers = json.map(row => ({
+        username: row['username']?.toString(),
+        password: row['password']?.toString(),
+        role: row['role']?.toString(),
+        department: row['department']?.toString(),
+        name: row['name']?.toString(),
+        phoneNo: row['phoneNo']?.toString(),
+      }));
+      setUsers(parsedUsers);
+    } catch (error) {
+      Alert.alert("Error", "Failed to read file");
+    }
   };
 
-  const registerStudents = async (students) => {
-    setIsLoading(true);
+  const addUsers = async () => {
+    const url = `${baseURL}/user/RegisterUsers`;
     try {
-      const response = await fetch(`${baseURL}/user/registerusers`, {
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(students),
+        body: JSON.stringify(users),
       });
-      const responseData = await response.json();
-      if (response.ok) {
-        Alert.alert("Success", "Data uploaded successfully!");
-      } else {
-        Alert.alert("Error", "Failed to upload data. " + responseData.message);
-      }
+
+      const responseBody = await response.json();
+
+      const updatedUsers = users.map(user => {
+        const responseItem = responseBody.find(item => item.username === user.username);
+        if (responseItem) {
+          return {
+            ...user,
+            status: responseItem.status,
+            message: responseItem.message,
+          };
+        }
+        return user;
+      });
+      setUsers(updatedUsers);
     } catch (error) {
-      console.error(error);
-      Alert.alert("Error", "An error occurred while uploading data. " + error.message);
+      Alert.alert("Error", "Failed to add users");
     }
-    setIsLoading(false);
+  };
+
+  const clearRegisteredUsers = () => {
+    const filteredUsers = users.filter(user => user.status !== 'Success');
+    setUsers(filteredUsers);
+  };
+
+  const editUser = (index) => {
+    // Implement user edit functionality
+    // You might show a dialog or navigate to another screen to edit the user details
   };
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        value={selectedFile}
-        placeholder="Upload Excel File"
-        placeholderTextColor="#7E7E7E"
-        editable={false}
-      />
-      <TouchableOpacity style={styles.button} onPress={selectDoc}>
-        <Text style={styles.buttonText}>Upload Batch File</Text>
-      </TouchableOpacity>
-      {isLoading && <ActivityIndicator size="large" color="#5B5D8B" />}
-      {fileData && (
+      <View style={styles.row}>
+        <Button title="Select File" onPress={selectFile} />
+        <Text style={styles.fileText}>{file}</Text>
+        <Button
+          title="Load Data"
+          onPress={() => {
+            if (!filePath) {
+              Alert.alert("Error", "Select File First");
+            } else {
+              readExcelFile(filePath);
+            }
+          }}
+        />
+      </View>
+      <View style={styles.userListContainer}>
+        <View style={styles.row}>
+          <Button title="Clear" onPress={clearRegisteredUsers} />
+          <Button title="Clear All" onPress={() => setUsers([])} />
+        </View>
         <FlatList
-          data={fileData}
+          data={users}
           keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.item}>
-              <Text>{item.name}</Text>
-              {/* Render other details here */}
+          renderItem={({ item, index }) => (
+            <View style={styles.userTile}>
+              <View style={styles.userInfo}>
+                <Text style={styles.userName}>{item.name}</Text>
+                <Text>{item.username}</Text>
+                {item.status && item.message && (
+                  <>
+                    <Text
+                      style={{
+                        color: item.status === 'Success' ? 'green' : 'red',
+                      }}
+                    >
+                      {item.status}
+                    </Text>
+                    <Text
+                      style={{
+                        color: item.status === 'Success' ? 'green' : 'red',
+                      }}
+                    >
+                      {item.message}
+                    </Text>
+                  </>
+                )}
+              </View>
+              <View style={styles.userActions}>
+                <TouchableOpacity onPress={() => editUser(index)}>
+                  <Text>Edit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    const newUsers = users.filter((_, i) => i !== index);
+                    setUsers(newUsers);
+                  }}
+                >
+                  <Text>Delete</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
         />
-      )}
+      </View>
+      <Button title="Add Users" onPress={addUsers} />
     </View>
   );
 };
@@ -102,36 +171,44 @@ const AddStudentBatch = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    padding: 20,
+    padding: 16,
   },
-  input: {
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  fileText: {
+    flex: 1,
+    textAlign: 'center',
+  },
+  userListContainer: {
+    flex: 1,
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-    width: '100%',
-    color: "black",
+    borderColor: 'grey',
+    padding: 8,
   },
-  button: {
-    backgroundColor: '#5B5D8B',
-    padding: 10,
-    borderRadius: 5,
-    width: '100%',
+  userTile: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    padding: 10,
+    marginVertical: 5,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 10,
   },
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
+  userInfo: {
+    flex: 1,
   },
-  item: {
-    backgroundColor: '#f9c2ff',
-    padding: 20,
-    marginVertical: 8,
-    marginHorizontal: 16,
+  userName: {
+    fontSize: 18,
+  },
+  userActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: 80,
   },
 });
 
-export default AddStudentBatch;
+export default AddMultipleUsers;

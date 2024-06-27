@@ -1,21 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons'; 
 import LogoutButton from './customcomponent/logoutComponent';
 import baseURL from '../../config';
 
 const StudentDepartmentScreen = ({ route }) => {
-
-  //logout icon in header
-  React.useLayoutEffect(()=>{
-    navigation.setOptions({
-      headerRight:()=><LogoutButton />,
-    });
-  }, [navigation]);
-
   const navigation = useNavigation();
   const [departments, setDepartments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [serverDown, setServerDown] = useState(false);
 
   // Function to fetch departments from the API
   const fetchDepartments = async () => {
@@ -26,15 +20,24 @@ const StudentDepartmentScreen = ({ route }) => {
       }
       const data = await response.json();
       setDepartments(data.data);
+      setLoading(false);
     } catch (error) {
       console.error(error);
+      setLoading(false);
+      setServerDown(true);
     }
   };
 
-  // Fetch departments when component mounts or when updatedDepartmentName param changes
-  useEffect(() => {
-    fetchDepartments();
-  }, [route.params?.updatedDepartmentName]); // this line ensure to directly fetch the updated name of the department
+  useFocusEffect(
+    React.useCallback(() => {
+      const timeoutId = setTimeout(() => {
+        setLoading(false);
+        setServerDown(true);
+      }, 10000);
+
+      fetchDepartments().then(() => clearTimeout(timeoutId));
+    }, [])
+  );
 
   const handleUpdateDepartment = (departmentId) => {
     // Handle update logic, navigate to update screen with departmentId
@@ -49,7 +52,7 @@ const StudentDepartmentScreen = ({ route }) => {
       });
       const data = await response.json();
       if (data.status === 'Success') {
-        // Remove deleted department from stat
+        // Remove deleted department from state
         setDepartments(departments.filter(department => department.departmentId !== departmentId));
       } else {
         Alert.alert('Error', data.message);
@@ -65,7 +68,7 @@ const StudentDepartmentScreen = ({ route }) => {
       <View style={styles.itemContainer}>
         <Text style={styles.departmentName}>{item.departmentName}</Text>
         <View style={styles.iconContainer}>
-          <TouchableOpacity onPress={() => handleUpdateDepartment(item.departmentId,'student')}>
+          <TouchableOpacity onPress={() => handleUpdateDepartment(item.departmentId)}>
             <Icon name="create-outline" size={24} color="white" />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => handleDeleteDepartment(item.departmentId)}>
@@ -75,6 +78,25 @@ const StudentDepartmentScreen = ({ route }) => {
       </View>
     </TouchableOpacity>
   );
+
+  //logout icon in header
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
+
+  if (serverDown) {
+    return (
+      <View style={styles.serverDownContainer}>
+        <Text style={styles.serverDownText}>Server Down</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -109,6 +131,15 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     flexDirection: 'row',
+  },
+  serverDownContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  serverDownText: {
+    fontSize: 20,
+    color: 'red',
   },
 });
 
