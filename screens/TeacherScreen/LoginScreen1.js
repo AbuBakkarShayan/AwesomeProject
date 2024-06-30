@@ -13,6 +13,8 @@ const LoginScreen1 = () => {
   const navigation = useNavigation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setname] = useState('');
+  const [phoneNo, setPhoneNo] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   const togglePasswordVisibility = () => {
@@ -43,6 +45,10 @@ const LoginScreen1 = () => {
             await AsyncStorage.setItem('userRole', role);
             await AsyncStorage.setItem('username', username);
             await AsyncStorage.setItem('password', password);
+            await AsyncStorage.setItem('name', name);
+            await AsyncStorage.setItem('phoneNo', phoneNo);
+
+            const isFirstLogin = user.isFirstLogin || 'False';
 
             if (role === 'Student') {
               if (!user.id || !user.department) {
@@ -50,15 +56,15 @@ const LoginScreen1 = () => {
               }
               await AsyncStorage.setItem('studentId', user.id.toString());
               await AsyncStorage.setItem('departmentId', user.department);
-              console.log("StudentId: ",user.id.toString(),"StudentDepartmentId:",user.department)
-              navigation.navigate('StudentDashboard');
+              console.log("StudentId: ", user.id.toString(), "StudentDepartmentId:", user.department);
+              navigation.navigate('StudentDashboard', { studentId: user.id, isFirstLogin });
             } else if (role === 'Teacher') {
               if (!user.id) {
                 throw new Error('Missing teacherId');
               }
               await AsyncStorage.setItem('teacherId', user.id.toString());
-              console.log("teacherId", user.id.toString())
-              navigation.navigate('TeacherDashboard');
+              console.log("teacherId", user.id.toString());
+              navigation.navigate('TeacherDashboard', { teacherId: user.id, isFirstLogin });
             } else if (role === 'Admin') {
               navigation.navigate('AdminDashboard');
             } else {
