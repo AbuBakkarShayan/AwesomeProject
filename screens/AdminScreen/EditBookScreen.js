@@ -2,20 +2,23 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Image } from 'react-native';
 import DocumentPicker from 'react-native-document-picker';
 import { useNavigation, useRoute } from '@react-navigation/core';
+import { Dropdown } from 'react-native-element-dropdown';
 import baseURL from '../../config';
 
 const EditBookScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { bookId, onBookUpdated } = route.params || {}; // Destructure onBookUpdated from route params
+  const { bookId, onBookUpdated } = route.params || {};
 
-  console.log('EditBookScreen route params:', route.params); // Log route params for debugging
-  console.log('Editing book with ID:', bookId); // Log bookId for debugging
+  console.log('EditBookScreen route params:', route.params);
+  console.log('Editing book with ID:', bookId);
 
   const [bookDetails, setBookDetails] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [newPdf, setNewPdf] = useState(null);
   const [newImage, setNewImage] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [category, setCategory] = useState(null);
 
   useEffect(() => {
     if (bookId) {
@@ -27,12 +30,38 @@ const EditBookScreen = () => {
     }
   }, [bookId]);
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(`${baseURL}/book/getBookCategory`);
+        const result = await response.json();
+
+        if (Array.isArray(result.data)) {
+          const transformedData = result.data.map(item => ({
+            label: item.categroyName,
+            value: item.categoryId,
+          }));
+          setCategories(transformedData);
+        } else {
+          console.error('Fetched data is not an array:', result.data);
+          Alert.alert('Error', 'Unexpected data format');
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        Alert.alert('Error', 'Failed to fetch categories');
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
   const fetchBookDetails = async () => {
     try {
       const response = await fetch(`${baseURL}/book/getSingleBook?bookId=${bookId}`);
       const result = await response.json();
       if (result.status === 'Success') {
         setBookDetails(result.data);
+        setCategory(result.data.categoryId);
       }
       setIsLoading(false);
     } catch (error) {
@@ -42,15 +71,15 @@ const EditBookScreen = () => {
   };
 
   const handleUpdateBook = async () => {
-    console.log('Updating book with ID:', bookId); // Log bookId for debugging
+    console.log('Updating book with ID:', bookId);
 
     try {
       const formData = new FormData();
       formData.append('bookId', bookId);
-      formData.append('uploaderId', bookDetails.uploaderId || 0); // assuming uploaderId is available
+      formData.append('uploaderId', bookDetails.uploaderId || 0);
       formData.append('bookName', bookDetails.bookName);
       formData.append('bookAuthor', bookDetails.bookAuthorName);
-      formData.append('category', bookDetails.category);
+      formData.append('categoryId', category); // Ensure categoryId is appended
 
       if (newPdf) {
         formData.append('bookPdf', {
@@ -77,12 +106,12 @@ const EditBookScreen = () => {
       });
 
       const result = await response.json();
-      console.log('Response from API:', result); // Log the API response
+      console.log('Response from API:', result);
 
       if (result.status === 'Success') {
         Alert.alert('Success', 'Book updated successfully');
         if (onBookUpdated) {
-          onBookUpdated(); // Call the callback to refresh the book list
+          onBookUpdated();
         }
         navigation.goBack();
       } else {
@@ -144,10 +173,15 @@ const EditBookScreen = () => {
       />
 
       <Text style={styles.label}>Category</Text>
-      <TextInput
+      <Dropdown
         style={styles.input}
-        value={bookDetails.category}
-        onChangeText={(text) => setBookDetails({ ...bookDetails, category: text })}
+        placeholder="Select Category"
+        placeholderTextColor="#7E7E7E"
+        data={categories}
+        labelField="label"
+        valueField="value"
+        value={category}
+        onChange={item => setCategory(item.value)}
       />
 
       <TouchableOpacity style={styles.button} onPress={pickPdf}>
@@ -183,10 +217,11 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   input: {
+    width: '80%',
+    marginBottom: 10,
+    padding: 10,
     borderWidth: 1,
     borderColor: '#ccc',
-    padding: 10,
-    marginBottom: 15,
     borderRadius: 5,
     color: 'black',
   },

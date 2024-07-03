@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, TouchableOpacity, Text, Alert, StyleSheet } from 'react-native';
 import DocumentPicker from 'react-native-document-picker';
 import LogoutButton from './customcomponent/logoutComponent';
 import baseURL from '../../config';
+import { Dropdown } from 'react-native-element-dropdown';
 
 const AddBookScreen = ({ navigation }) => {
 
@@ -13,13 +14,43 @@ const AddBookScreen = ({ navigation }) => {
   }, [navigation]);
 
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState(null);
+  const [categories, setCategories] = useState([]);
   const [coverImage, setCoverImage] = useState(null);
   const [pdfFile, setPdfFile] = useState(null);
   const [author, setAuthor] = useState('');
   const [keywords, setKeywords] = useState('');
 
   const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
+
+  useEffect(() => {
+    // Fetch categories from the backend
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(`${baseURL}/book/getBookCategory`);
+        const result = await response.json();
+
+        // Ensure result.data is an array before setting it to state
+        if (Array.isArray(result.data)) {
+          // Transform data to fit Dropdown component requirements if needed
+          const transformedData = result.data.map(item => ({
+            label: item.categroyName,
+            value: item.categoryId,
+          }));
+          setCategories(transformedData);
+        } else {
+          console.error('Fetched data is not an array:', result.data);
+          Alert.alert('Error', 'Unexpected data format');
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        Alert.alert('Error', 'Failed to fetch categories');
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
 
   const handleCoverImagePick = async () => {
     try {
@@ -69,7 +100,7 @@ const AddBookScreen = ({ navigation }) => {
   
       const formData = new FormData();
       formData.append('bookName', title);
-      formData.append('category', category);
+      formData.append('categoryId', category);
       formData.append('bookImage', {
         uri: coverImage.uri,
         type: coverImage.type,
@@ -100,12 +131,14 @@ const AddBookScreen = ({ navigation }) => {
       const result = await response.json();
       console.log('Upload result:', result);
   
-      if (result.status !== 'Success') {
-        throw new Error(result.message);
+      // Additional logging to check the result structure
+      if (!result.bookId) {
+        console.error('Server response:', result);
+        throw new Error('Book ID not returned from the server');
       }
   
-      if (!result.bookId) {
-        throw new Error('Book ID not returned from the server');
+      if (result.status !== 'Success') {
+        throw new Error(result.message);
       }
   
       // Navigate to AddTOC screen with bookId
@@ -115,7 +148,7 @@ const AddBookScreen = ({ navigation }) => {
       Alert.alert('Error', error.message);
     }
   };
-
+  
   return (
     <View style={styles.container}>
       <TextInput
@@ -125,12 +158,15 @@ const AddBookScreen = ({ navigation }) => {
         value={title}
         onChangeText={setTitle}
       />
-      <TextInput
+      <Dropdown
         style={styles.input}
         placeholder="Category"
         placeholderTextColor="#7E7E7E"
+        data={categories}
+        labelField="label"
+        valueField="value"
         value={category}
-        onChangeText={setCategory}
+        onChange={item => setCategory(item.value)}
       />
       <TextInput
         style={styles.input}
@@ -166,7 +202,7 @@ const AddBookScreen = ({ navigation }) => {
         value={keywords}
         onChangeText={setKeywords}
       />
-      <TouchableOpacity  style={styles.button} onPress={handleUpload}>
+      <TouchableOpacity style={styles.button} onPress={handleUpload}>
         <Text style={styles.buttonText}>Upload Book</Text>
       </TouchableOpacity>
     </View>
@@ -189,11 +225,10 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   button: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#5B5D8B',
     padding: 10,
     borderRadius: 5,
     marginBottom: 10,
-    backgroundColor:"#5B5D8B"
   },
   buttonText: {
     color: '#fff',

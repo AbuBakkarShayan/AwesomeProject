@@ -1,173 +1,33 @@
-// import React, { useState, useEffect } from 'react';
-// import { StyleSheet, View, ActivityIndicator ,TouchableOpacity} from 'react-native';
-// import { Dropdown } from 'react-native-element-dropdown';
-// import baseURL from '../../config';
-
-// const CourseMaterial = () => {
-//   const [departments, setDepartments] = useState([]);
-//   const [teachers, setTeachers] = useState([]);
-//   const [selectedDepartment, setSelectedDepartment] = useState(null);
-//   const [loadingDepartments, setLoadingDepartments] = useState(true);
-//   const [loadingTeachers, setLoadingTeachers] = useState(false);
-
-//   // Fetch departments on component mount
-//   useEffect(() => {
-//     fetchDepartments();
-//   }, []);
-
-//   // Fetch departments from API
-//   const fetchDepartments = () => {
-//     fetch(`${baseURL}/department/allDepartment`)
-//       .then(response => {
-//         if (!response.ok) {
-//           throw new Error(`HTTP error! status: ${response.status}`);
-//         }
-//         return response.json();
-//       })
-//       .then(data => {
-//         if (data && Array.isArray(data.data)) {
-//           const formattedData = data.data.map(department => ({
-//             label: department.departmentName,
-//             value: department.departmentId,
-//           }));
-//           setDepartments(formattedData);
-//         } else {
-//           console.error('Error: Data is not an array', data);
-//         }
-//         setLoadingDepartments(false);
-//       })
-//       .catch(error => {
-//         console.error('Error fetching departments:', error);
-//         setLoadingDepartments(false);
-//       });
-//   };
-
-//   // Fetch teachers for selected department
-//   useEffect(() => {
-//     if (selectedDepartment) {
-//       fetchTeachers(selectedDepartment);
-//     }
-//   }, [selectedDepartment]);
-
-//   // Fetch teachers from API for the selected department
-//   const fetchTeachers = (departmentId) => {
-//     setLoadingTeachers(true);
-//     fetch(`${baseURL}/teacher/getAllTeacher?departmentId=${departmentId}`)
-//       .then(response => {
-//         if (!response.ok) {
-//           throw new Error(`HTTP error! status: ${response.status}`);
-//         }
-//         return response.json();
-//       })
-//       .then(data => {
-//         if (data && Array.isArray(data.data)) {
-//           const formattedData = data.data.map(teacher => ({
-//             label: teacher.teacherName,
-//             value: teacher.teacherId,
-//           }));
-//           setTeachers(formattedData);
-//         } else {
-//           console.error('Error: Data is not an array', data);
-//         }
-//         setLoadingTeachers(false);
-//       })
-//       .catch(error => {
-//         console.error('Error fetching teachers:', error);
-//         setLoadingTeachers(false);
-//       });
-//   };
-
-
-  
-
-//   return (
-//     <View>
-//       {loadingDepartments ? (
-//         <ActivityIndicator size="large" color="#0000ff" />
-//       ) : (
-//         <Dropdown
-//           style={styles.dropdown}
-//           data={departments}
-//           labelField="label"
-//           valueField="value"
-//           itemTextStyle={styles.itemText}
-//           selectedTextStyle={{color:'black'}}
-//           placeholder="Select department"
-//           placeholderStyle={styles.placeholder}
-//           value={selectedDepartment}
-//           onChange={item => {
-//             setSelectedDepartment(item.value);
-//           }}
-//         />
-//       )}
-
-//       {loadingTeachers ? (
-//         <ActivityIndicator size="large" color="#0000ff" />
-//       ) : (
-//         <Dropdown
-//           style={styles.dropdown}
-//           data={teachers}
-//           labelField="label"
-//           valueField="value"
-//           selectedTextStyle={{color:'black'}}
-//           itemTextStyle={styles.itemText}
-//           placeholder="Select teacher"
-//           placeholderStyle={styles.placeholder}
-//           value={null}
-//           onChange={item => {
-//             // Handle teacher selection if needed
-//           }}
-//         />
-
-        
-//       )}
-//       <TouchableOpacity style={styles.button} onPress={assignCourseToTeacher}>
-//         <Text style={styles.buttonText}>Assign</Text>
-//       </TouchableOpacity>
-//     </View>
-//   );
-// };
-
-// export default CourseMaterial;
-
-// const styles = StyleSheet.create({
-//   dropdown: {
-//     margin: 16,
-//     height: 50,
-//     borderBottomColor: 'gray',
-//     borderBottomWidth: 0.5,
-//     color:"black"
-//   },
-//   placeholder:{
-//     color:'black'
-//   },
-//   itemText:{
-//     color:'black'
-//   }
-// });
 import React, { useState, useCallback } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, FlatList } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, FlatList, Modal } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
-//import DocumentPicker from 'react-native-document-picker';
+import DocumentPicker from 'react-native-document-picker';
 import baseURL from '../../config';
 
 const CourseMaterial = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { course, studentId } = route.params; // Ensure teacherId and course are received from route params
-  const [activeTab, setActiveTab] = useState('Weekly LP');
+  const { course, studentId } = route.params;
+  const [activeTab, setActiveTab] = useState('Books');
+  const [subTab, setSubTab] = useState('Lesson Plan');
   const [weekNo, setWeekNo] = useState('');
   const [lessonPlan, setLessonPlan] = useState(null);
   const [lessonPlans, setLessonPlans] = useState([]);
+  const [referenceMaterials, setReferenceMaterials] = useState([]);
+  const [books, setBooks] = useState([]);
+  const [myLessonPlans, setMyLessonPlans] = useState([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [currentLessonPlan, setCurrentLessonPlan] = useState(null);
+  const [selectedPdf, setSelectedPdf] = useState(null);
 
   const fetchLessonPlans = async () => {
     try {
-      const response = await fetch(`${baseURL}/LessonPlan/getMyLessonPlan?studentId=${studentId},courseCode=${course.courseCode}`);
+      const response = await fetch(`${baseURL}/LessonPlan/getAllLessonPlan?courseCode=${course.courseCode}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const result = await response.json();
-      console.log('API Response:', result); // Debugging log
+      console.log('API Response:', result);
       if (result.status === 'Success') {
         setLessonPlans(result.data);
       } else {
@@ -179,109 +39,195 @@ const CourseMaterial = () => {
     }
   };
 
+  const fetchBooks = async () => {
+    try {
+      const response = await fetch(`${baseURL}/CourseBookAssign/getCourseAssignedBook?courseCode=${course.courseCode}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const result = await response.json();
+      console.log('Books API Response:', result);
+      if (result.status === 'Success') {
+        setBooks(result.data);
+      } else {
+        Alert.alert('Error', result.message);
+      }
+    } catch (error) {
+      console.error('Fetch Books Error: ', error);
+      Alert.alert('Error', 'Failed to fetch books');
+    }
+  };
+
+  const fetchReferenceMaterials = async () => {
+    try {
+      const response = await fetch(`${baseURL}/Reference/getReferenceMaterial?courseCode=${course.courseCode}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const result = await response.json();
+      console.log('References API Response:', result);
+      if (result.status === 'Success') {
+        setReferenceMaterials(result.data);
+      } else {
+        Alert.alert('Error', result.message);
+      }
+    } catch (error) {
+      console.error('Fetch References Error: ', error);
+      Alert.alert('Error', 'Failed to fetch reference materials');
+    }
+  };
+
+  const fetchMyLessonPlans = async () => {
+    try {
+      const response = await fetch(`${baseURL}/LessonPlan/getMyLessonPlan?studentId=${studentId}&courseCode=${course.courseCode}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const result = await response.json();
+      console.log('My Lesson Plans API Response:', result);
+      if (result.status === 'Success') {
+        setMyLessonPlans(result.data);
+      } else {
+        Alert.alert('Error', result.message);
+      }
+    } catch (error) {
+      console.error('Fetch My Lesson Plans Error: ', error);
+      Alert.alert('Error', 'Failed to fetch my lesson plans');
+    }
+  };
+
+  const uploadLessonPlan = async () => {
+    if (!weekNo || !selectedPdf) {
+      Alert.alert('Error', 'Please enter week number and select a PDF file.');
+      return;
+    }
+    
+    const formData = new FormData();
+    formData.append('lessonPlanTitle', weekNo);
+    formData.append('creatorId', studentId);
+    formData.append('creatorType', 'Student');
+    formData.append('courseCode', course.courseCode);
+    formData.append('lessonPlanPdf', {
+      uri: selectedPdf.uri,
+      type: selectedPdf.type,
+      name: selectedPdf.name,
+    });
+
+    try {
+      const response = await fetch(`${baseURL}/LessonPlan/addLessonPlan`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      const result = await response.json();
+      if (result.status === 'Success') {
+        Alert.alert('Success', result.message);
+        fetchMyLessonPlans();
+        setWeekNo('');
+        setSelectedPdf(null);
+      } else {
+        Alert.alert('Error', result.message);
+      }
+    } catch (error) {
+      console.error('Upload Lesson Plan Error: ', error);
+      Alert.alert('Error', 'Failed to upload lesson plan');
+    }
+  };
+
+  const editLessonPlan = (lessonPlan) => {
+    setCurrentLessonPlan(lessonPlan);
+    setWeekNo(lessonPlan.lessonPlanTitle);
+    setIsModalVisible(true);
+  };
+
+  const updateLessonPlan = async () => {
+    if (!weekNo || (currentLessonPlan && !selectedPdf)) {
+      Alert.alert('Error', 'Please enter week number and select a PDF file.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('lessonPlanTitle', weekNo);
+    if (selectedPdf) {
+      formData.append('lessonPlanPdf', {
+        uri: selectedPdf.uri,
+        type: selectedPdf.type,
+        name: selectedPdf.name,
+      });
+    }
+
+    try {
+      const response = await fetch(`${baseURL}/LessonPlan/updateLessonPlan?id=${currentLessonPlan.lessonPlanId}`, {
+        method: 'PUT',
+        body: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      const result = await response.json();
+      if (result.status === 'Success') {
+        Alert.alert('Success', result.message);
+        fetchMyLessonPlans();
+        setIsModalVisible(false);
+        setWeekNo('');
+        setSelectedPdf(null);
+      } else {
+        Alert.alert('Error', result.message);
+      }
+    } catch (error) {
+      console.error('Update Lesson Plan Error: ', error);
+      Alert.alert('Error', 'Failed to update lesson plan');
+    }
+  };
+
+  const deleteLessonPlan = async (lessonPlanId) => {
+    try {
+      const response = await fetch(`${baseURL}/LessonPlan/removeLessonPlan?id=${lessonPlanId}`, {
+        method: 'DELETE',
+      });
+      const result = await response.json();
+      if (result.status === 'Success') {
+        fetchMyLessonPlans(); // Refresh the list
+      } else {
+        Alert.alert('Error', result.message);
+      }
+    } catch (error) {
+      console.error('Delete Lesson Plan Error: ', error);
+      Alert.alert('Error', 'Failed to delete lesson plan');
+    }
+  };
+
+  const selectPdf = async () => {
+    try {
+      const res = await DocumentPicker.pick({
+        type: [DocumentPicker.types.pdf],
+      });
+      setSelectedPdf(res[0]);
+    } catch (err) {
+      if (DocumentPicker.isCancel(err)) {
+        Alert.alert('Canceled');
+      } else {
+        Alert.alert('Unknown Error: ' + JSON.stringify(err));
+        throw err;
+      }
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
-      fetchLessonPlans();
-    }, [])
+      if (activeTab === 'Books') {
+        fetchBooks();
+      } else if (activeTab === 'Weekly LP' && subTab === 'Lesson Plan') {
+        fetchLessonPlans();
+      } else if (activeTab === 'Weekly LP' && subTab === 'Reference Material') {
+        fetchReferenceMaterials();
+      } else if (activeTab === 'My Lesson Plan') {
+        fetchMyLessonPlans();
+      }
+    }, [activeTab, subTab])
   );
-
-  // const handleBrowseFile = async () => {
-  //   try {
-  //     const res = await DocumentPicker.pickSingle({
-  //       type: [DocumentPicker.types.pdf],
-  //     });
-  //     setLessonPlan(res);
-  //   } catch (err) {
-  //     if (DocumentPicker.isCancel(err)) {
-  //       console.log('User cancelled the picker');
-  //     } else {
-  //       console.error('Document Picker Error: ', err);
-  //       Alert.alert('Unknown Error: ' + JSON.stringify(err));
-  //       throw err;
-  //     }
-  //   }
-  // };
-
-  // const handleAddLessonPlan = async () => {
-  //   if (!weekNo || !lessonPlan) {
-  //     Alert.alert('Error', 'Week number and lesson plan PDF are required');
-  //     return;
-  //   }
-
-  //   try {
-  //     const formData = new FormData();
-  //     formData.append('lessonPlanTitle', weekNo);
-  //     formData.append('lessonPlanPdf', {
-  //       uri: lessonPlan.uri,
-  //       type: lessonPlan.type,
-  //       name: lessonPlan.name,
-  //     });
-
-  //     // Ensure teacherId is defined and convert it to string
-  //     if (!teacherId) {
-  //       throw new Error('Teacher ID is undefined');
-  //     }
-  //     formData.append('creatorId', String(teacherId));
-  //     formData.append('creatorType', 'teacher');
-  //     formData.append('courseCode', course.courseCode);
-
-  //     console.log('FormData before sending:', formData); // Debugging log
-
-  //     const response = await fetch(`${baseURL}/LessonPlan/addLessonPlan`, {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'multipart/form-data',
-  //       },
-  //       body: formData,
-  //     });
-
-  //     if (!response.ok) {
-  //       const errorData = await response.text();
-  //       throw new Error(`HTTP error! status: ${response.status}, data: ${errorData}`);
-  //     }
-
-  //     const result = await response.json();
-  //     console.log('Add Lesson Plan Result:', result); // Debugging log
-  //     if (result.status === 'Success') {
-  //       fetchLessonPlans(); // Refresh lesson plans list
-  //       setWeekNo('');
-  //       setLessonPlan(null);
-  //       Alert.alert('Success', 'Lesson Plan Added');
-  //     } else {
-  //       Alert.alert('Error', result.message);
-  //     }
-  //   } catch (error) {
-  //     console.error('Add Lesson Plan Error: ', error);
-  //     Alert.alert('Error', `Failed to add lesson plan: ${error.message}`);
-  //   }
-  // };
-
-  // const handleDeleteLessonPlan = async (lessonPlanId) => {
-  //   try {
-  //     const response = await fetch(`${baseURL}/LessonPlan/removeLessonPlan?id=${lessonPlanId}`, {
-  //       method: 'DELETE',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //     });
-
-  //     const result = await response.json();
-  //     console.log('Delete Lesson Plan Result:', result); // Debugging log
-  //     if (result.status === 'Success') {
-  //       fetchLessonPlans(); // Refresh lesson plans list
-  //       Alert.alert('Success', 'Lesson Plan Removed');
-  //     } else {
-  //       Alert.alert('Error', result.message);
-  //     }
-  //   } catch (error) {
-  //     console.error('Delete Lesson Plan Error: ', error);
-  //     Alert.alert('Error', 'Failed to remove lesson plan');
-  //   }
-  // };
-
-  // const handleEditLessonPlan = (lessonPlanId) => {
-  //   navigation.navigate('EditLessonPlan', { lessonPlanId });
-  // };
 
   return (
     <View style={styles.container}>
@@ -290,73 +236,154 @@ const CourseMaterial = () => {
           onPress={() => setActiveTab('Books')}
           style={[styles.tabButton, activeTab === 'Books' && styles.activeTab]}
         >
-          <Text style={styles.tabText}>Books</Text>
+          <Text style={[styles.tabText, activeTab !== 'Books' && styles.inactiveTabText]}>Books</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => setActiveTab('Weekly LP')}
           style={[styles.tabButton, activeTab === 'Weekly LP' && styles.activeTab]}
         >
-          <Text style={styles.tabText}>Weekly LP</Text>
+          <Text style={[styles.tabText, activeTab !== 'Weekly LP' && styles.inactiveTabText]}>Weekly LP</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => setActiveTab('References')}
-          style={[styles.tabButton, activeTab === 'References' && styles.activeTab]}
+          onPress={() => setActiveTab('My Lesson Plan')}
+          style={[styles.tabButton, activeTab === 'My Lesson Plan' && styles.activeTab]}
         >
-          <Text style={styles.tabText}>References</Text>
+          <Text style={[styles.tabText, activeTab !== 'My Lesson Plan' && styles.inactiveTabText]}>My Lesson Plan</Text>
         </TouchableOpacity>
       </View>
 
       {activeTab === 'Books' && (
-        <View style={styles.contentContainer}>
-          <Text>Books content for {course.courseName} goes here.</Text>
-        </View>
+        <FlatList
+          data={books}
+          keyExtractor={(item) => item.bookId.toString()}
+          renderItem={({ item }) => (
+            <View style={styles.itemContainer}>
+              <Text style={styles.itemText}>Title: {item.bookName}</Text>
+              <Text style={styles.itemText}>Author: {item.bookAuthorName}</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('PDFReaderScreen', { pdfUri: item.bookPdfPath })}>
+                <Text style={styles.linkText}>Open PDF</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          ListEmptyComponent={<Text>No books assigned to this course.</Text>}
+        />
       )}
 
       {activeTab === 'Weekly LP' && (
         <View style={styles.contentContainer}>
-          {/* <TextInput
+          <View style={styles.subTabContainer}>
+            <TouchableOpacity
+              onPress={() => setSubTab('Lesson Plan')}
+              style={[styles.tabButton, subTab === 'Lesson Plan' && styles.activeTab]}
+            >
+              <Text style={[styles.tabText, subTab !== 'Lesson Plan' && styles.inactiveTabText]}>Lesson Plan</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setSubTab('Reference Material')}
+              style={[styles.tabButton, subTab === 'Reference Material' && styles.activeTab]}
+            >
+              <Text style={[styles.tabText, subTab !== 'Reference Material' && styles.inactiveTabText]}>Reference Material</Text>
+            </TouchableOpacity>
+          </View>
+
+          {subTab === 'Lesson Plan' && (
+            <FlatList
+              data={lessonPlans}
+              keyExtractor={(item) => item.lessonPlanId.toString()}
+              renderItem={({ item }) => (
+                <View style={styles.itemContainer}>
+                  <Text style={styles.itemText}>Title: {item.lessonPlanTitle}</Text>
+                  <TouchableOpacity onPress={() => navigation.navigate('PDFReaderScreen', { pdfUri: item.lessonPlanPdfPatn })}>
+                    <Text style={styles.linkText}>Open PDF</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+              ListEmptyComponent={<Text>No lesson plans available.</Text>}
+            />
+          )}
+
+          {subTab === 'Reference Material' && (
+            <FlatList
+              data={referenceMaterials}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => (
+                <View style={styles.itemContainer}>
+                  <Text style={styles.itemText}>Title: {item.referenceTitle}</Text>
+                  <TouchableOpacity onPress={() => navigation.navigate('WebViewer', { uri: item.referenceUri })}>
+                    <Text style={styles.linkText}>Open Reference</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+              ListEmptyComponent={<Text>No reference materials available.</Text>}
+            />
+          )}
+        </View>
+      )}
+
+      {activeTab === 'My Lesson Plan' && (
+        <View style={styles.contentContainer}>
+          <TextInput
             style={styles.input}
             placeholder="Week No"
             value={weekNo}
             onChangeText={setWeekNo}
-          /> */}
-          {/* <TextInput
-            style={styles.input}
-            placeholder="Lesson Plan pdf"
-            value={lessonPlan ? lessonPlan.name : ''}
-            editable={false}
-          /> */}
-          {/* <TouchableOpacity style={styles.button} onPress={handleBrowseFile}>
-            <Text style={styles.buttonText}>Browse File</Text>
+          />
+          <TouchableOpacity style={styles.button} onPress={selectPdf}>
+            <Text style={styles.buttonText}>Browse PDF</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={handleAddLessonPlan}>
+          {selectedPdf && (
+            <Text style={styles.selectedFileText}>{selectedPdf.name}</Text>
+          )}
+          <TouchableOpacity style={styles.button} onPress={uploadLessonPlan}>
             <Text style={styles.buttonText}>Add Lesson Plan</Text>
-          </TouchableOpacity> */}
+          </TouchableOpacity>
 
           <FlatList
-            data={lessonPlans}
+            data={myLessonPlans}
             keyExtractor={(item) => item.lessonPlanId.toString()}
             renderItem={({ item }) => (
               <View style={styles.lessonPlanContainer}>
                 <Text style={styles.lessonPlanText}>Week {item.lessonPlanTitle}</Text>
                 <View style={styles.lessonPlanActions}>
-                  {/* <TouchableOpacity onPress={() => handleEditLessonPlan(item.lessonPlanId)}>
+                  <TouchableOpacity onPress={() => editLessonPlan(item)}>
                     <Text style={styles.editText}>Edit</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={() => handleDeleteLessonPlan(item.lessonPlanId)}>
+                  <TouchableOpacity onPress={() => deleteLessonPlan(item.lessonPlanId)}>
                     <Text style={styles.deleteText}>Delete</Text>
-                  </TouchableOpacity> */}
+                  </TouchableOpacity>
                 </View>
               </View>
             )}
             ListEmptyComponent={<Text>No lesson plans available.</Text>}
           />
-        </View>
-      )}
 
-      {activeTab === 'References' && (
-        <View style={styles.contentContainer}>
-          <Text>References content for {course.courseName} goes here.</Text>
+          <Modal
+            visible={isModalVisible}
+            animationType="slide"
+            onRequestClose={() => setIsModalVisible(false)}
+          >
+            <View style={styles.modalContent}>
+              <Text>Edit Lesson Plan</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Week No"
+                value={weekNo}
+                onChangeText={setWeekNo}
+              />
+              <TouchableOpacity style={styles.button} onPress={selectPdf}>
+                <Text style={styles.buttonText}>Browse PDF</Text>
+              </TouchableOpacity>
+              {selectedPdf && (
+                <Text style={styles.selectedFileText}>{selectedPdf.name}</Text>
+              )}
+              <TouchableOpacity style={styles.button} onPress={updateLessonPlan}>
+                <Text style={styles.buttonText}>Update Lesson Plan</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setIsModalVisible(false)}>
+                <Text style={styles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </Modal>
         </View>
       )}
     </View>
@@ -381,10 +408,12 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: '#fff',
     marginHorizontal: 4,
-    
   },
   activeTab: {
     backgroundColor: '#5B5D8B',
+  },
+  inactiveTabText: {
+    color: '#5B5D8B',
   },
   tabText: {
     color: '#FFFFFF',
@@ -396,12 +425,17 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     flex: 1,
   },
+  subTabContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
     padding: 10,
     marginBottom: 10,
-    color:'black'
+    color: 'black'
   },
   button: {
     backgroundColor: '#5B5D8B',
@@ -423,7 +457,7 @@ const styles = StyleSheet.create({
   },
   lessonPlanText: {
     fontSize: 16,
-    color:'black',
+    color: 'black',
   },
   lessonPlanActions: {
     flexDirection: 'row',
@@ -434,6 +468,31 @@ const styles = StyleSheet.create({
   },
   deleteText: {
     color: '#ff0000',
+  },
+  itemContainer: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  itemText: {
+    fontSize: 16,
+    color: 'black',
+  },
+  modalContent: {
+    padding: 20,
+  },
+  cancelText: {
+    color: '#ff0000',
+    textAlign: 'center',
+    marginTop: 10,
+  },
+  selectedFileText: {
+    marginBottom: 10,
+    color: 'black'
+  },
+  linkText: {
+    color: '#5B5D8B',
+    textDecorationLine: 'underline',
   },
 });
 
