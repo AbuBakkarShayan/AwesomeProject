@@ -100,9 +100,9 @@ const CourseManagementScreen = () => {
     );
   };
 
-  const handleEnrollStudent = async (courseId) => {
+  const handleEnrollStudent = async (courseCode) => {
     // Logic for enrolling student
-    navigation.navigate('EnrollStudent', { courseId });
+    navigation.navigate('EnrollStudent', { courseCode });
   };
 
   const handleEnrollTeacher = async (courseCode) => {
@@ -120,7 +120,7 @@ const CourseManagementScreen = () => {
         <TouchableOpacity onPress={() => confirmDeleteCourse(item.courseCode)}>
           <Icon name="trash-outline" size={24} color="#7E7E7E" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleEnrollStudent(item.id)}>
+        <TouchableOpacity onPress={() => handleEnrollStudent(item.courseCode)}>
           <Icon name="person-outline" size={24} color="#7E7E7E" />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => handleEnrollTeacher(item.courseCode)}>

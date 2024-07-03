@@ -59,6 +59,10 @@ const BooksManagementScreen = () => {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
 
+  const handleAddBook= () => {
+    navigation.navigate("AddBookScreen");
+  }
+
   const handleAddCategory = async (bookCategory) => {
     try {
       const response = await fetch(`${baseURL}/book/addBookCategory?bookCategory=${bookCategory}`, {

@@ -8,6 +8,8 @@ export default function MyCourseItemsScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('Downloads');
   const [activeSubTab, setActiveSubTab] = useState('DownloadedLessonPlans');
   const [data, setData] = useState([]);
+  const userId = 1; // Assuming you have a userId state or prop
+  const userType = 'User'; // Replace with actual user type, e.g., 'Teacher' or 'Student'
 
   // logout icon in header
   React.useLayoutEffect(() => {
@@ -21,19 +23,47 @@ export default function MyCourseItemsScreen({ navigation }) {
     fetchData();
   }, [activeTab, activeSubTab]);
 
-  const fetchData = () => {
-    // Fetch data from C# API based on the activeTab and activeSubTab
-    // Here, we'll use sample data
-    const sampleData = [
-      { id: '1', name: 'Sample Item 1', author: 'Author 1', image: 'https://via.placeholder.com/100' },
-      { id: '2', name: 'Sample Item 2', author: 'Author 2', image: 'https://via.placeholder.com/100' },
-    ];
-    setData(sampleData);
+  const fetchData = async () => {
+    try {
+      let endpoint = '';
+      if (activeTab === 'Downloads') {
+        if (activeSubTab === 'DownloadedLessonPlans') {
+          endpoint = '/api/DownloadedLessonPlans';
+        } else if (activeSubTab === 'DownloadedBooks') {
+          endpoint = '/api/DownloadedBooks';
+        }
+      } else if (activeTab === 'Bookmarks') {
+        if (activeSubTab === 'BookmarkBooks') {
+          endpoint = `/api/BookMark/getBookMark?userId=${userId}&userType=${userType}`;
+        }
+        else if (activeSubTab === 'BookmarkLessonPlans') {
+          endpoint = '/api/DownloadedBooks';
+        }
+      }
+  
+      console.log(`Fetching data from: http://192.168.91.26/FYPAPI${endpoint}`); // Debugging log
+      const response = await fetch(`http://192.168.91.26/FYPAPI${endpoint}`); // Use 10.0.2.2 for Android emulator
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      console.log('Fetched data:', result); // Debugging log
+      if (result.status === 'Success') {
+        setData(result.data);
+      } else {
+        alert('Failed to fetch data: ' + result.message);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      alert('Error fetching data: ' + error.message);
+    }
   };
+  
 
   const handleDelete = (id) => {
     // Call C# API to delete the item
-    setData(data.filter(item => item.id !== id));
+    setData(data.filter(item => item.bookmarkId !== id));
   };
 
   const handleTOC = (id) => {
@@ -43,15 +73,15 @@ export default function MyCourseItemsScreen({ navigation }) {
 
   const renderItem = ({ item }) => (
     <View style={styles.listItem}>
-      <TouchableOpacity onPress={() => handleTOC(item.id)}>
-        <Image source={{ uri: item.image }} style={styles.image} />
-        <Text style={styles.textStyle}>{item.name}</Text>
-        <Text style={styles.textStyle}>{item.author}</Text>
+      <TouchableOpacity onPress={() => handleTOC(item.bookId)}>
+        <Image source={{ uri: 'https://via.placeholder.com/100' }} style={styles.image} />
+        <Text style={styles.textStyle}>Book ID: {item.bookId}</Text>
+        <Text style={styles.textStyle}>Bookmark ID: {item.bookmarkId}</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.deleteIcon}>
+      <TouchableOpacity onPress={() => handleDelete(item.bookmarkId)} style={styles.deleteIcon}>
         <Text style={styles.iconText}>Delete</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => handleTOC(item.id)} style={styles.tocIcon}>
+      <TouchableOpacity onPress={() => handleTOC(item.bookId)} style={styles.tocIcon}>
         <Text style={styles.iconText}>TOC</Text>
       </TouchableOpacity>
     </View>
@@ -107,7 +137,7 @@ export default function MyCourseItemsScreen({ navigation }) {
       )}
       <FlatList
         data={data}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.bookmarkId?.toString()}
         renderItem={renderItem}
       />
     </View>

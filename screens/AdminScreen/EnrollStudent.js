@@ -206,7 +206,7 @@
 //   }
 // });
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, ActivityIndicator, TouchableOpacity, Text, TextInput, Alert } from 'react-native';
+import { StyleSheet, View, ActivityIndicator, TouchableOpacity, Text, Alert, TextInput } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import baseURL from '../../config';
 
@@ -217,13 +217,13 @@ const EnrollStudent = ({ route, navigation }) => {
   const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [semesterNumber, setSemesterNumber] = useState('');
-  const [year, setYear] = useState('');
-  const [month, setMonth] = useState('');
   const [loadingDepartments, setLoadingDepartments] = useState(true);
   const [loadingStudents, setLoadingStudents] = useState(false);
+  const [session, setSession] = useState('');
 
   useEffect(() => {
     fetchDepartments();
+    calculateSession(); // Calculate session based on current date
   }, []);
 
   const fetchDepartments = () => {
@@ -250,6 +250,22 @@ const EnrollStudent = ({ route, navigation }) => {
         console.error('Error fetching departments:', error);
         setLoadingDepartments(false);
       });
+  };
+
+  const calculateSession = () => {
+    const currentDate = new Date(); // Current date and time based on the device's local time zone
+    const year = currentDate.getFullYear(); // Get the current year
+    const month = currentDate.getMonth() + 1; // Get the current month (0-indexed, so add 1)
+    const semester = getSemester(month); // Determine the semester based on the month
+    setSession(`${semester} ${year}`); // Update the session state with semester and year
+  };
+  
+  const getSemester = (month) => {
+    if (month >= 1 && month <= 6) {
+      return "Spring";
+    } else {
+      return "Fall";
+    }
   };
 
   useEffect(() => {
@@ -286,19 +302,31 @@ const EnrollStudent = ({ route, navigation }) => {
   };
 
   const enrollStudent = () => {
-    if (!selectedStudent || !semesterNumber || !year || !month) {
+    if (!selectedStudent || !semesterNumber || !session) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
-
+  
+    const [semester, year] = session.split(' ');
+  
+    let month;
+    if (semester === 'Spring') {
+      month = 1;
+    } else {
+      month = 7;
+    }
+  
     const payload = {
       studentId: selectedStudent,
       smesterNo: semesterNumber,
       courseCode: [courseCode],
-      year: year,
-      month: month,
+      enrollmentSession: session,
+      year: parseInt(year, 10),
+      month: month
     };
-
+  
+    console.log('Enrollment Payload:', payload); // Add this line to debug the payload
+  
     fetch(`${baseURL}/enrollment/enroll`, {
       method: 'POST',
       headers: {
@@ -313,6 +341,7 @@ const EnrollStudent = ({ route, navigation }) => {
         return response.json();
       })
       .then(data => {
+        console.log('API Response:', data); // Add this line to debug the API response
         if (data.status === 'Success') {
           Alert.alert('Success', 'Enrollment successful');
           navigation.goBack(); 
@@ -324,30 +353,18 @@ const EnrollStudent = ({ route, navigation }) => {
         console.error('Error enrolling student:', error);
         Alert.alert('Error', 'Failed to enroll student');
       });
-  };
+  };  
+  
 
   return (
     <View style={styles.container}>
+      <Text style={styles.sessionText}>{session}</Text>
       <TextInput
         style={styles.input}
         placeholder="Semester Number"
         placeholderTextColor="#7E7E7E"
         value={semesterNumber}
         onChangeText={setSemesterNumber}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Year"
-        placeholderTextColor="#7E7E7E"
-        value={year}
-        onChangeText={setYear}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Month"
-        placeholderTextColor="#7E7E7E"
-        value={month}
-        onChangeText={setMonth}
       />
       {loadingDepartments ? (
         <ActivityIndicator size="large" color="#0000ff" />
@@ -364,7 +381,6 @@ const EnrollStudent = ({ route, navigation }) => {
             setSelectedDepartment(item.value);
             setSelectedStudent(null); 
           }}
-          
         />
       )}
       {loadingStudents ? (
@@ -383,6 +399,7 @@ const EnrollStudent = ({ route, navigation }) => {
           }}
         />
       )}
+      
       <TouchableOpacity style={styles.button} onPress={enrollStudent}>
         <Text style={styles.buttonText}>Enroll</Text>
       </TouchableOpacity>
@@ -405,7 +422,7 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderWidth: 1,
     paddingLeft: 8,
-    color:'black'
+    color: 'black',
   },
   dropdown: {
     width: '80%',
@@ -426,7 +443,13 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
   },
-  placeholder:{
-    color:"#7E7E7E"
-  }
+  sessionText: {
+    margin: 16,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color:'black'
+  },
+  placeholder: {
+    color: '#7E7E7E',
+  },
 });

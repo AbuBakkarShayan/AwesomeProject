@@ -212,7 +212,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import baseURL from '../../config';
 
-const TeacherCoursesScreen = () => {
+const Courses = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const [courses, setCourses] = useState([]);
@@ -351,4 +351,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TeacherCoursesScreen;
+export default Courses;
