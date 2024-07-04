@@ -112,15 +112,17 @@ import baseURL from '../../config';
 const StudentDashboard = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  
-  // Provide default values to avoid undefined properties
+
   const { studentId = null, isFirstLogin = 'False' } = route.params || {};
   const [regNo, setRegNo] = useState('');
+  const [role, setRole] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
-      const regNo = await AsyncStorage.getItem('regNo');
-      setRegNo(regNo);
+      const storedRegNo = await AsyncStorage.getItem('regNo');
+      const storedRole = await AsyncStorage.getItem('userRole'); // Changed to 'userRole'
+      setRegNo(storedRegNo);
+      setRole(storedRole);
       if (isFirstLogin === 'True') {
         showUpdatePasswordDialog();
       }
@@ -130,7 +132,7 @@ const StudentDashboard = () => {
   }, [isFirstLogin]);
 
   const logout = async () => {
-    await AsyncStorage.multiRemove(['role', 'username', 'regNo', 'phoneNo', 'password']);
+    await AsyncStorage.multiRemove(['userRole', 'username', 'regNo', 'phoneNo', 'password']);
     navigation.reset({
       index: 0,
       routes: [{ name: 'LoginScreen1' }],
@@ -183,17 +185,17 @@ const StudentDashboard = () => {
     {
       name: 'Course',
       icon: 'document-outline',
-      function: () => navigation.navigate('CoursesScreen', { studentId }),
+      function: () => navigation.navigate('CoursesScreen', { studentId, role }),
     },
     {
       name: 'Library Books',
       icon: 'book-outline',
-      function: () => navigation.navigate('LibraryScreen', { studentId, user: 'Student' }),
+      function: () => navigation.navigate('LibraryScreen', { studentId, role }),
     },
     {
       name: 'My Item',
       icon: 'save-outline',
-      function: () => navigation.navigate('MyCourseItemsScreen', { studentId }),
+      function: () => navigation.navigate('MyCourseItemsScreen', { studentId, role }),
     },
     {
       name: 'Profile',
@@ -204,7 +206,8 @@ const StudentDashboard = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Student Dashboard</Text>
+      <Text style={styles.title}>Student Dashboard {studentId}</Text>
+      <Text style={styles.roleText}>Role: {role}</Text>
       {dashboardData.map((item, index) => (
         <TouchableOpacity key={index} style={styles.tile} onPress={item.function}>
           <Icon name={item.icon} size={40} style={styles.icon} />
@@ -219,13 +222,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#ccc',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
-    color:'black'
+    color: 'black',
+  },
+  roleText: {
+    fontSize: 18,
+    color: 'black',
+    marginBottom: 20,
   },
   tile: {
     padding: 20,
@@ -237,11 +245,11 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginRight: 20,
-    color:'white'
+    color: 'white',
   },
   tileText: {
     fontSize: 18,
-    color:'white'
+    color: 'white',
   },
 });
 

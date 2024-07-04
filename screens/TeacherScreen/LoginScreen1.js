@@ -56,14 +56,14 @@ const LoginScreen1 = () => {
               }
               await AsyncStorage.setItem('studentId', user.id.toString());
               await AsyncStorage.setItem('departmentId', user.department);
-              console.log("StudentId: ", user.id.toString(), "StudentDepartmentId:", user.department);
+              console.log("StudentId: ", user.id.toString(), "StudentDepartmentId:", user.department, "User Role: ",user.role );
               navigation.navigate('StudentDashboard', { studentId: user.id, isFirstLogin });
             } else if (role === 'Teacher') {
               if (!user.id) {
                 throw new Error('Missing teacherId');
               }
               await AsyncStorage.setItem('teacherId', user.id.toString());
-              console.log("teacherId", user.id.toString());
+              console.log("teacherId", user.id.toString(), "user Role: ", user.role);
               navigation.navigate('TeacherDashboard', { teacherId: user.id, isFirstLogin });
             } else if (role === 'Admin') {
               navigation.navigate('AdminDashboard');

@@ -218,7 +218,7 @@ const Courses = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [studentId, setStudentId] = useState(null); // State to store teacherId
+  const [studentId, setStudentId] = useState(null); // State to store studentId
 
   useEffect(() => {
     const fetchStudentId = async () => {

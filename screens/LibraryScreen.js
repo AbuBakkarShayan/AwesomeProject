@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, FlatList, Image, TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNFS from 'react-native-fs';
 import baseURL from '../config';
 
@@ -8,6 +9,46 @@ const LibraryScreen = ({ navigation }) => {
     const [books, setBooks] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [filteredBooks, setFilteredBooks] = useState([]);
+    const [downloadedBooks, setDownloadedBooks] = useState([]); // State for downloaded books
+    const [studentId, setStudentId] = useState('');  // State to store studentId
+    const [teacherId, setTeacherId] = useState(''); // State to store teacherId
+    const [role, setRole] = useState(''); // State to store role
+
+    useEffect(() => {
+        const fetchRole = async () => {
+            try {
+                const fetchedRole = await AsyncStorage.getItem('userRole');
+                if (fetchedRole) {
+                    setRole(fetchedRole);
+                    if (fetchedRole === 'Student') {
+                        const id = await AsyncStorage.getItem('studentId');
+                        if (id !== null) {
+                            setStudentId(id);
+                        } else {
+                            console.log('No studentId found');
+                            throw new Error('Student ID is missing');
+                        }
+                    } else if (fetchedRole === 'Teacher') {
+                        const id = await AsyncStorage.getItem('teacherId');
+                        if (id !== null) {
+                            setTeacherId(id);
+                        } else {
+                            console.log('No teacherId found');
+                            throw new Error('Teacher ID is missing');
+                        }
+                    }
+                } else {
+                    console.log('No role found');
+                    throw new Error('Role is missing');
+                }
+            } catch (error) {
+                console.log('Error fetching role:', error);
+                // Handle error if necessary
+            }
+        };
+
+        fetchRole();
+    }, []);
 
     useEffect(() => {
         fetchBooks();
@@ -94,23 +135,30 @@ const LibraryScreen = ({ navigation }) => {
 
     const handleDownload = async (bookId, bookName) => {
         try {
-            const url = `${baseURL}/book/DownloadBook?bookId=${bookId}`;
-            const downloadDest = `${RNFS.DocumentDirectoryPath}/${bookId}.pdf`;
-
-            const options = {
-                fromUrl: url,
-                toFile: downloadDest,
-            };
-
-            const result = await RNFS.downloadFile(options).promise;
-
-            if (result.statusCode === 200) {
-                console.log('Book downloaded successfully to', downloadDest);
-            } else {
-                throw new Error('Failed to download book');
+            const coverImageResponse = await fetch(`${baseURL}/book/DownloadBookCover?bookId=${bookId}`);
+            if (!coverImageResponse.ok) {
+                throw new Error('Failed to download cover image');
             }
+            const coverImageData = await coverImageResponse.blob();
+            const coverImagePath = `${RNFS.DocumentDirectoryPath}/${bookName}_cover.jpg`;
+
+            await RNFS.writeFile(coverImagePath, coverImageData, 'base64');
+
+            const pdfResponse = await fetch(`${baseURL}/book/DownloadBook?bookId=${bookId}`);
+            if (!pdfResponse.ok) {
+                throw new Error('Failed to download PDF');
+            }
+            const pdfData = await pdfResponse.blob();
+            const pdfPath = `${RNFS.DocumentDirectoryPath}/${bookName}.pdf`;
+
+            await RNFS.writeFile(pdfPath, pdfData, 'base64');
+
+            setDownloadedBooks([...downloadedBooks, { bookId, bookName, coverImagePath, pdfPath }]);
+
+            Alert.alert('Success', 'Book downloaded successfully');
         } catch (error) {
             console.error('Error downloading book:', error);
+            Alert.alert('Error', 'Failed to download book');
         }
     };
 
@@ -132,9 +180,12 @@ const LibraryScreen = ({ navigation }) => {
                     <TouchableOpacity onPress={() => handleViewTOC(item.bookId)}>
                         <Icon name="list" size={25} color="#5B5D8B" />
                     </TouchableOpacity>
-                    <TouchableOpacity>
-                        <Icon name="star" size={25} color="gold" />
-                    </TouchableOpacity>
+                    {/* Render star icon only if the book is downloaded */}
+                    {downloadedBooks.some(book => book.bookId === item.bookId) && (
+                        <TouchableOpacity>
+                            <Icon name="star" size={25} color="gold" />
+                        </TouchableOpacity>
+                    )}
                 </View>
             </View>
         </TouchableOpacity>
@@ -142,10 +193,12 @@ const LibraryScreen = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
+            <Text style={{ color: "black" }}>{studentId ? `Student ID: ${studentId}` : teacherId ? `Teacher ID: ${teacherId}` : 'ID not found'}</Text>
+            <Text style={{ color: "black" }}>{role ? `Role: ${role}` : 'Role not found'}</Text>
             <TextInput
                 style={styles.searchInput}
                 placeholder="Search"
-                placeholderTextColor={"black"}
+                placeholderTextColor="black"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
             />
