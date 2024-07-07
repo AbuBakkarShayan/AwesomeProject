@@ -69,9 +69,9 @@ const MyCourseItemsScreen = ({ navigation }) => {
 
     const fetchDownloadedBooks = async () => {
         try {
-            const downloadedBooks = await AsyncStorage.getItem('downloadedBooks');
-            if (downloadedBooks) {
-                setDownloadedBooks(JSON.parse(downloadedBooks));
+            const storedDownloads = await AsyncStorage.getItem(`downloadedBooks_${role}_${userId}`);
+            if (storedDownloads) {
+                setDownloadedBooks(JSON.parse(storedDownloads));
             } else {
                 setDownloadedBooks([]);
             }
@@ -91,12 +91,10 @@ const MyCourseItemsScreen = ({ navigation }) => {
             }
             const data = await response.json();
             if (data.status === 'Success') {
-                // Update bookmarkedBooks state and AsyncStorage
                 const updatedBookmarkedBooks = bookmarkedBooks.filter(book => book.bookId !== bookId);
                 setBookmarkedBooks(updatedBookmarkedBooks);
-                await AsyncStorage.setItem('bookmarkedBooks', JSON.stringify(updatedBookmarkedBooks));
+                await AsyncStorage.setItem(`bookmarkedBooks_${role}_${userId}`, JSON.stringify(updatedBookmarkedBooks));
                 Alert.alert('Success', data.message);
-                //navigation.goBack(); // Navigate back to LibraryScreen or refresh it
             } else {
                 Alert.alert('Error', data.message);
             }
@@ -105,21 +103,20 @@ const MyCourseItemsScreen = ({ navigation }) => {
             Alert.alert('Error', 'Failed to remove bookmark');
         }
     };
-    
+
     const removeDownloadedBook = async (bookId) => {
         try {
-            const downloadedBooks = await AsyncStorage.getItem('downloadedBooks');
-            let books = downloadedBooks ? JSON.parse(downloadedBooks) : [];
-            books = books.filter(book => book.bookId !== bookId);
-            await AsyncStorage.setItem('downloadedBooks', JSON.stringify(books));
-            setDownloadedBooks(books); // Update state with filtered books
+            const storedDownloads = await AsyncStorage.getItem(`downloadedBooks_${role}_${userId}`);
+            if (storedDownloads) {
+                let downloadedBooks = JSON.parse(storedDownloads);
+                downloadedBooks = downloadedBooks.filter(book => book.bookId !== bookId);
+                await AsyncStorage.setItem(`downloadedBooks_${role}_${userId}`, JSON.stringify(downloadedBooks));
+                setDownloadedBooks(downloadedBooks); // Update state with filtered books
+            }
         } catch (error) {
             console.error('Error removing book from AsyncStorage:', error);
         }
     };
-    
-    
-    
 
     const renderBookItem = ({ item }) => (
         <View style={styles.bookContainer}>
@@ -143,7 +140,7 @@ const MyCourseItemsScreen = ({ navigation }) => {
             )}
         </View>
     );
-    
+
     return (
         <View style={styles.container}>
             <View style={styles.tabContainer}>
@@ -163,8 +160,7 @@ const MyCourseItemsScreen = ({ navigation }) => {
                     <FlatList
                         data={bookmarkedBooks}
                         renderItem={renderBookItem}
-                        keyExtractor={item => item.bookId ? item.bookId.toString() : ''}
-// Assuming bookId is unique
+                        keyExtractor={item => item.bookId.toString()}
                         contentContainerStyle={{ paddingHorizontal: 10 }}
                         showsVerticalScrollIndicator={false}
                     />
@@ -179,7 +175,6 @@ const MyCourseItemsScreen = ({ navigation }) => {
                         data={downloadedBooks}
                         renderItem={renderBookItem}
                         keyExtractor={(item, index) => `${item.bookId}_${index}`} // Assuming bookId is unique
-
                         contentContainerStyle={{ paddingHorizontal: 10 }}
                         showsVerticalScrollIndicator={false}
                     />

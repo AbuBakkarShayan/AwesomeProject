@@ -92,6 +92,12 @@ const BooksManagementScreen = () => {
     }
   };
 
+  const addTOC=(bookId)=>{
+      navigation.navigate('AddTOC',{
+        bookId,
+      })
+  }
+
   const handleEditBook = (book) => {
     console.log('Editing book object:', book);
     navigation.navigate('EditBookScreen', {
@@ -142,7 +148,7 @@ const BooksManagementScreen = () => {
         <Image
     source={{ uri: item.image }}
     style={{ width: 100, height: 100 }}
-    onError={(e) => console.error(`Failed to load image: ${image}`, e.nativeEvent.error)}
+    onError={(e) => console.error(`Failed to load image:`, e.nativeEvent.error)}
   />
 {/* <Image
   source={{
@@ -163,6 +169,9 @@ const BooksManagementScreen = () => {
           <Text style={styles.bookAuthor}>{item.author}</Text>
         </View>
         <View style={styles.bookActions}>
+        <TouchableOpacity onPress={()=> addTOC(item.bookId)}>
+            <Icon name="documents-outline" size={30} color="#5B5D8B" />
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => handleEditBook(item)}>
             <Icon name="create-outline" size={30} color="#5B5D8B" />
           </TouchableOpacity>

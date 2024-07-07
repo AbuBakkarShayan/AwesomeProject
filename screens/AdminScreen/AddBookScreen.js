@@ -142,7 +142,8 @@ const AddBookScreen = ({ navigation }) => {
       }
   
       // Navigate to AddTOC screen with bookId
-      navigation.navigate('AddTOC', { bookId: result.bookId });
+      // navigation.navigate('AddTOC', { bookId: result.bookId });
+      Alert.alert("Success","Successfully uploaded the book");
     } catch (error) {
       console.log('Error uploading book:', error);
       Alert.alert('Error', error.message);

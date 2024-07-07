@@ -38,7 +38,7 @@ const LibraryScreen = ({ navigation, route }) => {
 
         const loadBookmarkedBooks = async () => {
             try {
-                const storedBookmarks = await AsyncStorage.getItem('bookmarkedBooks');
+                const storedBookmarks = await AsyncStorage.getItem(`bookmarkedBooks_${role}_${userId}`);
                 if (storedBookmarks) {
                     const parsedBookmarks = JSON.parse(storedBookmarks);
                     setBookmarkedBooks(new Set(parsedBookmarks));
@@ -50,7 +50,7 @@ const LibraryScreen = ({ navigation, route }) => {
 
         const loadDownloadedBooks = async () => {
             try {
-                const storedDownloads = await AsyncStorage.getItem('downloadedBooks');
+                const storedDownloads = await AsyncStorage.getItem(`downloadedBooks_${role}_${userId}`);
                 if (storedDownloads) {
                     const parsedDownloads = JSON.parse(storedDownloads);
                     setDownloadedBooks(new Set(parsedDownloads));
@@ -63,7 +63,7 @@ const LibraryScreen = ({ navigation, route }) => {
         fetchRoleAndId();
         loadBookmarkedBooks();
         loadDownloadedBooks();
-    }, []);
+    }, [userId, role]);
 
     useEffect(() => {
         fetchBooks();
@@ -85,13 +85,17 @@ const LibraryScreen = ({ navigation, route }) => {
 
     useEffect(() => {
         // Update AsyncStorage whenever bookmarkedBooks state changes
-        AsyncStorage.setItem('bookmarkedBooks', JSON.stringify(Array.from(bookmarkedBooks)));
-    }, [bookmarkedBooks]);
+        if (userId && role) {
+            AsyncStorage.setItem(`bookmarkedBooks_${role}_${userId}`, JSON.stringify(Array.from(bookmarkedBooks)));
+        }
+    }, [bookmarkedBooks, userId, role]);
 
     useEffect(() => {
         // Update AsyncStorage whenever downloadedBooks state changes
-        AsyncStorage.setItem('downloadedBooks', JSON.stringify(Array.from(downloadedBooks)));
-    }, [downloadedBooks]);
+        if (userId && role) {
+            AsyncStorage.setItem(`downloadedBooks_${role}_${userId}`, JSON.stringify(Array.from(downloadedBooks)));
+        }
+    }, [downloadedBooks, userId, role]);
 
     const fetchBooks = async () => {
         try {
@@ -217,6 +221,9 @@ const convertBlobToBase64 = (blob) => {
             Alert.alert('Error', error.message);
         }
     };
+    const handleHighlights= (bookId)=>{
+        navigation.navigate("StudentHighlights", bookId)
+    }
 
     const renderBookItem = ({ item }) => {
         const isBookmarked = bookmarkedBooks.has(item.bookId);
@@ -232,15 +239,15 @@ const convertBlobToBase64 = (blob) => {
                     </View>
                     <View style={styles.bookActions}>
                         <TouchableOpacity onPress={() => handleDownload(item.bookId, item.bookName, item.bookCoverPagePath, item.bookPdfPath)}>
-                            <Icon name="download" size={25} color={isDownloaded ? 'green' : '#5B5D8B'} />
+                            <Icon name="download" size={25} color={isDownloaded ? '#5B5D8B' : '#7E7E7E'} />
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => handleBookmark(item.bookId)}>
-                            <Icon name="bookmark" size={25} color={isBookmarked ? 'gold' : '#5B5D8B'} />
+                        <TouchableOpacity onPress={() => handleBookmark(item.bookId, item.bookName, item.bookAuthorName)}>
+                            <Icon name="bookmark" size={25} color={isBookmarked ? '#5B5D8B' : '#7E7E7E'} />
                         </TouchableOpacity>
                         <TouchableOpacity>
                             <Icon name="list" size={25} color="#5B5D8B" />
                         </TouchableOpacity>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={()=>{handleHighlights(item.bookId)}}>
                             <Icon name="eye" size={25} color="#5B5D8B" />
                         </TouchableOpacity>
                     </View>
@@ -251,7 +258,7 @@ const convertBlobToBase64 = (blob) => {
 
     return (
         <View style={styles.container}>
-             <Text style={{ color: "black" }}>{userId ? `ID: ${userId}` : 'ID not found'}</Text>
+            <Text style={{ color: "black" }}>{userId ? `ID: ${userId}` : 'ID not found'}</Text>
             <Text style={{ color: "black" }}>{role ? `Role: ${role}` : 'Role not found'}</Text>
             <TextInput
                 style={styles.searchBar}

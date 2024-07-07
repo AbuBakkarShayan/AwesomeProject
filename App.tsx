@@ -24,6 +24,7 @@ import BookmarkBooks from './screens/StudentScreen/BookmarkBooks';
 import Downloads from './screens/StudentScreen/Downloads/Downloads';
 import LibraryScreen from './screens/LibraryScreen';
 import MyCourseItemsScreen from './screens/StudentScreen/MyCourseItemsScreen';
+import StudentHighlights from './screens/StudentScreen/StudentHighlights';
 import StudentProfileScreen from './screens/StudentScreen/StudentProfileScreen';
 import StudentDepartmentScreen from './screens/AdminScreen/StudentDepartmentScreen';
 import UpdateDepartmentScreen from './screens/AdminScreen/UpdateDepartmentScreen';
@@ -47,6 +48,7 @@ import UpdateCourseScreen from './screens/AdminScreen/UpdateCourseScreen';
 import AddBookScreen from './screens/AdminScreen/AddBookScreen';
 import AddTOC from './screens/AdminScreen/AddTOC';
 import MyBooksScreen from './screens/TeacherScreen/MyBooksScreen';
+
 import { navigate } from '@react-navigation/routers/lib/typescript/src/CommonActions';
 
 
@@ -116,6 +118,7 @@ const App = () => {
 
         <Stack.Screen name='LibraryScreen' component={LibraryScreen} />
         <Stack.Screen name='MyCourseItemsScreen' component={MyCourseItemsScreen} />
+        <Stack.Screen name='StudentHighlights' component={StudentHighlights} options={{title:"Highlights"}}/>
         <Stack.Screen name='StudentProfileScreen' component={StudentProfileScreen} options={{title:"Profile"}} />
         <Stack.Screen name='StudentDepartmentScreen' component={StudentDepartmentScreen} options={{title:'Student Departments'}}/>
         <Stack.Screen name='UpdateDepartmentScreen' component={UpdateDepartmentScreen} options={{title:'Update Department Name'}}/>

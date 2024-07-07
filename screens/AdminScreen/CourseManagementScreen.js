@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity, Alert, FlatList } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Alert, FlatList, Modal } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/core';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -10,6 +10,8 @@ const CourseManagementScreen = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [selectedCourseCode, setSelectedCourseCode] = useState(null);
 
   //logout icon in header
   React.useLayoutEffect(() => {
@@ -79,7 +81,7 @@ const CourseManagementScreen = () => {
       Alert.alert('Error', 'Failed to delete course. Please try again later.');
     }
   };
-  
+
   const confirmDeleteCourse = (courseCode) => {
     Alert.alert(
       'Confirm Delete',
@@ -100,32 +102,48 @@ const CourseManagementScreen = () => {
     );
   };
 
-  const handleEnrollStudent = async (courseCode) => {
-    // Logic for enrolling student
-    navigation.navigate('EnrollStudent', { courseCode });
+  const handleEnrollStudent = (courseCode) => {
+    setSelectedCourseCode(courseCode);
+    setModalVisible(true);
   };
 
-  const handleEnrollTeacher = async (courseCode) => {
-    // Logic for enrolling teacher
+  const handleEnrollSingleStudent = () => {
+    setModalVisible(false);
+    navigation.navigate('EnrollStudent', { courseCode: selectedCourseCode });
+  };
+
+  const handleEnrollMultipleStudents = () => {
+    setModalVisible(false);
+    navigation.navigate('EnrollMultipleStudent', { courseCode: selectedCourseCode });
+  };
+
+  const handleEnrollTeacher = (courseCode) => {
     navigation.navigate('AssignTeacher', { courseCode });
   };
 
   const renderCourseItem = ({ item }) => (
     <View style={styles.courseContainer}>
-      <Text style={styles.courseName}>{item.courseName}</Text>
+      <View style={styles.courseDetails}>
+        <Icon name="book-outline" size={20} color="white" style={styles.courseIcon} />
+        <Text style={styles.courseName}>{item.courseName}</Text>
+      </View>
       <View style={styles.iconsContainer}>
-        <TouchableOpacity onPress={() => handleEditCourse(item)}>
-          <Icon name="create-outline" size={24} color="#7E7E7E" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => confirmDeleteCourse(item.courseCode)}>
-          <Icon name="trash-outline" size={24} color="#7E7E7E" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleEnrollStudent(item.courseCode)}>
-          <Icon name="person-outline" size={24} color="#7E7E7E" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleEnrollTeacher(item.courseCode)}>
-          <Icon name="school-outline" size={24} color="#7E7E7E" />
-        </TouchableOpacity>
+        <View style={styles.iconRow}>
+          <TouchableOpacity onPress={() => handleEditCourse(item)}>
+            <Icon name="create-outline" style={styles.courseIcon} size={20} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => confirmDeleteCourse(item.courseCode)}>
+            <Icon style={styles.courseIcon} name="trash-outline" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.iconRow}>
+          <TouchableOpacity onPress={() => handleEnrollStudent(item.courseCode)}>
+            <Icon style={styles.courseIcon} name="person-outline" size={24} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleEnrollTeacher(item.courseCode)}>
+            <Icon style={styles.courseIcon} name="school-outline" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -156,6 +174,26 @@ const CourseManagementScreen = () => {
       <TouchableOpacity style={styles.addButton} onPress={handleAddCourse}>
         <Icon name="add-circle-outline" size={60} color="#5B5D8B" />
       </TouchableOpacity>
+      <Modal
+        visible={isModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity onPress={handleEnrollSingleStudent} style={styles.modalButton}>
+              <Text style={styles.modalButtonText}>Enroll Single Student</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleEnrollMultipleStudents} style={styles.modalButton}>
+              <Text style={styles.modalButtonText}>Enroll Multiple Students</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalButton}>
+              <Text style={styles.modalButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -165,6 +203,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#F5F5F5',
   },
   addButton: {
     position: 'absolute',
@@ -172,19 +211,61 @@ const styles = StyleSheet.create({
     right: 20,
   },
   courseContainer: {
+    
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    backgroundColor: '#5B5D8B',
+    padding: 5,
+    borderRadius: 5,
+    marginVertical: 5,
+    width: '95%',
+  },
+  courseDetails: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  courseIcon: {
+    marginRight: 5,
   },
   courseName: {
     fontSize: 16,
-    color: "#7E7E7E",
+    color: 'white',
   },
   iconsContainer: {
+    flexDirection: 'column',
+   // marginLeft:5,
+  },
+  iconRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: 70,
+    //marginVertical: 5,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+    alignItems: 'center',
+  },
+  modalButton: {
+    backgroundColor: '#5B5D8B',
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 5,
+    width: '100%',
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    color: 'white',
+    fontSize: 16,
   },
 });
 
