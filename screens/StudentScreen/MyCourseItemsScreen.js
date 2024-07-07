@@ -1,231 +1,268 @@
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, Image } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import LogoutButton from '../AdminScreen/customcomponent/logoutComponent';
-import { useNavigation } from '@react-navigation/core';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import baseURL from '../../config';
+import Icon from 'react-native-vector-icons/MaterialIcons'; // Assuming you are using react-native-vector-icons
 import RNFS from 'react-native-fs';
 
-export default function MyCourseItemsScreen({ navigation }) {
-  const [activeTab, setActiveTab] = useState('Downloads');
-  const [activeSubTab, setActiveSubTab] = useState('DownloadedLessonPlans');
-  const [data, setData] = useState([]);
-  const userId = 1; // Assuming you have a userId state or prop
-  const userType = 'User'; // Replace with actual user type, e.g., 'Teacher' or 'Student'
+const MyCourseItemsScreen = ({ navigation }) => {
+    const [activeTab, setActiveTab] = useState('Bookmarked');
+    const [bookmarkedBooks, setBookmarkedBooks] = useState([]);
+    const [downloadedBooks, setDownloadedBooks] = useState([]);
+    const [noBookmarks, setNoBookmarks] = useState(false);
+    const [userId, setUserId] = useState('');
+    const [role, setRole] = useState('');
 
-  // logout icon in header
-  React.useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => <LogoutButton />,
-    });
-  }, [navigation]);
+    useEffect(() => {
+        const fetchRoleAndId = async () => {
+            try {
+                const fetchedRole = await AsyncStorage.getItem('userRole');
+                if (fetchedRole) {
+                    setRole(fetchedRole);
+                    const id = await AsyncStorage.getItem(fetchedRole === 'Student' ? 'studentId' : 'teacherId');
+                    if (id) {
+                        setUserId(id);
+                    } else {
+                        console.log('No user ID found');
+                    }
+                } else {
+                    console.log('No role found');
+                }
+            } catch (error) {
+                console.log('Error fetching role or user ID:', error);
+            }
+        };
 
-  useEffect(() => {
-    // Fetch data based on active tab and sub-tab
-    fetchData();
-  }, [activeTab, activeSubTab]);
+        fetchRoleAndId();
+    }, []);
 
-  const fetchData = async () => {
-    try {
-      let endpoint = '';
-      if (activeTab === 'Downloads') {
-        if (activeSubTab === 'DownloadedLessonPlans') {
-          endpoint = '/api/DownloadedLessonPlans';
-        } else if (activeSubTab === 'DownloadedBooks') {
-          endpoint = '/api/DownloadedBooks';
+    useEffect(() => {
+        if (userId && role) {
+            fetchBookmarkedBooks();
+            fetchDownloadedBooks(); // Fetch downloaded books initially
         }
-      } else if (activeTab === 'Bookmarks') {
-        if (activeSubTab === 'BookmarkBooks') {
-          endpoint = `/api/BookMark/getBookMark?userId=${userId}&userType=${userType}`;
+    }, [userId, role]);
+
+    const fetchBookmarkedBooks = async () => {
+        try {
+            const response = await fetch(`${baseURL}/bookmark/getBookMark?userId=${userId}&userType=${role}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch bookmarks');
+            }
+            const data = await response.json();
+            if (data.status === 'Success') {
+                if (data.data.length === 0) {
+                    setNoBookmarks(true);
+                    setBookmarkedBooks([]);
+                } else {
+                    setNoBookmarks(false);
+                    setBookmarkedBooks(data.data);
+                }
+            } else {
+                setNoBookmarks(true);
+            }
+        } catch (error) {
+            console.error('Error fetching bookmarks:', error);
+            setNoBookmarks(true);
         }
-        else if (activeSubTab === 'BookmarkLessonPlans') {
-          endpoint = '/api/DownloadedBooks';
+    };
+
+    const fetchDownloadedBooks = async () => {
+        try {
+            const downloadedBooks = await AsyncStorage.getItem('downloadedBooks');
+            if (downloadedBooks) {
+                setDownloadedBooks(JSON.parse(downloadedBooks));
+            } else {
+                setDownloadedBooks([]);
+            }
+        } catch (error) {
+            console.error('Error fetching downloaded books:', error);
+            setDownloadedBooks([]);
         }
-      }
-  
-      console.log(`Fetching data from: http://192.168.91.26/FYPAPI${endpoint}`); // Debugging log
-      const response = await fetch(`http://192.168.91.26/FYPAPI${endpoint}`); // Use 10.0.2.2 for Android emulator
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-  
-      const result = await response.json();
-      console.log('Fetched data:', result); // Debugging log
-      if (result.status === 'Success') {
-        setData(result.data);
-      } else {
-        alert('Failed to fetch data: ' + result.message);
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      alert('Error fetching data: ' + error.message);
-    }
-  };
-  
+    };
 
-  const handleDelete = (id) => {
-    // Call C# API to delete the item
-    setData(data.filter(item => item.bookmarkId !== id));
-  };
+    const removeBookmark = async (bookId) => {
+        try {
+            const response = await fetch(`${baseURL}/bookmark/removeBookMark?userId=${userId}&bookId=${bookId}&userType=${role}`, {
+                method: 'DELETE',
+            });
+            if (!response.ok) {
+                throw new Error('Failed to remove bookmark');
+            }
+            const data = await response.json();
+            if (data.status === 'Success') {
+                // Update bookmarkedBooks state and AsyncStorage
+                const updatedBookmarkedBooks = bookmarkedBooks.filter(book => book.bookId !== bookId);
+                setBookmarkedBooks(updatedBookmarkedBooks);
+                await AsyncStorage.setItem('bookmarkedBooks', JSON.stringify(updatedBookmarkedBooks));
+                Alert.alert('Success', data.message);
+                //navigation.goBack(); // Navigate back to LibraryScreen or refresh it
+            } else {
+                Alert.alert('Error', data.message);
+            }
+        } catch (error) {
+            console.error('Error removing bookmark:', error);
+            Alert.alert('Error', 'Failed to remove bookmark');
+        }
+    };
+    
+    const removeDownloadedBook = async (bookId) => {
+        try {
+            const downloadedBooks = await AsyncStorage.getItem('downloadedBooks');
+            let books = downloadedBooks ? JSON.parse(downloadedBooks) : [];
+            books = books.filter(book => book.bookId !== bookId);
+            await AsyncStorage.setItem('downloadedBooks', JSON.stringify(books));
+            setDownloadedBooks(books); // Update state with filtered books
+        } catch (error) {
+            console.error('Error removing book from AsyncStorage:', error);
+        }
+    };
+    
+    
+    
 
-  const handleTOC = (id) => {
-    // Navigate to PDFReaderScreen with the item id to show table of contents
-    navigation.navigate('PDFReaderScreen', { itemId: id });
-  };
-
-  const renderItem = ({ item }) => (
-    <View style={styles.listItem}>
-      <TouchableOpacity onPress={() => handleTOC(item.bookId)}>
-        <Image source={{ uri: 'https://via.placeholder.com/100' }} style={styles.image} />
-        <Text style={styles.textStyle}>Book ID: {item.bookId}</Text>
-        <Text style={styles.textStyle}>Bookmark ID: {item.bookmarkId}</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => handleDelete(item.bookmarkId)} style={styles.deleteIcon}>
-        <Text style={styles.iconText}>Delete</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => handleTOC(item.bookId)} style={styles.tocIcon}>
-        <Text style={styles.iconText}>TOC</Text>
-      </TouchableOpacity>
-    </View>
-  );
-
-  return (
-    <View style={styles.container}>
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'Downloads' ? styles.activeTab : {}]}
-          onPress={() => setActiveTab('Downloads')}
-        >
-          <Text style={activeTab === 'Downloads' ? styles.activeTabText : styles.tabText}>Downloads</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'Bookmarks' ? styles.activeTab : {}]}
-          onPress={() => setActiveTab('Bookmarks')}
-        >
-          <Text style={activeTab === 'Bookmarks' ? styles.activeTabText : styles.tabText}>Bookmarks</Text>
-        </TouchableOpacity>
-      </View>
-      {activeTab === 'Downloads' && (
-        <View style={styles.subTabContainer}>
-          <TouchableOpacity
-            style={[styles.subTab, activeSubTab === 'DownloadedLessonPlans' ? styles.activeSubTab : {}]}
-            onPress={() => setActiveSubTab('DownloadedLessonPlans')}
-          >
-            <Text style={activeSubTab === 'DownloadedLessonPlans' ? styles.activeSubTabText : styles.subTabText}>Downloaded Lesson Plans</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.subTab, activeSubTab === 'DownloadedBooks' ? styles.activeSubTab : {}]}
-            onPress={() => setActiveSubTab('DownloadedBooks')}
-          >
-            <Text style={activeSubTab === 'DownloadedBooks' ? styles.activeSubTabText : styles.subTabText}>Downloaded Books</Text>
-          </TouchableOpacity>
+    const renderBookItem = ({ item }) => (
+        <View style={styles.bookContainer}>
+            <TouchableOpacity onPress={() => navigation.navigate('PDFReaderScreen', { bookId: item.bookId })}>
+                <View style={styles.bookDetailsContainer}>
+                    <Image source={{ uri: `${baseURL}/book/cover/${item.bookId}` }} style={styles.bookCover} />
+                    <View style={styles.bookDetails}>
+                        <Text style={styles.bookTitle}>{item.bookName}</Text>
+                        <Text style={styles.bookAuthor}>{item.bookAuthorName}</Text>
+                    </View>
+                </View>
+            </TouchableOpacity>
+            {activeTab === 'Bookmarked' ? (
+                <TouchableOpacity onPress={() => removeBookmark(item.bookId)}>
+                    <Icon name="delete" size={24} color="red" />
+                </TouchableOpacity>
+            ) : (
+                <TouchableOpacity onPress={() => removeDownloadedBook(item.bookId)}>
+                    <Icon name="delete" size={24} color="red" />
+                </TouchableOpacity>
+            )}
         </View>
-      )}
-      {activeTab === 'Bookmarks' && (
-        <View style={styles.subTabContainer}>
-          <TouchableOpacity
-            style={[styles.subTab, activeSubTab === 'BookmarkLessonPlans' ? styles.activeSubTab : {}]}
-            onPress={() => setActiveSubTab('BookmarkLessonPlans')}
-          >
-            <Text style={activeSubTab === 'BookmarkLessonPlans' ? styles.activeSubTabText : styles.subTabText}>Bookmark Lesson Plans</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.subTab, activeSubTab === 'BookmarkBooks' ? styles.activeSubTab : {}]}
-            onPress={() => setActiveSubTab('BookmarkBooks')}
-          >
-            <Text style={activeSubTab === 'BookmarkBooks' ? styles.activeSubTabText : styles.subTabText}>Bookmark Books</Text>
-          </TouchableOpacity>
+    );
+    
+    return (
+        <View style={styles.container}>
+            <View style={styles.tabContainer}>
+                <TouchableOpacity style={[styles.tabButton, activeTab === 'Bookmarked' && styles.activeTabButton]} onPress={() => setActiveTab('Bookmarked')}>
+                    <Text style={[styles.tabButtonText, activeTab === 'Bookmarked' && styles.activeTabButtonText]}>Bookmarked Books</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.tabButton, activeTab === 'Downloaded' && styles.activeTabButton]} onPress={() => setActiveTab('Downloaded')}>
+                    <Text style={[styles.tabButtonText, activeTab === 'Downloaded' && styles.activeTabButtonText]}>Downloaded Books</Text>
+                </TouchableOpacity>
+            </View>
+            {activeTab === 'Bookmarked' ? (
+                noBookmarks ? (
+                    <View style={styles.placeholderContainer}>
+                        <Text style={styles.placeholderText}>No bookmarked books by the user.</Text>
+                    </View>
+                ) : (
+                    <FlatList
+                        data={bookmarkedBooks}
+                        renderItem={renderBookItem}
+                        keyExtractor={item => item.bookId ? item.bookId.toString() : ''}
+// Assuming bookId is unique
+                        contentContainerStyle={{ paddingHorizontal: 10 }}
+                        showsVerticalScrollIndicator={false}
+                    />
+                )
+            ) : (
+                downloadedBooks.length === 0 ? (
+                    <View style={styles.placeholderContainer}>
+                        <Text style={styles.placeholderText}>No downloaded books.</Text>
+                    </View>
+                ) : (
+                    <FlatList
+                        data={downloadedBooks}
+                        renderItem={renderBookItem}
+                        keyExtractor={(item, index) => `${item.bookId}_${index}`} // Assuming bookId is unique
+
+                        contentContainerStyle={{ paddingHorizontal: 10 }}
+                        showsVerticalScrollIndicator={false}
+                    />
+                )
+            )}
         </View>
-      )}
-      <FlatList
-        data={data}
-        keyExtractor={(item) => item.bookmarkId?.toString()}
-        renderItem={renderItem}
-      />
-    </View>
-  );
-}
+    );
+};
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: '#5B5D8B',
-    paddingVertical: 10,
-  },
-  tab: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-  },
-  activeTab: {
-    backgroundColor: '#5B5D8B',
-    borderBottomWidth: 2,
-    borderBottomColor: '#fff',
-  },
-  tabText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  activeTabText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  subTabContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: '#5B5D8B',
-    paddingVertical: 10,
-  },
-  subTab: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-  },
-  activeSubTab: {
-    backgroundColor: '#5B5D8B',
-    borderBottomWidth: 2,
-    borderBottomColor: '#fff',
-  },
-  subTabText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  activeSubTabText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  listItem: {
-    backgroundColor: '#5B5D8B',
-    margin: 5,
-    padding: 20,
-    borderRadius: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  textStyle: {
-    fontSize: 20,
-    color: 'white',
-  },
-  image: {
-    width: 50,
-    height: 50,
-    marginRight: 10,
-  },
-  deleteIcon: {
-    padding: 10,
-    backgroundColor: 'red',
-    borderRadius: 5,
-  },
-  tocIcon: {
-    padding: 10,
-    backgroundColor: 'green',
-    borderRadius: 5,
-  },
-  iconText: {
-    color: 'white',
-  },
+    container: {
+        flex: 1,
+        backgroundColor: '#f8f9fa',
+    },
+    tabContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        paddingVertical: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#e2e8f0',
+    },
+    tabButton: {
+        paddingVertical: 10,
+        borderRadius: 10,
+        borderColor: 'black',
+        backgroundColor: "white",
+        flex: 1,
+        alignItems: 'center',
+        marginHorizontal: 5,
+    },
+    activeTabButton: {
+        backgroundColor: '#5B5D8B',
+    },
+    tabButtonText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#5B5D8B',
+    },
+    activeTabButtonText: {
+        color: 'white',
+    },
+    bookContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 15,
+        backgroundColor: '#fff',
+        marginVertical: 5,
+        borderRadius: 10,
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 2,
+    },
+    bookDetailsContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
+    },
+    bookCover: {
+        width: 50,
+        height: 70,
+        marginRight: 15,
+    },
+    bookDetails: {
+        flex: 1,
+    },
+    bookTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: 'black', // Updated color to black
+    },
+    bookAuthor: {
+        color: 'black', // Updated color to black
+    },
+    placeholderContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    placeholderText: {
+        fontSize: 18,
+        color: '#7E7E7E',
+    },
 });
+
+export default MyCourseItemsScreen;

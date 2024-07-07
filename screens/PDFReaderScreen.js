@@ -104,32 +104,64 @@
 //         height:Dimensions.get('window').height,
 //     }
 // });
+
+//new
+// import React from 'react';
+// import { View } from 'react-native';
+// import RNFS from 'react-native-fs';
+// import Pdf from 'react-native-pdf';
+
+// const PDFReaderScreen = ({ route }) => {
+//     const { bookId } = route.params;
+//     const pdfSource = `${RNFS.DocumentDirectoryPath}/${bookId}.pdf`;
+
+//     return (
+//         <View style={{ flex: 1 }}>
+//             <Pdf
+//                 source={{ uri: pdfSource, cache: true }}
+//                 onLoadComplete={(numberOfPages, filePath) => {
+//                     console.log(`Number of pages: ${numberOfPages}`);
+//                 }}
+//                 onPageChanged={(page, numberOfPages) => {
+//                     console.log(`Current page: ${page}`);
+//                 }}
+//                 onError={(error) => {
+//                     console.log(error);
+//                 }}
+//                 style={{ flex: 1 }}
+//             />
+//         </View>
+//     );
+// };
+
+// export default PDFReaderScreen;
 import React from 'react';
-import { View } from 'react-native';
-import RNFS from 'react-native-fs';
+import { View, StyleSheet } from 'react-native';
 import Pdf from 'react-native-pdf';
 
 const PDFReaderScreen = ({ route }) => {
-    const { bookId } = route.params;
-    const pdfSource = `${RNFS.DocumentDirectoryPath}/${bookId}.pdf`;
+  const { uri } = route.params;
 
-    return (
-        <View style={{ flex: 1 }}>
-            <Pdf
-                source={{ uri: pdfSource, cache: true }}
-                onLoadComplete={(numberOfPages, filePath) => {
-                    console.log(`Number of pages: ${numberOfPages}`);
-                }}
-                onPageChanged={(page, numberOfPages) => {
-                    console.log(`Current page: ${page}`);
-                }}
-                onError={(error) => {
-                    console.log(error);
-                }}
-                style={{ flex: 1 }}
-            />
-        </View>
-    );
+  return (
+    <View style={styles.container}>
+      <Pdf
+        source={{ uri }}
+        style={styles.pdf}
+      />
+    </View>
+  );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  pdf: {
+    flex: 1,
+    width: '100%',
+  },
+});
 
 export default PDFReaderScreen;

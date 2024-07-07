@@ -10,6 +10,7 @@ import LoginScreen1 from './screens/TeacherScreen/LoginScreen1';
 import TeacherDashboard from './screens/TeacherScreen/TeacherDashboard';
 import EditTeacherScreen from './screens/AdminScreen/EditTeacherScreen';
 import TeacherCoursesScreen from './screens/TeacherScreen/TeacherCoursesScreen';
+import TeacherProfileScreen from './screens/TeacherScreen/TeacherProfileScreen';
 import DownloadedBooks from './screens/TeacherScreen/DownloadedBooks';
 import CourseScreen from './screens/TeacherScreen/Courses';
 import EditLessonPlan from './screens/TeacherScreen/EditLessonPlan';
@@ -97,6 +98,8 @@ const App = () => {
         <Stack.Screen name="EditTeacherScreen" component={EditTeacherScreen} options={{title:'Edit Teacher Details'
         }}/>
         <Stack.Screen name="TeacherCoursesScreen" component={TeacherCoursesScreen} options={{title:'Teacher Courses'
+        }}/>
+        <Stack.Screen name="TeacherProfileScreen" component={TeacherProfileScreen} options={{title:'Teacher Profile'
         }}/>
         <Stack.Screen name='DownloadedBooks' component={DownloadedBooks} />
         <Stack.Screen name='EditLessonPlan' component={EditLessonPlan} options={{title:'EditLessonPlan'}} />

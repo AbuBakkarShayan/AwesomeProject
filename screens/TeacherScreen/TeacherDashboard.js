@@ -211,9 +211,10 @@ const TeacherDashboard = () => {
     {
       name: 'Profile',
       icon: 'person-outline',
-      function: () => navigation.navigate('TeacherProfileScreen', { title: 'Teacher Profile', type: 'Teacher' }),
+       function: () => navigation.navigate('TeacherProfileScreen',teacherId, role ),
     },
   ];
+  //{ title: 'Teacher Profile', type: 'Teacher' }
 
   return (
     <View style={styles.container}>

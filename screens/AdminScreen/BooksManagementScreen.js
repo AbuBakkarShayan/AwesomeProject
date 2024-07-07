@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image, Alert, Modal
 import { useNavigation } from '@react-navigation/core';
 import LogoutButton from './customcomponent/logoutComponent';
 import Icon from 'react-native-vector-icons/Ionicons';
-import baseURL from '../../config';
+import baseURL, { downloadBookPdfURL, imageBaseURL } from '../../config';
 
 const BooksManagementScreen = () => {
   const navigation = useNavigation();
@@ -23,45 +23,50 @@ const BooksManagementScreen = () => {
     fetchBooks();
   }, []);
 
-  useEffect(() => {
-    fetchBooks();
-  }, []);
-
   const fetchBooks = async () => {
     try {
-      const response = await fetch(`${baseURL}/book/getall`); // Replace with your API endpoint
+      const response = await fetch(`${baseURL}/book/getall`);
       const result = await response.json();
-      console.log('Fetched books data:', result); // Debugging log
+      console.log('Fetched books data:', result);
+  
       if (result.status === 'Success') {
-        // Map data to expected properties
-        const formattedBooks = result.data.map(book => ({
-          bookId: book.bookId, // Make sure the property matches what you expect
-          name: book.bookName,
-          author: book.bookAuthorName,
-          image: book.bookCoverPagePath
-            ? `${baseURL}/path-to-images/${book.bookCoverPagePath}` // Replace with your actual image base URL
-            : 'https://via.placeholder.com/150',
-          pdfUrl: `${baseURL}/BookPDFFolder/${book.bookPdfPath}`,
-          uploaderId: book.uploaderId || 0, // Add appropriate uploaderId if available in your API response
-        }));
+        const formattedBooks = result.data.map(book => {
+          const bookCoverPagePath = book.bookCoverPagePath ? encodeURIComponent(book.bookCoverPagePath) : null;
+          const imageUrl = bookCoverPagePath
+            ? `${imageBaseURL}/BookImageFolder/${bookCoverPagePath}`
+            : 'https://via.placeholder.com/150';
+  
+          console.log('Encoded Image URL:', imageUrl);
+  
+          return {
+            bookId: book.bookId,
+            name: book.bookName,
+            author: book.bookAuthorName,
+            image: imageUrl,
+            pdfUrl: `${downloadBookPdfURL}/BookPDFFolder/${encodeURIComponent(book.bookPdfPath)}`,
+            uploaderId: book.uploaderId || 0,
+          };
+        });
+  
         setBooks(formattedBooks);
       } else {
-        setBooks([]); // Ensure books is set to an empty array if the status is not 'Success'
+        setBooks([]);
       }
+  
       setIsLoading(false);
     } catch (error) {
       console.error('Error fetching books:', error);
       setIsLoading(false);
     }
   };
-
+  
   if (isLoading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
 
-  const handleAddBook= () => {
+  const handleAddBook = () => {
     navigation.navigate("AddBookScreen");
-  }
+  };
 
   const handleAddCategory = async (bookCategory) => {
     try {
@@ -70,9 +75,9 @@ const BooksManagementScreen = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ bookCategory: categoryName }), // Send as JSON object
+        body: JSON.stringify({ bookCategory: categoryName }),
       });
-  
+
       const result = await response.json();
       if (result.status === 'Success') {
         Alert.alert('Success', 'Category added successfully');
@@ -86,12 +91,12 @@ const BooksManagementScreen = () => {
       Alert.alert('Error', 'Failed to add category');
     }
   };
-  
-  
+
   const handleEditBook = (book) => {
+    console.log('Editing book object:', book);
     navigation.navigate('EditBookScreen', {
-      bookId: book.id,
-      onBookUpdated: fetchBooks, // Pass the fetchBooks function as a callback
+      bookId: book.bookId,
+      onBookUpdated: fetchBooks,
     });
   };
 
@@ -102,7 +107,7 @@ const BooksManagementScreen = () => {
       });
       const result = await response.json();
       if (response.ok && result.status === 'Success') {
-        fetchBooks(); // Refresh the list after deletion
+        fetchBooks();
       } else {
         console.error('Failed to delete book:', result.message);
       }
@@ -124,10 +129,35 @@ const BooksManagementScreen = () => {
   };
 
   const renderItem = ({ item }) => (
-    // <TouchableOpacity onPress={() => navigation.navigate('PDFReaderScreen', { pdfUrl: item.pdfUrl })}>
     <TouchableOpacity onPress={() => navigation.navigate('PDFReaderScreen', { bookId: item.bookId })}>
       <View style={styles.bookItem}>
-        <Image source={{ uri: item.image }} style={styles.bookImage} />
+        {/* <Image
+          // source={{ uri: item.image }}
+          source={{ uri: imageUrl }}
+          style={styles.bookImage}
+          onError={(error) => {
+            console.error('Failed to load image:', item.image, error);
+          }}
+        /> */}
+        <Image
+    source={{ uri: item.image }}
+    style={{ width: 100, height: 100 }}
+    onError={(e) => console.error(`Failed to load image: ${image}`, e.nativeEvent.error)}
+  />
+{/* <Image
+  source={{
+    uri: encodeURI('http://192.168.163.251/FYPAPI/api/BookImageFolder/English Language_2024515455511.jpg')
+  }}
+  style={{ width: 120, height: 120 }}
+  onError={(e) => {
+    const errorMessage = e.nativeEvent.error;
+    console.log('Failed to load image:', errorMessage);
+    // Additional logging or error handling
+    console.error('Image URL:', 'http://192.168.163.251/FYPAPI/api/BookImageFolder/English Language_2024515455511.jpg');
+  }}
+/> */}
+
+
         <View style={styles.bookDetails}>
           <Text style={styles.bookTitle}>{item.name}</Text>
           <Text style={styles.bookAuthor}>{item.author}</Text>
@@ -136,7 +166,7 @@ const BooksManagementScreen = () => {
           <TouchableOpacity onPress={() => handleEditBook(item)}>
             <Icon name="create-outline" size={30} color="#5B5D8B" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => confirmDeleteBook(item.id, item.uploaderId)}>
+          <TouchableOpacity onPress={() => confirmDeleteBook(item.bookId, item.uploaderId)}>
             <Icon name="trash-outline" size={30} color="#5B5D8B" />
           </TouchableOpacity>
         </View>
@@ -165,7 +195,7 @@ const BooksManagementScreen = () => {
         <FlatList
           data={books}
           renderItem={renderItem}
-          keyExtractor={item => item.bookId?.toString()} // Safeguard with optional chaining
+          keyExtractor={item => item.bookId?.toString()}
           contentContainerStyle={styles.list}
           ListEmptyComponent={<Text>No books available</Text>}
         />
@@ -261,7 +291,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize:20,
     marginBottom: 20,
     color: 'black',
   },

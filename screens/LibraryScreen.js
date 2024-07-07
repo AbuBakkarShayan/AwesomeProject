@@ -1,53 +1,68 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, FlatList, Image, TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNFS from 'react-native-fs';
 import baseURL from '../config';
 
-const LibraryScreen = ({ navigation }) => {
+const LibraryScreen = ({ navigation, route }) => {
     const [books, setBooks] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [filteredBooks, setFilteredBooks] = useState([]);
-    const [downloadedBooks, setDownloadedBooks] = useState([]); // State for downloaded books
-    const [studentId, setStudentId] = useState('');  // State to store studentId
-    const [teacherId, setTeacherId] = useState(''); // State to store teacherId
-    const [role, setRole] = useState(''); // State to store role
+    const [userId, setUserId] = useState('');
+    const [role, setRole] = useState('');
+    const [bookmarkedBooks, setBookmarkedBooks] = useState(new Set());
+    const [downloadedBooks, setDownloadedBooks] = useState(new Set());
 
     useEffect(() => {
-        const fetchRole = async () => {
+        const fetchRoleAndId = async () => {
             try {
                 const fetchedRole = await AsyncStorage.getItem('userRole');
                 if (fetchedRole) {
                     setRole(fetchedRole);
-                    if (fetchedRole === 'Student') {
-                        const id = await AsyncStorage.getItem('studentId');
-                        if (id !== null) {
-                            setStudentId(id);
-                        } else {
-                            console.log('No studentId found');
-                            throw new Error('Student ID is missing');
-                        }
-                    } else if (fetchedRole === 'Teacher') {
-                        const id = await AsyncStorage.getItem('teacherId');
-                        if (id !== null) {
-                            setTeacherId(id);
-                        } else {
-                            console.log('No teacherId found');
-                            throw new Error('Teacher ID is missing');
-                        }
+                    const id = await AsyncStorage.getItem(fetchedRole === 'Student' ? 'studentId' : 'teacherId');
+                    if (id) {
+                        setUserId(id);
+                    } else {
+                        console.log('No user ID found');
+                        throw new Error('User ID is missing');
                     }
                 } else {
                     console.log('No role found');
                     throw new Error('Role is missing');
                 }
             } catch (error) {
-                console.log('Error fetching role:', error);
-                // Handle error if necessary
+                console.log('Error fetching role or user ID:', error);
             }
         };
 
-        fetchRole();
+        const loadBookmarkedBooks = async () => {
+            try {
+                const storedBookmarks = await AsyncStorage.getItem('bookmarkedBooks');
+                if (storedBookmarks) {
+                    const parsedBookmarks = JSON.parse(storedBookmarks);
+                    setBookmarkedBooks(new Set(parsedBookmarks));
+                }
+            } catch (error) {
+                console.error('Error loading bookmarks:', error);
+            }
+        };
+
+        const loadDownloadedBooks = async () => {
+            try {
+                const storedDownloads = await AsyncStorage.getItem('downloadedBooks');
+                if (storedDownloads) {
+                    const parsedDownloads = JSON.parse(storedDownloads);
+                    setDownloadedBooks(new Set(parsedDownloads));
+                }
+            } catch (error) {
+                console.error('Error loading downloaded books:', error);
+            }
+        };
+
+        fetchRoleAndId();
+        loadBookmarkedBooks();
+        loadDownloadedBooks();
     }, []);
 
     useEffect(() => {
@@ -68,6 +83,16 @@ const LibraryScreen = ({ navigation }) => {
         }
     }, [searchQuery, books]);
 
+    useEffect(() => {
+        // Update AsyncStorage whenever bookmarkedBooks state changes
+        AsyncStorage.setItem('bookmarkedBooks', JSON.stringify(Array.from(bookmarkedBooks)));
+    }, [bookmarkedBooks]);
+
+    useEffect(() => {
+        // Update AsyncStorage whenever downloadedBooks state changes
+        AsyncStorage.setItem('downloadedBooks', JSON.stringify(Array.from(downloadedBooks)));
+    }, [downloadedBooks]);
+
     const fetchBooks = async () => {
         try {
             const response = await fetch(`${baseURL}/book/getall`);
@@ -86,136 +111,158 @@ const LibraryScreen = ({ navigation }) => {
         }
     };
 
-    const handleBookmark = async (bookId) => {
+const handleDownload = async (bookId, bookName, bookCoverPath, bookPdfPath) => {
+    const isDownloaded = downloadedBooks.has(bookId);
+    const bookCoverLocalPath = `${RNFS.DocumentDirectoryPath}/${bookName}_cover.jpg`;
+    const bookPdfLocalPath = `${RNFS.DocumentDirectoryPath}/${bookName}.pdf`;
+
+    if (isDownloaded) {
         try {
-            const bookmarkData = {
-                bookId,
-                bookmarkOwnerId: 1, // Replace with the actual owner ID
-                bookmarkOwnerType: 'User', // Replace with the actual owner type
-            };
+            await RNFS.unlink(bookPdfLocalPath);
+            await RNFS.unlink(bookCoverLocalPath);
 
-            const response = await fetch(`${baseURL}/bookmark/addBookMark`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(bookmarkData),
-            });
-
-            const data = await response.json();
-            if (data.status === 'Success') {
-                Alert.alert('Success', 'Book bookmarked successfully');
-            } else {
-                throw new Error('Failed to bookmark the book');
-            }
+            const updatedDownloadedBooks = new Set(downloadedBooks);
+            updatedDownloadedBooks.delete(bookId);
+            setDownloadedBooks(updatedDownloadedBooks);
+            Alert.alert('Success', 'Book deleted successfully');
         } catch (error) {
-            console.error('Error bookmarking book:', error);
-            Alert.alert('Error', 'Failed to bookmark the book');
+            console.error('Error deleting book:', error);
+            Alert.alert('Error', 'Failed to delete the book');
         }
-    };
-
-    const handleViewTOC = async (bookId) => {
+    } else {
         try {
-            const response = await fetch(`${baseURL}/getBookTOC?BookId=${bookId}`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch table of contents');
-            }
-            const data = await response.json();
-            if (data.status === 'Success') {
-                // Navigate to the TOC screen or display the TOC data
-                navigation.navigate('TOCScreen', { tocData: data.data });
+            // Download and save book cover image
+            const bookCoverResponse = await fetch(`${baseURL}/book/downloadBookCover?bookId=${bookId}&userId=${userId}&userType=${role}`);
+            if (bookCoverResponse.ok) {
+                const bookCoverBlob = await bookCoverResponse.blob();
+                const bookCoverBase64 = await convertBlobToBase64(bookCoverBlob);
+                await RNFS.writeFile(bookCoverLocalPath, bookCoverBase64, 'base64');
             } else {
-                throw new Error('No table of contents found');
+                throw new Error('Failed to download book cover');
             }
-        } catch (error) {
-            console.error('Error fetching table of contents:', error);
-            Alert.alert('Error', 'Failed to fetch table of contents');
-        }
-    };
 
-    const handleDownload = async (bookId, bookName) => {
-        try {
-            const coverImageResponse = await fetch(`${baseURL}/book/DownloadBookCover?bookId=${bookId}`);
-            if (!coverImageResponse.ok) {
-                throw new Error('Failed to download cover image');
+            // Download and save book PDF
+            const bookPdfResponse = await fetch(`${baseURL}/book/downloadBook?bookId=${bookId}&userId=${userId}&userType=${role}`);
+            if (bookPdfResponse.ok) {
+                const bookPdfBlob = await bookPdfResponse.blob();
+                const bookPdfBase64 = await convertBlobToBase64(bookPdfBlob);
+                await RNFS.writeFile(bookPdfLocalPath, bookPdfBase64, 'base64');
+            } else {
+                throw new Error('Failed to download book PDF');
             }
-            const coverImageData = await coverImageResponse.blob();
-            const coverImagePath = `${RNFS.DocumentDirectoryPath}/${bookName}_cover.jpg`;
 
-            await RNFS.writeFile(coverImagePath, coverImageData, 'base64');
-
-            const pdfResponse = await fetch(`${baseURL}/book/DownloadBook?bookId=${bookId}`);
-            if (!pdfResponse.ok) {
-                throw new Error('Failed to download PDF');
-            }
-            const pdfData = await pdfResponse.blob();
-            const pdfPath = `${RNFS.DocumentDirectoryPath}/${bookName}.pdf`;
-
-            await RNFS.writeFile(pdfPath, pdfData, 'base64');
-
-            setDownloadedBooks([...downloadedBooks, { bookId, bookName, coverImagePath, pdfPath }]);
-
+            const updatedDownloadedBooks = new Set(downloadedBooks);
+            updatedDownloadedBooks.add(bookId);
+            setDownloadedBooks(updatedDownloadedBooks);
             Alert.alert('Success', 'Book downloaded successfully');
         } catch (error) {
             console.error('Error downloading book:', error);
-            Alert.alert('Error', 'Failed to download book');
+            Alert.alert('Error', 'Failed to download the book');
+        }
+    }
+};
+
+const convertBlobToBase64 = (blob) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = () => {
+            resolve(reader.result.split(',')[1]);
+        };
+        reader.readAsDataURL(blob);
+    });
+};
+
+    const handleBookmark = async (bookId, bookName, bookAuthorName) => {
+        const isBookmarked = bookmarkedBooks.has(bookId);
+        const url = isBookmarked ? `${baseURL}/bookmark/removeBookMark?userId=${userId}&bookId=${bookId}&userType=${role}` : `${baseURL}/bookmark/addBookMark?userId=${userId}&bookId=${bookId}&userType=${role}`;
+        const method = isBookmarked ? 'DELETE' : 'POST';
+        const body = isBookmarked ? null : JSON.stringify({
+            bookId,
+            bookName,
+            bookAuthorName,
+            bookmarkOwnerId: userId,
+            bookmarkOwnerType: role,
+        });
+
+        try {
+            const response = await fetch(url, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body,
+            });
+
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.indexOf('application/json') !== -1) {
+                const data = await response.json();
+                if (data.status === 'Success') {
+                    const updatedBookmarkedBooks = new Set(bookmarkedBooks);
+                    if (isBookmarked) {
+                        updatedBookmarkedBooks.delete(bookId);
+                    } else {
+                        updatedBookmarkedBooks.add(bookId);
+                    }
+                    setBookmarkedBooks(updatedBookmarkedBooks);
+                    Alert.alert('Success', data.message);
+                } else {
+                    throw new Error(data.message);
+                }
+            } else {
+                throw new Error('Unexpected response format');
+            }
+        } catch (error) {
+            console.error('Error updating bookmark:', error);
+            Alert.alert('Error', error.message);
         }
     };
 
-    const renderBookItem = ({ item }) => (
-        <TouchableOpacity onPress={() => navigation.navigate('PDFReaderScreen', { bookId: item.bookId })}>
-            <View style={styles.bookContainer}>
-                <Image source={{ uri: item.bookCoverPagePath }} style={styles.bookCover} />
-                <View style={styles.bookDetails}>
-                    <Text style={styles.bookTitle}>{item.bookName}</Text>
-                    <Text style={styles.bookAuthor}>{item.bookAuthorName}</Text>
-                </View>
-                <View style={styles.bookActions}>
-                    <TouchableOpacity onPress={() => handleDownload(item.bookId, item.bookName)}>
-                        <Icon name="download" size={25} color="#5B5D8B" />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => handleBookmark(item.bookId)}>
-                        <Icon name="bookmark" size={25} color="#5B5D8B" />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => handleViewTOC(item.bookId)}>
-                        <Icon name="list" size={25} color="#5B5D8B" />
-                    </TouchableOpacity>
-                    {/* Render star icon only if the book is downloaded */}
-                    {downloadedBooks.some(book => book.bookId === item.bookId) && (
-                        <TouchableOpacity>
-                            <Icon name="star" size={25} color="gold" />
+    const renderBookItem = ({ item }) => {
+        const isBookmarked = bookmarkedBooks.has(item.bookId);
+        const isDownloaded = downloadedBooks.has(item.bookId);
+
+        return (
+            <TouchableOpacity onPress={() => navigation.navigate('PDFReaderScreen', { bookId: item.bookId })}>
+                <View style={styles.bookContainer}>
+                    <Image source={{ uri: item.bookCoverPagePath }} style={styles.bookCover} />
+                    <View style={styles.bookDetails}>
+                        <Text style={styles.bookTitle}>{item.bookName}</Text>
+                        <Text style={styles.bookAuthor}>{item.bookAuthorName}</Text>
+                    </View>
+                    <View style={styles.bookActions}>
+                        <TouchableOpacity onPress={() => handleDownload(item.bookId, item.bookName, item.bookCoverPagePath, item.bookPdfPath)}>
+                            <Icon name="download" size={25} color={isDownloaded ? 'green' : '#5B5D8B'} />
                         </TouchableOpacity>
-                    )}
+                        <TouchableOpacity onPress={() => handleBookmark(item.bookId)}>
+                            <Icon name="bookmark" size={25} color={isBookmarked ? 'gold' : '#5B5D8B'} />
+                        </TouchableOpacity>
+                        <TouchableOpacity>
+                            <Icon name="list" size={25} color="#5B5D8B" />
+                        </TouchableOpacity>
+                        <TouchableOpacity>
+                            <Icon name="eye" size={25} color="#5B5D8B" />
+                        </TouchableOpacity>
+                    </View>
                 </View>
-            </View>
-        </TouchableOpacity>
-    );
+            </TouchableOpacity>
+        );
+    };
 
     return (
         <View style={styles.container}>
-            <Text style={{ color: "black" }}>{studentId ? `Student ID: ${studentId}` : teacherId ? `Teacher ID: ${teacherId}` : 'ID not found'}</Text>
+             <Text style={{ color: "black" }}>{userId ? `ID: ${userId}` : 'ID not found'}</Text>
             <Text style={{ color: "black" }}>{role ? `Role: ${role}` : 'Role not found'}</Text>
             <TextInput
-                style={styles.searchInput}
-                placeholder="Search"
-                placeholderTextColor="black"
+                style={styles.searchBar}
+                placeholder="Search books..."
                 value={searchQuery}
                 onChangeText={setSearchQuery}
             />
-            <View style={styles.tabContainer}>
-                <TouchableOpacity style={styles.tabButton}>
-                    <Text style={styles.tabButtonText}>Downloaded Books</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabButton}>
-                    <Text style={styles.tabButtonText}>My Books List</Text>
-                </TouchableOpacity>
-            </View>
             <FlatList
                 data={filteredBooks}
                 renderItem={renderBookItem}
-                keyExtractor={item => item.bookId.toString()}
-                contentContainerStyle={{ paddingHorizontal: 10 }}
-                showsVerticalScrollIndicator={false}
+                keyExtractor={(item) => item.bookId.toString()}
             />
         </View>
     );
@@ -224,51 +271,28 @@ const LibraryScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f8f9fa',
+        padding: 16,
     },
-    searchInput: {
-        backgroundColor: '#fff',
-        padding: 15,
-        margin: 20,
-        borderRadius: 10,
-        borderColor: '#e2e8f0',
+    searchBar: {
+        height: 40,
+        borderColor: 'gray',
         borderWidth: 1,
-        color: 'black',
-    },
-    tabContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        paddingVertical: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#e2e8f0',
-    },
-    tabButton: {
-        paddingVertical: 10,
-        borderRadius: 10,
-        borderColor: 'black',
-        backgroundColor: "white"
-    },
-    tabButtonText: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#5B5D8B',
+        borderRadius: 5,
+        paddingHorizontal: 10,
+        marginBottom: 10,
     },
     bookContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 15,
-        backgroundColor: '#fff',
-        marginVertical: 5,
-        borderRadius: 10,
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowRadius: 5,
-        elevation: 2,
+        padding: 10,
+        backgroundColor: '#f0f0f0',
+        marginBottom: 10,
+        borderRadius: 5,
     },
     bookCover: {
-        width: 50,
-        height: 70,
-        marginRight: 15,
+        width: 60,
+        height: 90,
+        marginRight: 10,
     },
     bookDetails: {
         flex: 1,
@@ -276,16 +300,15 @@ const styles = StyleSheet.create({
     bookTitle: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: 'black'
+        color:'black'
     },
     bookAuthor: {
-        color: '#7E7E7E',
+        fontSize: 14,
+        color: 'gray',
     },
     bookActions: {
         flexDirection: 'row',
-        alignItems: 'center',
         justifyContent: 'space-around',
-        width: 100,
     },
 });
 
