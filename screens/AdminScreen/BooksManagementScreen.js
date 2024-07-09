@@ -1,9 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image, Alert, Modal, TextInput, ActivityIndicator } from 'react-native';
-import { useNavigation } from '@react-navigation/core';
+import React, {useEffect, useState} from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  FlatList,
+  Image,
+  Alert,
+  Modal,
+  TextInput,
+  ActivityIndicator,
+} from 'react-native';
+import {useNavigation} from '@react-navigation/core';
 import LogoutButton from './customcomponent/logoutComponent';
 import Icon from 'react-native-vector-icons/Ionicons';
-import baseURL, { downloadBookPdfURL, imageBaseURL } from '../../config';
+import baseURL, {downloadBookPdfURL, imageBaseURL} from '../../config';
 
 const BooksManagementScreen = () => {
   const navigation = useNavigation();
@@ -28,55 +39,62 @@ const BooksManagementScreen = () => {
       const response = await fetch(`${baseURL}/book/getall`);
       const result = await response.json();
       console.log('Fetched books data:', result);
-  
+
       if (result.status === 'Success') {
         const formattedBooks = result.data.map(book => {
-          const bookCoverPagePath = book.bookCoverPagePath ? encodeURIComponent(book.bookCoverPagePath) : null;
+          const bookCoverPagePath = book.bookCoverPagePath
+            ? encodeURIComponent(book.bookCoverPagePath)
+            : null;
           const imageUrl = bookCoverPagePath
             ? `${imageBaseURL}/BookImageFolder/${bookCoverPagePath}`
             : 'https://via.placeholder.com/150';
-  
+
           console.log('Encoded Image URL:', imageUrl);
-  
+
           return {
             bookId: book.bookId,
             name: book.bookName,
             author: book.bookAuthorName,
             image: imageUrl,
-            pdfUrl: `${downloadBookPdfURL}/BookPDFFolder/${encodeURIComponent(book.bookPdfPath)}`,
+            pdfUrl: `${baseURL}/BookPDFFolder/${encodeURIComponent(
+              book.bookPdfPath,
+            )}`,
             uploaderId: book.uploaderId || 0,
           };
         });
-  
+
         setBooks(formattedBooks);
       } else {
         setBooks([]);
       }
-  
+
       setIsLoading(false);
     } catch (error) {
       console.error('Error fetching books:', error);
       setIsLoading(false);
     }
   };
-  
+
   if (isLoading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
 
   const handleAddBook = () => {
-    navigation.navigate("AddBookScreen");
+    navigation.navigate('AddBookScreen');
   };
 
-  const handleAddCategory = async (bookCategory) => {
+  const handleAddCategory = async bookCategory => {
     try {
-      const response = await fetch(`${baseURL}/book/addBookCategory?bookCategory=${bookCategory}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${baseURL}/book/addBookCategory?bookCategory=${bookCategory}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({bookCategory: categoryName}),
         },
-        body: JSON.stringify({ bookCategory: categoryName }),
-      });
+      );
 
       const result = await response.json();
       if (result.status === 'Success') {
@@ -92,13 +110,13 @@ const BooksManagementScreen = () => {
     }
   };
 
-  const addTOC=(bookId)=>{
-      navigation.navigate('AddTOC',{
-        bookId,
-      })
-  }
+  const addTOC = bookId => {
+    navigation.navigate('AddTOC', {
+      bookId,
+    });
+  };
 
-  const handleEditBook = (book) => {
+  const handleEditBook = book => {
     console.log('Editing book object:', book);
     navigation.navigate('EditBookScreen', {
       bookId: book.bookId,
@@ -108,9 +126,12 @@ const BooksManagementScreen = () => {
 
   const handleDeleteBook = async (bookId, uploaderId) => {
     try {
-      const response = await fetch(`${baseURL}/book/deleteBook?bookId=${bookId}&uploaderId=${uploaderId}`, {
-        method: 'DELETE',
-      });
+      const response = await fetch(
+        `${baseURL}/book/deleteBook?bookId=${bookId}&uploaderId=${uploaderId}`,
+        {
+          method: 'DELETE',
+        },
+      );
       const result = await response.json();
       if (response.ok && result.status === 'Success') {
         fetchBooks();
@@ -127,15 +148,18 @@ const BooksManagementScreen = () => {
       'Delete Book',
       'Are you sure you want to delete this book?',
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', onPress: () => handleDeleteBook(bookId, uploaderId) },
+        {text: 'Cancel', style: 'cancel'},
+        {text: 'Delete', onPress: () => handleDeleteBook(bookId, uploaderId)},
       ],
-      { cancelable: false }
+      {cancelable: false},
     );
   };
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity onPress={() => navigation.navigate('PDFReaderScreen', { bookId: item.bookId })}>
+  const renderItem = ({item}) => (
+    <TouchableOpacity
+      onPress={() =>
+        navigation.navigate('PDFReaderScreen', {bookName: item.bookName})
+      }>
       <View style={styles.bookItem}>
         {/* <Image
           // source={{ uri: item.image }}
@@ -146,11 +170,13 @@ const BooksManagementScreen = () => {
           }}
         /> */}
         <Image
-    source={{ uri: item.image }}
-    style={{ width: 100, height: 100 }}
-    onError={(e) => console.error(`Failed to load image:`, e.nativeEvent.error)}
-  />
-{/* <Image
+          source={{uri: item.image}}
+          style={{width: 100, height: 100}}
+          onError={e =>
+            console.error(`Failed to load image:`, e.nativeEvent.error)
+          }
+        />
+        {/* <Image
   source={{
     uri: encodeURI('http://192.168.163.251/FYPAPI/api/BookImageFolder/English Language_2024515455511.jpg')
   }}
@@ -163,19 +189,19 @@ const BooksManagementScreen = () => {
   }}
 /> */}
 
-
         <View style={styles.bookDetails}>
           <Text style={styles.bookTitle}>{item.name}</Text>
           <Text style={styles.bookAuthor}>{item.author}</Text>
         </View>
         <View style={styles.bookActions}>
-        <TouchableOpacity onPress={()=> addTOC(item.bookId)}>
+          <TouchableOpacity onPress={() => addTOC(item.bookId)}>
             <Icon name="documents-outline" size={30} color="#5B5D8B" />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => handleEditBook(item)}>
             <Icon name="create-outline" size={30} color="#5B5D8B" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => confirmDeleteBook(item.bookId, item.uploaderId)}>
+          <TouchableOpacity
+            onPress={() => confirmDeleteBook(item.bookId, item.uploaderId)}>
             <Icon name="trash-outline" size={30} color="#5B5D8B" />
           </TouchableOpacity>
         </View>
@@ -188,11 +214,11 @@ const BooksManagementScreen = () => {
       'Add Options',
       'Choose an option to add:',
       [
-        { text: 'Add Category', onPress: () => setIsModalVisible(true) },
-        { text: 'Add Book', onPress: handleAddBook },
-        { text: 'Cancel', style: 'cancel' },
+        {text: 'Add Category', onPress: () => setIsModalVisible(true)},
+        {text: 'Add Book', onPress: handleAddBook},
+        {text: 'Cancel', style: 'cancel'},
       ],
-      { cancelable: true }
+      {cancelable: true},
     );
   };
 
@@ -224,10 +250,14 @@ const BooksManagementScreen = () => {
               onChangeText={setCategoryName}
             />
             <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.modalButton} onPress={handleAddCategory}>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={handleAddCategory}>
                 <Text style={styles.modalButtonText}>Add Category</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.modalButton} onPress={() => setIsModalVisible(false)}>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={() => setIsModalVisible(false)}>
                 <Text style={styles.modalButtonText}>Cancel</Text>
               </TouchableOpacity>
             </View>
@@ -300,7 +330,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalTitle: {
-    fontSize:20,
+    fontSize: 20,
     marginBottom: 20,
     color: 'black',
   },

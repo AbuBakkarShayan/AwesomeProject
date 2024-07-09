@@ -10,11 +10,13 @@ import LoginScreen1 from './screens/TeacherScreen/LoginScreen1';
 import TeacherDashboard from './screens/TeacherScreen/TeacherDashboard';
 import EditTeacherScreen from './screens/AdminScreen/EditTeacherScreen';
 import TeacherCoursesScreen from './screens/TeacherScreen/TeacherCoursesScreen';
+import AddTBookScreen from './screens/TeacherScreen/AddTBookScreen';
 import TeacherProfileScreen from './screens/TeacherScreen/TeacherProfileScreen';
 import DownloadedBooks from './screens/TeacherScreen/DownloadedBooks';
 import CourseScreen from './screens/TeacherScreen/Courses';
 import EditLessonPlan from './screens/TeacherScreen/EditLessonPlan';
 import StudentLogsScreen from './screens/TeacherScreen/StudentsLogsScreen';
+import StudentNamesScreen from './screens/TeacherScreen/StudentNamesScreen';
 import StudentDashboard from './screens/StudentScreen/StudentDashboard';
 import AdminDashboard from './screens/AdminScreen/AdminDashboard';
 import CoursesScreen from './screens/StudentScreen/CoursesScreen';
@@ -39,6 +41,7 @@ import AssignBook from './screens/TeacherScreen/AssignBook';
 import CourseManagementScreen from './screens/AdminScreen/CourseManagementScreen';
 import AssignTeacher from './screens/AdminScreen/AssignTeacher';
 import EnrollStudent from './screens/AdminScreen/EnrollStudent';
+import EnrollMultipleStudents from './screens/AdminScreen/EnrollMultipleStudents';
 import TeacherDepartmentScreen from './screens/AdminScreen/TeacherDepartmentScreen';
 import TeachersScreen from './screens/AdminScreen/TeachersScreen';
 import AddSingleTeacher from './screens/AdminScreen/AddSingleTeacher';
@@ -50,6 +53,7 @@ import AddTOC from './screens/AdminScreen/AddTOC';
 import MyBooksScreen from './screens/TeacherScreen/MyBooksScreen';
 
 import { navigate } from '@react-navigation/routers/lib/typescript/src/CommonActions';
+import StudentLogs from './screens/TeacherScreen/StudentLogs';
 
 
 
@@ -101,6 +105,8 @@ const App = () => {
         }}/>
         <Stack.Screen name="TeacherCoursesScreen" component={TeacherCoursesScreen} options={{title:'Teacher Courses'
         }}/>
+        <Stack.Screen name="AddTBookScreen" component={AddTBookScreen} options={{title:'Upload Book by Teacher'
+        }}/>
         <Stack.Screen name="TeacherProfileScreen" component={TeacherProfileScreen} options={{title:'Teacher Profile'
         }}/>
         <Stack.Screen name='DownloadedBooks' component={DownloadedBooks} />
@@ -108,6 +114,8 @@ const App = () => {
         <Stack.Screen name='CourseScreen' component={CourseScreen} options={{title:'Course'}}/>
         <Stack.Screen name='MyBooksScreen' component={MyBooksScreen} />
         <Stack.Screen name='StudentLogsScreen' component={StudentLogsScreen} />
+        <Stack.Screen name='StudentNamesScreen' component={StudentNamesScreen} />
+        <Stack.Screen name='StudentLogs' component={StudentLogs}/>
         <Stack.Screen name="StudentDashboard" component={StudentDashboard} />
         <Stack.Screen name="AdminDashboard" component={AdminDashboard} options={{title:'Admin Dashboard'}} />
         <Stack.Screen name="CoursesScreen" component={CoursesScreen} />
@@ -138,6 +146,7 @@ const App = () => {
         <Stack.Screen name='CourseManagementScreen' component={CourseManagementScreen} />
         <Stack.Screen name='AssignTeacher' component={AssignTeacher} />
         <Stack.Screen name="EnrollStudent" component={EnrollStudent} />
+        <Stack.Screen name='EnrollMultipleStudents' component={EnrollMultipleStudents}/>
         <Stack.Screen name='AddCourseScreen' component={AddCourseScreen} />
         <Stack.Screen name='UpdateCourseScreen' component={UpdateCourseScreen} />
         <Stack.Screen name='AddBookScreen' component={AddBookScreen} />

@@ -4,10 +4,10 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  TouchableOpacity,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useRoute} from '@react-navigation/native';
 import baseURL from '../../config';
 
 const headers = {
@@ -15,22 +15,25 @@ const headers = {
   // Add other headers as needed
 };
 
-const StudentLogsScreen = ({route}) => {
-  const {teacherId} = route.params;
-  const [smesterNumbers, setSmesterNumbers] = useState([]);
+const StudentLogs = () => {
+  const route = useRoute();
+  const {studentId, regNo} = route.params;
+  const [logs, setLogs] = useState([]);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
-  const navigation = useNavigation();
 
   useEffect(() => {
-    const getSemesterNumbers = async () => {
-      const url = `${baseURL}/Logs/getSmesterNumbers?teacherId=${teacherId}`;
+    const getLogs = async () => {
+      const url = `${baseURL}/Logs/getLogs?studentId=${studentId}&type=Book`;
+      console.log(`Requesting URL: ${url}`); // Log the URL
       try {
         const response = await fetch(url, {headers});
+        console.log(`Response status: ${response.status}`); // Log response status
         if (response.status === 200) {
           const responseBody = await response.json();
+          console.log(`Response body: ${JSON.stringify(responseBody)}`); // Log response body
           if (responseBody.status === 'Success') {
-            setSmesterNumbers(responseBody.data);
+            setLogs(responseBody.data);
           } else {
             setMessage(responseBody.message);
           }
@@ -38,45 +41,56 @@ const StudentLogsScreen = ({route}) => {
           setMessage(`Error: ${response.status}`);
         }
       } catch (error) {
-        console.error(error);
+        console.error(`Fetch error: ${error}`); // Log fetch error
+        setMessage('Server Down');
       } finally {
         setLoading(false);
       }
     };
 
-    getSemesterNumbers();
-  }, [teacherId]);
+    getLogs();
+  }, [studentId]);
 
-  const renderItem = ({item}) => (
-    <TouchableOpacity
-      style={styles.itemContainer}
-      onPress={() =>
-        navigation.navigate('StudentNamesScreen', {smesterNumber: item})
-      }>
-      <Text style={styles.itemText}>Semester {item}</Text>
-    </TouchableOpacity>
-  );
+  const renderItem = ({item}) => <LogsTile logs={item} />;
 
   return (
     <View style={styles.container}>
       <View style={styles.appBar}>
-        <Text style={styles.title}>Student Logs</Text>
+        <Text style={styles.title}>{regNo}</Text>
       </View>
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />
-      ) : smesterNumbers.length === 0 ? (
+      ) : logs.length === 0 ? (
         <Text style={styles.message}>{message}</Text>
       ) : (
         <FlatList
-          data={smesterNumbers}
+          data={logs}
           renderItem={renderItem}
-          keyExtractor={item => item.toString()}
+          keyExtractor={(item, index) => index.toString()}
           contentContainerStyle={styles.list}
         />
       )}
     </View>
   );
 };
+
+const LogsTile = ({logs}) => (
+  <View style={styles.logsTileContainer}>
+    <View style={styles.bookContainer}>
+      <Text style={styles.bookTitle}>Book</Text>
+    </View>
+    <View style={styles.row}>
+      <View style={styles.column}>
+        <Text style={styles.boldText}>Start Time</Text>
+        <Text>{logs.startTime}</Text>
+      </View>
+      <View style={styles.column}>
+        <Text style={styles.boldText}>End Time</Text>
+        <Text>{logs.endTime}</Text>
+      </View>
+    </View>
+  </View>
+);
 
 const styles = StyleSheet.create({
   container: {
@@ -110,21 +124,34 @@ const styles = StyleSheet.create({
   list: {
     padding: 10,
   },
-  itemContainer: {
-    marginVertical: 7.5,
+  logsTileContainer: {
+    marginVertical: 5,
     marginHorizontal: 10,
-    height: 50,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     backgroundColor: '#FFFFFF',
     borderRadius: 25,
-    justifyContent: 'center',
-    paddingHorizontal: 15,
   },
-  itemText: {
+  bookContainer: {
+    alignItems: 'center',
+    paddingVertical: 5,
+  },
+  bookTitle: {
     fontSize: 20,
-    color: '#000000',
-    width: 200,
     overflow: 'hidden',
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 10,
+  },
+  column: {
+    alignItems: 'center',
+    marginHorizontal: 25,
+  },
+  boldText: {
+    fontWeight: 'bold',
   },
 });
 
-export default StudentLogsScreen;
+export default StudentLogs;

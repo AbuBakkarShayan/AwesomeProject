@@ -1,21 +1,41 @@
-import React, { useState, useCallback } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, FlatList } from 'react-native';
-import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import React, {useState, useCallback} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  FlatList,
+} from 'react-native';
+import {Linking} from 'react-native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import DocumentPicker from 'react-native-document-picker';
 import baseURL from '../../config';
 
 const CourseScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { course, teacherId } = route.params; // Ensure teacherId and course are received from route params
+  const {course, teacherId} = route.params; // Ensure teacherId and course are received from route params
   const [activeTab, setActiveTab] = useState('Weekly LP');
   const [weekNo, setWeekNo] = useState('');
   const [lessonPlan, setLessonPlan] = useState(null);
   const [lessonPlans, setLessonPlans] = useState([]);
 
+  // State for reference materials
+  const [referenceTitle, setReferenceTitle] = useState('');
+  const [referenceUri, setReferenceUri] = useState('');
+  const [referenceMaterials, setReferenceMaterials] = useState([]);
+
   const fetchLessonPlans = async () => {
     try {
-      const response = await fetch(`${baseURL}/LessonPlan/getAllLessonPlan?courseCode=${course.courseCode}`);
+      const response = await fetch(
+        `${baseURL}/LessonPlan/getAllLessonPlan?courseCode=${course.courseCode}`,
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -32,10 +52,32 @@ const CourseScreen = () => {
     }
   };
 
+  const fetchReferenceMaterials = async () => {
+    try {
+      const response = await fetch(
+        `${baseURL}/Reference/getReferenceMaterial?courseCode=${course.courseCode}`,
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const result = await response.json();
+      console.log('Reference Materials API Response:', result); // Debugging log
+      if (result.status === 'Success') {
+        setReferenceMaterials(result.data);
+      } else {
+        Alert.alert('Error', result.message);
+      }
+    } catch (error) {
+      console.error('Fetch Reference Materials Error: ', error);
+      Alert.alert('Error', 'Failed to fetch reference materials');
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
       fetchLessonPlans();
-    }, [course.courseCode])
+      fetchReferenceMaterials();
+    }, [course.courseCode]),
   );
 
   const handleBrowseFile = async () => {
@@ -90,7 +132,9 @@ const CourseScreen = () => {
 
       if (!response.ok) {
         const errorData = await response.text();
-        throw new Error(`HTTP error! status: ${response.status}, data: ${errorData}`);
+        throw new Error(
+          `HTTP error! status: ${response.status}, data: ${errorData}`,
+        );
       }
 
       const result = await response.json();
@@ -109,31 +153,112 @@ const CourseScreen = () => {
     }
   };
 
-  const handleDeleteLessonPlan = async (lessonPlanId) => {
+  const handleAddReferenceMaterial = async () => {
+    if (!referenceTitle || !referenceUri) {
+      Alert.alert('Error', 'Title and URI are required for reference material');
+      return;
+    }
+
     try {
-      const response = await fetch(`${baseURL}/LessonPlan/removeLessonPlan?id=${lessonPlanId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
+      const payload = {
+        referenceTitle,
+        referenceUri,
+        courseCode: course.courseCode,
+        uploaderId: teacherId,
+        uploaderType: 'teacher',
+      };
+
+      const response = await fetch(
+        `${baseURL}/Reference/addReferenceMaterial`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
         },
-      });
+      );
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(
+          `HTTP error! status: ${response.status}, data: ${errorData}`,
+        );
+      }
 
       const result = await response.json();
-      console.log('Delete Lesson Plan Result:', result); // Debugging log
+      console.log('Add Reference Material Result:', result); // Debugging log
       if (result.status === 'Success') {
-        fetchLessonPlans(); // Refresh lesson plans list
-        Alert.alert('Success', 'Lesson Plan Removed');
+        fetchReferenceMaterials(); // Refresh reference materials list
+        setReferenceTitle('');
+        setReferenceUri('');
+        Alert.alert('Success', 'Reference Material Added');
       } else {
         Alert.alert('Error', result.message);
       }
     } catch (error) {
-      console.error('Delete Lesson Plan Error: ', error);
-      Alert.alert('Error', 'Failed to remove lesson plan');
+      console.error('Add Reference Material Error: ', error);
+      Alert.alert(
+        'Error',
+        `Failed to add reference material: ${error.message}`,
+      );
     }
   };
 
-  const handleEditLessonPlan = (lessonPlanId) => {
-    navigation.navigate('EditLessonPlan', { lessonPlanId });
+  const handleDeleteReferenceMaterial = async referenceId => {
+    try {
+      const response = await fetch(
+        `${baseURL}/Reference/removeReferenceMaterial?referenceId=${referenceId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      const result = await response.json();
+      console.log('Delete Reference Material Result:', result); // Debugging log
+      if (result.status === 'Success') {
+        fetchReferenceMaterials(); // Refresh reference materials list
+        Alert.alert('Success', 'Reference Material Removed');
+      } else {
+        Alert.alert('Error', result.message);
+      }
+    } catch (error) {
+      console.error('Delete Reference Material Error: ', error);
+      Alert.alert('Error', 'Failed to remove reference material');
+    }
+  };
+
+  const handleEditLessonPlan = lessonPlanId => {
+    navigation.navigate('EditLessonPlan', {lessonPlanId});
+  };
+
+  const handleDeleteLessonPlan = async lessonPlanId => {
+    try {
+      const response = await fetch(
+        `${baseURL}/lessonplan/removeLessonPlan/${lessonPlanId}`,
+        {
+          method: 'DELETE',
+        },
+      );
+
+      const result = await response.json();
+
+      if (result.status === 'Success') {
+        alert('Lesson Plan Removed');
+        // Optionally refresh your lesson plans list or perform other actions
+      } else {
+        alert(result.message);
+      }
+    } catch (error) {
+      alert('An error occurred: ' + error.message);
+    }
+  };
+
+  const handleEditReferenceMaterial = referenceId => {
+    navigation.navigate('EditReferenceMaterial', {referenceId});
   };
 
   return (
@@ -141,20 +266,23 @@ const CourseScreen = () => {
       <View style={styles.tabContainer}>
         <TouchableOpacity
           onPress={() => setActiveTab('Books')}
-          style={[styles.tabButton, activeTab === 'Books' && styles.activeTab]}
-        >
+          style={[styles.tabButton, activeTab === 'Books' && styles.activeTab]}>
           <Text style={styles.tabText}>Books</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => setActiveTab('Weekly LP')}
-          style={[styles.tabButton, activeTab === 'Weekly LP' && styles.activeTab]}
-        >
+          style={[
+            styles.tabButton,
+            activeTab === 'Weekly LP' && styles.activeTab,
+          ]}>
           <Text style={styles.tabText}>Weekly LP</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => setActiveTab('References')}
-          style={[styles.tabButton, activeTab === 'References' && styles.activeTab]}
-        >
+          style={[
+            styles.tabButton,
+            activeTab === 'References' && styles.activeTab,
+          ]}>
           <Text style={styles.tabText}>References</Text>
         </TouchableOpacity>
       </View>
@@ -170,12 +298,14 @@ const CourseScreen = () => {
           <TextInput
             style={styles.input}
             placeholder="Week No"
+            placeholderTextColor={'#7E7E7E'}
             value={weekNo}
             onChangeText={setWeekNo}
           />
           <TextInput
             style={styles.input}
             placeholder="Lesson Plan pdf"
+            placeholderTextColor={'#7E7E7E'}
             value={lessonPlan ? lessonPlan.name : ''}
             editable={false}
           />
@@ -188,19 +318,30 @@ const CourseScreen = () => {
 
           <FlatList
             data={lessonPlans}
-            keyExtractor={(item) => item.lessonPlanId.toString()}
-            renderItem={({ item }) => (
-              <View style={styles.lessonPlanContainer}>
-                <Text style={styles.lessonPlanText}>Week {item.lessonPlanTitle}</Text>
-                <View style={styles.lessonPlanActions}>
-                  <TouchableOpacity onPress={() => handleEditLessonPlan(item.lessonPlanId)}>
-                    <Text style={styles.editText}>Edit</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => handleDeleteLessonPlan(item.lessonPlanId)}>
-                    <Text style={styles.deleteText}>Delete</Text>
-                  </TouchableOpacity>
+            keyExtractor={item => item.lessonPlanId.toString()}
+            renderItem={({item}) => (
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate('PDFReaderScreen', {
+                    uri: item.lessonPlanPdfUri,
+                  })
+                }>
+                <View style={styles.lessonPlanContainer}>
+                  <Text style={styles.lessonPlanText}>
+                    Week {item.lessonPlanTitle}
+                  </Text>
+                  <View style={styles.lessonPlanActions}>
+                    <TouchableOpacity
+                      onPress={() => handleEditLessonPlan(item.lessonPlanId)}>
+                      <Text style={styles.editText}>Edit</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => handleDeleteLessonPlan(item.lessonPlanId)}>
+                      <Text style={styles.deleteText}>Delete</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
-              </View>
+              </TouchableOpacity>
             )}
             ListEmptyComponent={<Text>No lesson plans available.</Text>}
           />
@@ -209,7 +350,51 @@ const CourseScreen = () => {
 
       {activeTab === 'References' && (
         <View style={styles.contentContainer}>
-          <Text>References content for {course.courseName} goes here.</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Reference Title"
+            placeholderTextColor={'#7E7E7E'}
+            value={referenceTitle}
+            onChangeText={setReferenceTitle}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Reference URI"
+            placeholderTextColor={'#7E7E7E'}
+            value={referenceUri}
+            onChangeText={setReferenceUri}
+          />
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleAddReferenceMaterial}>
+            <Text style={styles.buttonText}>Add Reference Material</Text>
+          </TouchableOpacity>
+
+          <FlatList
+            data={referenceMaterials}
+            keyExtractor={item => item.id.toString()}
+            renderItem={({item}) => (
+              <TouchableOpacity
+                onPress={() => Linking.openURL(item.referenceUri)}>
+                <View style={styles.lessonPlanContainer}>
+                  <Text style={styles.lessonPlanText}>
+                    {item.referenceTitle}
+                  </Text>
+                  <View style={styles.lessonPlanActions}>
+                    <TouchableOpacity
+                      onPress={() => handleEditReferenceMaterial(item.id)}>
+                      <Text style={styles.editText}>Edit</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => handleDeleteReferenceMaterial(item.id)}>
+                      <Text style={styles.deleteText}>Delete</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            )}
+            ListEmptyComponent={<Text>No reference materials available.</Text>}
+          />
         </View>
       )}
     </View>
@@ -234,13 +419,13 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: '#fff',
     marginHorizontal: 4,
-    
   },
   activeTab: {
     backgroundColor: '#5B5D8B',
+    color: 'white',
   },
   tabText: {
-    color: '#FFFFFF',
+    color: 'black',
     fontWeight: 'bold',
   },
   contentContainer: {
@@ -254,7 +439,7 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     padding: 10,
     marginBottom: 10,
-    color:'black'
+    color: 'black',
   },
   button: {
     backgroundColor: '#5B5D8B',
@@ -276,7 +461,7 @@ const styles = StyleSheet.create({
   },
   lessonPlanText: {
     fontSize: 16,
-    color:'black',
+    color: 'black',
   },
   lessonPlanActions: {
     flexDirection: 'row',

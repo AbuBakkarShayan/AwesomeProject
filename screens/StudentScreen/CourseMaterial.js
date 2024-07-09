@@ -1,13 +1,26 @@
-import React, { useState, useCallback } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, FlatList, Modal } from 'react-native';
-import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import React, {useState, useCallback} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  FlatList,
+  Modal,
+} from 'react-native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import DocumentPicker from 'react-native-document-picker';
 import baseURL from '../../config';
 
 const CourseMaterial = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { course, studentId } = route.params;
+  const {course, studentId} = route.params;
   const [activeTab, setActiveTab] = useState('Books');
   const [subTab, setSubTab] = useState('Lesson Plan');
   const [weekNo, setWeekNo] = useState('');
@@ -22,7 +35,9 @@ const CourseMaterial = () => {
 
   const fetchLessonPlans = async () => {
     try {
-      const response = await fetch(`${baseURL}/LessonPlan/getAllLessonPlan?courseCode=${course.courseCode}`);
+      const response = await fetch(
+        `${baseURL}/LessonPlan/getAllLessonPlan?courseCode=${course.courseCode}`,
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -41,7 +56,9 @@ const CourseMaterial = () => {
 
   const fetchBooks = async () => {
     try {
-      const response = await fetch(`${baseURL}/CourseBookAssign/getCourseAssignedBook?courseCode=${course.courseCode}`);
+      const response = await fetch(
+        `${baseURL}/CourseBookAssign/getCourseAssignedBook?courseCode=${course.courseCode}`,
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -60,7 +77,9 @@ const CourseMaterial = () => {
 
   const fetchReferenceMaterials = async () => {
     try {
-      const response = await fetch(`${baseURL}/Reference/getReferenceMaterial?courseCode=${course.courseCode}`);
+      const response = await fetch(
+        `${baseURL}/Reference/getReferenceMaterial?courseCode=${course.courseCode}`,
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -79,7 +98,9 @@ const CourseMaterial = () => {
 
   const fetchMyLessonPlans = async () => {
     try {
-      const response = await fetch(`${baseURL}/LessonPlan/getMyLessonPlan?studentId=${studentId}&courseCode=${course.courseCode}`);
+      const response = await fetch(
+        `${baseURL}/LessonPlan/getMyLessonPlan?studentId=${studentId}&courseCode=${course.courseCode}`,
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -101,7 +122,7 @@ const CourseMaterial = () => {
       Alert.alert('Error', 'Please enter week number and select a PDF file.');
       return;
     }
-    
+
     const formData = new FormData();
     formData.append('lessonPlanTitle', weekNo);
     formData.append('creatorId', studentId);
@@ -136,7 +157,7 @@ const CourseMaterial = () => {
     }
   };
 
-  const editLessonPlan = (lessonPlan) => {
+  const editLessonPlan = lessonPlan => {
     setCurrentLessonPlan(lessonPlan);
     setWeekNo(lessonPlan.lessonPlanTitle);
     setIsModalVisible(true);
@@ -159,13 +180,16 @@ const CourseMaterial = () => {
     }
 
     try {
-      const response = await fetch(`${baseURL}/LessonPlan/updateLessonPlan?id=${currentLessonPlan.lessonPlanId}`, {
-        method: 'PUT',
-        body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
+      const response = await fetch(
+        `${baseURL}/LessonPlan/updateLessonPlan?id=${currentLessonPlan.lessonPlanId}`,
+        {
+          method: 'PUT',
+          body: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         },
-      });
+      );
       const result = await response.json();
       if (result.status === 'Success') {
         Alert.alert('Success', result.message);
@@ -182,11 +206,14 @@ const CourseMaterial = () => {
     }
   };
 
-  const deleteLessonPlan = async (lessonPlanId) => {
+  const deleteLessonPlan = async lessonPlanId => {
     try {
-      const response = await fetch(`${baseURL}/LessonPlan/removeLessonPlan?id=${lessonPlanId}`, {
-        method: 'DELETE',
-      });
+      const response = await fetch(
+        `${baseURL}/LessonPlan/removeLessonPlan?id=${lessonPlanId}`,
+        {
+          method: 'DELETE',
+        },
+      );
       const result = await response.json();
       if (result.status === 'Success') {
         fetchMyLessonPlans(); // Refresh the list
@@ -226,7 +253,7 @@ const CourseMaterial = () => {
       } else if (activeTab === 'My Lesson Plan') {
         fetchMyLessonPlans();
       }
-    }, [activeTab, subTab])
+    }, [activeTab, subTab]),
   );
 
   return (
@@ -234,33 +261,59 @@ const CourseMaterial = () => {
       <View style={styles.tabContainer}>
         <TouchableOpacity
           onPress={() => setActiveTab('Books')}
-          style={[styles.tabButton, activeTab === 'Books' && styles.activeTab]}
-        >
-          <Text style={[styles.tabText, activeTab !== 'Books' && styles.inactiveTabText]}>Books</Text>
+          style={[styles.tabButton, activeTab === 'Books' && styles.activeTab]}>
+          <Text
+            style={[
+              styles.tabText,
+              activeTab !== 'Books' && styles.inactiveTabText,
+            ]}>
+            Books
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => setActiveTab('Weekly LP')}
-          style={[styles.tabButton, activeTab === 'Weekly LP' && styles.activeTab]}
-        >
-          <Text style={[styles.tabText, activeTab !== 'Weekly LP' && styles.inactiveTabText]}>Weekly LP</Text>
+          style={[
+            styles.tabButton,
+            activeTab === 'Weekly LP' && styles.activeTab,
+          ]}>
+          <Text
+            style={[
+              styles.tabText,
+              activeTab !== 'Weekly LP' && styles.inactiveTabText,
+            ]}>
+            Weekly LP
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => setActiveTab('My Lesson Plan')}
-          style={[styles.tabButton, activeTab === 'My Lesson Plan' && styles.activeTab]}
-        >
-          <Text style={[styles.tabText, activeTab !== 'My Lesson Plan' && styles.inactiveTabText]}>My Lesson Plan</Text>
+          style={[
+            styles.tabButton,
+            activeTab === 'My Lesson Plan' && styles.activeTab,
+          ]}>
+          <Text
+            style={[
+              styles.tabText,
+              activeTab !== 'My Lesson Plan' && styles.inactiveTabText,
+            ]}>
+            My Lesson Plan
+          </Text>
         </TouchableOpacity>
       </View>
 
       {activeTab === 'Books' && (
         <FlatList
           data={books}
-          keyExtractor={(item) => item.bookId.toString()}
-          renderItem={({ item }) => (
+          keyExtractor={item => item.bookId.toString()}
+          renderItem={({item}) => (
             <View style={styles.itemContainer}>
               <Text style={styles.itemText}>Title: {item.bookName}</Text>
               <Text style={styles.itemText}>Author: {item.bookAuthorName}</Text>
-              <TouchableOpacity onPress={() => navigation.navigate('PDFReaderScreen', { pdfUri: item.bookPdfPath })}>
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate('PDFReaderScreen', {
+                    pdfUri: item.bookPdfPath,
+                  })
+                }>
                 <Text style={styles.linkText}>Open PDF</Text>
               </TouchableOpacity>
             </View>
@@ -274,26 +327,49 @@ const CourseMaterial = () => {
           <View style={styles.subTabContainer}>
             <TouchableOpacity
               onPress={() => setSubTab('Lesson Plan')}
-              style={[styles.tabButton, subTab === 'Lesson Plan' && styles.activeTab]}
-            >
-              <Text style={[styles.tabText, subTab !== 'Lesson Plan' && styles.inactiveTabText]}>Lesson Plan</Text>
+              style={[
+                styles.tabButton,
+                subTab === 'Lesson Plan' && styles.activeTab,
+              ]}>
+              <Text
+                style={[
+                  styles.tabText,
+                  subTab !== 'Lesson Plan' && styles.inactiveTabText,
+                ]}>
+                Lesson Plan
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => setSubTab('Reference Material')}
-              style={[styles.tabButton, subTab === 'Reference Material' && styles.activeTab]}
-            >
-              <Text style={[styles.tabText, subTab !== 'Reference Material' && styles.inactiveTabText]}>Reference Material</Text>
+              style={[
+                styles.tabButton,
+                subTab === 'Reference Material' && styles.activeTab,
+              ]}>
+              <Text
+                style={[
+                  styles.tabText,
+                  subTab !== 'Reference Material' && styles.inactiveTabText,
+                ]}>
+                Reference Material
+              </Text>
             </TouchableOpacity>
           </View>
 
           {subTab === 'Lesson Plan' && (
             <FlatList
               data={lessonPlans}
-              keyExtractor={(item) => item.lessonPlanId.toString()}
-              renderItem={({ item }) => (
+              keyExtractor={item => item.lessonPlanId.toString()}
+              renderItem={({item}) => (
                 <View style={styles.itemContainer}>
-                  <Text style={styles.itemText}>Title: {item.lessonPlanTitle}</Text>
-                  <TouchableOpacity onPress={() => navigation.navigate('PDFReaderScreen', { pdfUri: item.lessonPlanPdfPatn })}>
+                  <Text style={styles.itemText}>
+                    Title: {item.lessonPlanTitle}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigation.navigate('PDFReaderScreen', {
+                        pdfUri: item.lessonPlanPdfPatn,
+                      })
+                    }>
                     <Text style={styles.linkText}>Open PDF</Text>
                   </TouchableOpacity>
                 </View>
@@ -305,16 +381,21 @@ const CourseMaterial = () => {
           {subTab === 'Reference Material' && (
             <FlatList
               data={referenceMaterials}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={({ item }) => (
+              keyExtractor={item => item.id.toString()}
+              renderItem={({item}) => (
                 <View style={styles.itemContainer}>
-                  <Text style={styles.itemText}>Title: {item.referenceTitle}</Text>
-                  <TouchableOpacity onPress={() => navigation.navigate('WebViewer', { uri: item.referenceUri })}>
+                  <Text style={styles.itemText}>
+                    Title: {item.referenceTitle}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => Linking.openURL(item.referenceUri)}>
                     <Text style={styles.linkText}>Open Reference</Text>
                   </TouchableOpacity>
                 </View>
               )}
-              ListEmptyComponent={<Text>No reference materials available.</Text>}
+              ListEmptyComponent={
+                <Text>No reference materials available.</Text>
+              }
             />
           )}
         </View>
@@ -340,15 +421,18 @@ const CourseMaterial = () => {
 
           <FlatList
             data={myLessonPlans}
-            keyExtractor={(item) => item.lessonPlanId.toString()}
-            renderItem={({ item }) => (
+            keyExtractor={item => item.lessonPlanId.toString()}
+            renderItem={({item}) => (
               <View style={styles.lessonPlanContainer}>
-                <Text style={styles.lessonPlanText}>Week {item.lessonPlanTitle}</Text>
+                <Text style={styles.lessonPlanText}>
+                  Week {item.lessonPlanTitle}
+                </Text>
                 <View style={styles.lessonPlanActions}>
                   <TouchableOpacity onPress={() => editLessonPlan(item)}>
                     <Text style={styles.editText}>Edit</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={() => deleteLessonPlan(item.lessonPlanId)}>
+                  <TouchableOpacity
+                    onPress={() => deleteLessonPlan(item.lessonPlanId)}>
                     <Text style={styles.deleteText}>Delete</Text>
                   </TouchableOpacity>
                 </View>
@@ -360,8 +444,7 @@ const CourseMaterial = () => {
           <Modal
             visible={isModalVisible}
             animationType="slide"
-            onRequestClose={() => setIsModalVisible(false)}
-          >
+            onRequestClose={() => setIsModalVisible(false)}>
             <View style={styles.modalContent}>
               <Text>Edit Lesson Plan</Text>
               <TextInput
@@ -376,7 +459,9 @@ const CourseMaterial = () => {
               {selectedPdf && (
                 <Text style={styles.selectedFileText}>{selectedPdf.name}</Text>
               )}
-              <TouchableOpacity style={styles.button} onPress={updateLessonPlan}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={updateLessonPlan}>
                 <Text style={styles.buttonText}>Update Lesson Plan</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setIsModalVisible(false)}>
@@ -435,7 +520,7 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     padding: 10,
     marginBottom: 10,
-    color: 'black'
+    color: 'black',
   },
   button: {
     backgroundColor: '#5B5D8B',
@@ -488,7 +573,7 @@ const styles = StyleSheet.create({
   },
   selectedFileText: {
     marginBottom: 10,
-    color: 'black'
+    color: 'black',
   },
   linkText: {
     color: '#5B5D8B',

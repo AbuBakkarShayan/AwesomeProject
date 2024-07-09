@@ -107,61 +107,58 @@
 
 //new
 // import React from 'react';
-// import { View } from 'react-native';
+// import {View} from 'react-native';
 // import RNFS from 'react-native-fs';
 // import Pdf from 'react-native-pdf';
 
-// const PDFReaderScreen = ({ route }) => {
-//     const { bookId } = route.params;
-//     const pdfSource = `${RNFS.DocumentDirectoryPath}/${bookId}.pdf`;
+// const PDFReaderScreen = ({route}) => {
+//   const {bookName} = route.params;
+//   const pdfSource = `${RNFS.DocumentDirectoryPath}/${bookName}.pdf`;
 
-//     return (
-//         <View style={{ flex: 1 }}>
-//             <Pdf
-//                 source={{ uri: pdfSource, cache: true }}
-//                 onLoadComplete={(numberOfPages, filePath) => {
-//                     console.log(`Number of pages: ${numberOfPages}`);
-//                 }}
-//                 onPageChanged={(page, numberOfPages) => {
-//                     console.log(`Current page: ${page}`);
-//                 }}
-//                 onError={(error) => {
-//                     console.log(error);
-//                 }}
-//                 style={{ flex: 1 }}
-//             />
-//         </View>
-//     );
+//   return (
+//     <View style={{flex: 1}}>
+//       <Pdf
+//         source={{uri: pdfSource, cache: true}}
+//         onLoadComplete={(numberOfPages, filePath) => {
+//           console.log(`Number of pages: ${numberOfPages}`);
+//         }}
+//         onPageChanged={(page, numberOfPages) => {
+//           console.log(`Current page: ${page}`);
+//         }}
+//         onError={error => {
+//           console.log(error);
+//         }}
+//         style={{flex: 1}}
+//       />
+//     </View>
+//   );
 // };
 
 // export default PDFReaderScreen;
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import {View, Text} from 'react-native';
 import Pdf from 'react-native-pdf';
 
-const PDFReaderScreen = ({ route }) => {
-  const { uri } = route.params;
+const PDFReaderScreen = ({route}) => {
+  const {pdfPath} = route.params;
 
   return (
-    <View style={styles.container}>
+    <View style={{flex: 1}}>
       <Pdf
-        source={{ uri }}
-        style={styles.pdf}
+        source={{uri: pdfPath, cache: true}}
+        onLoadComplete={(numberOfPages, filePath) => {
+          console.log(`number of pages: ${numberOfPages}`);
+        }}
+        onPageChanged={(page, numberOfPages) => {
+          console.log(`current page: ${page}`);
+        }}
+        onError={error => {
+          console.log(error);
+        }}
+        style={{flex: 1}}
       />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  pdf: {
-    flex: 1,
-    width: '100%',
-  },
-});
 
 export default PDFReaderScreen;

@@ -1,6 +1,14 @@
-import { StyleSheet, Text, View, TouchableOpacity, Alert, FlatList, Modal } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import { useNavigation } from '@react-navigation/core';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Alert,
+  FlatList,
+  Modal,
+} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {useNavigation} from '@react-navigation/core';
 import Icon from 'react-native-vector-icons/Ionicons';
 import LogoutButton from './customcomponent/logoutComponent';
 import baseURL from '../../config';
@@ -44,31 +52,34 @@ const CourseManagementScreen = () => {
     navigation.navigate('AddCourseScreen');
   };
 
-  const handleEditCourse = (course) => {
-    navigation.navigate('UpdateCourseScreen', { course });
+  const handleEditCourse = course => {
+    navigation.navigate('UpdateCourseScreen', {course});
   };
 
-  const handleDeleteCourse = async (courseCode) => {
+  const handleDeleteCourse = async courseCode => {
     if (!courseCode || courseCode.trim() === '') {
-      Alert.alert("Failed", "Course Code required");
+      Alert.alert('Failed', 'Course Code required');
       return;
     }
-  
+
     console.log('Initiating delete request for course:', courseCode);
-  
+
     try {
-      const response = await fetch(`${baseURL}/Course/deleteCourse?courseCode=${courseCode}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-  
+      const response = await fetch(
+        `${baseURL}/Course/deleteCourse?courseCode=${courseCode}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
       const responseData = await response.json();
-  
+
       console.log('Response status:', response.status);
       console.log('Response data:', responseData);
-  
+
       if (response.ok) {
         Alert.alert('Success', 'Course Deleted Successfully');
         setCourses(courses.filter(course => course.courseCode !== courseCode));
@@ -82,7 +93,7 @@ const CourseManagementScreen = () => {
     }
   };
 
-  const confirmDeleteCourse = (courseCode) => {
+  const confirmDeleteCourse = courseCode => {
     Alert.alert(
       'Confirm Delete',
       'Are you sure you want to delete this course?',
@@ -90,58 +101,88 @@ const CourseManagementScreen = () => {
         {
           text: 'Cancel',
           onPress: () => console.log('Delete Cancelled'),
-          style: 'cancel'
+          style: 'cancel',
         },
         {
           text: 'Delete',
           onPress: () => handleDeleteCourse(courseCode),
-          style: 'destructive'
-        }
+          style: 'destructive',
+        },
       ],
-      { cancelable: false }
+      {cancelable: false},
     );
   };
 
-  const handleEnrollStudent = (courseCode) => {
+  const handleEnrollStudent = courseCode => {
     setSelectedCourseCode(courseCode);
     setModalVisible(true);
   };
 
   const handleEnrollSingleStudent = () => {
     setModalVisible(false);
-    navigation.navigate('EnrollStudent', { courseCode: selectedCourseCode });
+    navigation.navigate('EnrollStudent', {courseCode: selectedCourseCode});
   };
 
   const handleEnrollMultipleStudents = () => {
     setModalVisible(false);
-    navigation.navigate('EnrollMultipleStudent', { courseCode: selectedCourseCode });
+    navigation.navigate('EnrollMultipleStudents', {
+      courseCode: selectedCourseCode,
+    });
   };
 
-  const handleEnrollTeacher = (courseCode) => {
-    navigation.navigate('AssignTeacher', { courseCode });
+  const handleEnrollTeacher = courseCode => {
+    navigation.navigate('AssignTeacher', {courseCode});
   };
 
-  const renderCourseItem = ({ item }) => (
+  const renderCourseItem = ({item}) => (
     <View style={styles.courseContainer}>
       <View style={styles.courseDetails}>
-        <Icon name="book-outline" size={20} color="white" style={styles.courseIcon} />
+        <Icon
+          name="book-outline"
+          size={20}
+          color="white"
+          style={styles.courseIcon}
+        />
         <Text style={styles.courseName}>{item.courseName}</Text>
       </View>
       <View style={styles.iconsContainer}>
         <View style={styles.iconRow}>
           <TouchableOpacity onPress={() => handleEditCourse(item)}>
-            <Icon name="create-outline" style={styles.courseIcon} size={20} color="white" />
+            <Icon
+              name="create-outline"
+              style={styles.courseIcon}
+              size={20}
+              color="white"
+            />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => confirmDeleteCourse(item.courseCode)}>
-            <Icon style={styles.courseIcon} name="trash-outline" size={24} color="white" />
+          <TouchableOpacity
+            onPress={() => confirmDeleteCourse(item.courseCode)}>
+            <Icon
+              style={styles.courseIcon}
+              name="trash-outline"
+              size={24}
+              color="white"
+            />
           </TouchableOpacity>
         </View>
         <View style={styles.iconRow}>
-          <TouchableOpacity onPress={() => handleEnrollStudent(item.courseCode)}>
-            <Icon style={styles.courseIcon} name="person-outline" size={24} color="white" />
+          <TouchableOpacity
+            onPress={() => handleEnrollStudent(item.courseCode)}>
+            <Icon
+              style={styles.courseIcon}
+              name="person-outline"
+              size={24}
+              color="white"
+            />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleEnrollTeacher(item.courseCode)}>
-            <Icon style={styles.courseIcon} name="school-outline" size={24} color="white" />
+          <TouchableOpacity
+            onPress={() => handleEnrollTeacher(item.courseCode)}>
+            <Icon
+              style={styles.courseIcon}
+              name="school-outline"
+              size={24}
+              color="white"
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -178,17 +219,24 @@ const CourseManagementScreen = () => {
         visible={isModalVisible}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setModalVisible(false)}
-      >
+        onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <TouchableOpacity onPress={handleEnrollSingleStudent} style={styles.modalButton}>
+            <TouchableOpacity
+              onPress={handleEnrollSingleStudent}
+              style={styles.modalButton}>
               <Text style={styles.modalButtonText}>Enroll Single Student</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleEnrollMultipleStudents} style={styles.modalButton}>
-              <Text style={styles.modalButtonText}>Enroll Multiple Students</Text>
+            <TouchableOpacity
+              onPress={handleEnrollMultipleStudents}
+              style={styles.modalButton}>
+              <Text style={styles.modalButtonText}>
+                Enroll Multiple Students
+              </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalButton}>
+            <TouchableOpacity
+              onPress={() => setModalVisible(false)}
+              style={styles.modalButton}>
               <Text style={styles.modalButtonText}>Cancel</Text>
             </TouchableOpacity>
           </View>
@@ -211,7 +259,6 @@ const styles = StyleSheet.create({
     right: 20,
   },
   courseContainer: {
-    
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -234,7 +281,7 @@ const styles = StyleSheet.create({
   },
   iconsContainer: {
     flexDirection: 'column',
-   // marginLeft:5,
+    // marginLeft:5,
   },
   iconRow: {
     flexDirection: 'row',
