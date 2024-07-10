@@ -142,10 +142,11 @@ const EnrollMultipleStudents = () => {
   const renderHeader = () => (
     <View>
       <View style={styles.row}>
-        <Button title="Select File" onPress={selectFile} />
+        <Button title="Select File" color={'#5B5D8D'} onPress={selectFile} />
         <Text style={styles.fileName}>{file}</Text>
         <Button
           title="Load Data"
+          color={'#5B5D8D'}
           onPress={() => {
             if (!filePath) {
               showSnackBar('Select File First');
@@ -156,9 +157,14 @@ const EnrollMultipleStudents = () => {
         />
       </View>
       <View style={styles.row}>
-        <Button title="Clear" onPress={clearEnrolledStudent} />
+        <Button
+          title="Clear"
+          color={'#5B5D8D'}
+          onPress={clearEnrolledStudent}
+        />
         <Button
           title="Clear All"
+          color={'#5B5D8D'}
           onPress={() => {
             setEnrollments([]);
           }}
@@ -183,7 +189,11 @@ const EnrollMultipleStudents = () => {
           />
         )}
       />
-      <Button title="Enroll Students" onPress={enrollStudents} />
+      <Button
+        title="Enroll Students"
+        color={'#5B5D8D'}
+        onPress={enrollStudents}
+      />
       {selectedEnrollment && (
         <EditEnrollmentDialog
           enrollment={selectedEnrollment}
@@ -284,6 +294,7 @@ const styles = StyleSheet.create({
   fileName: {
     flex: 1,
     textAlign: 'center',
+    color: 'black',
   },
   tile: {
     padding: 16,
@@ -298,9 +309,10 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 18,
+    color: 'black',
   },
   editButton: {
-    color: 'blue',
+    color: '#5B5D8D',
   },
   deleteButton: {
     color: 'red',
@@ -331,6 +343,7 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 4,
     marginBottom: 16,
+    color: '#7E7E7E',
   },
   dialogButtons: {
     flexDirection: 'row',

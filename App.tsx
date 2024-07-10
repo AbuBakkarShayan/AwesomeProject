@@ -51,10 +51,10 @@ import UpdateCourseScreen from './screens/AdminScreen/UpdateCourseScreen';
 import AddBookScreen from './screens/AdminScreen/AddBookScreen';
 import AddTOC from './screens/AdminScreen/AddTOC';
 import MyBooksScreen from './screens/TeacherScreen/MyBooksScreen';
-
 import { navigate } from '@react-navigation/routers/lib/typescript/src/CommonActions';
 import StudentLogs from './screens/TeacherScreen/StudentLogs';
 
+import Tester from './screens/Tester';
 
 
 const Stack = createStackNavigator();
@@ -151,6 +151,7 @@ const App = () => {
         <Stack.Screen name='UpdateCourseScreen' component={UpdateCourseScreen} />
         <Stack.Screen name='AddBookScreen' component={AddBookScreen} />
         <Stack.Screen name='AddTOC' component={AddTOC} />
+        <Stack.Screen name='Tester' component={Tester} />
         <Stack.Screen name='AdminProfileScreen' component={AdminProfileScreen} />
       </Stack.Navigator>
     </NavigationContainer>

@@ -59,9 +59,9 @@ const StudentLogsScreen = ({route}) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.appBar}>
+      {/* <View style={styles.appBar}>
         <Text style={styles.title}>Student Logs</Text>
-      </View>
+      </View> */}
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />
       ) : smesterNumbers.length === 0 ? (

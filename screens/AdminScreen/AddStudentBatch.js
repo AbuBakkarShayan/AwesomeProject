@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,7 @@ import RNFS from 'react-native-fs';
 import baseURL from '../../config';
 
 const AddMultipleUsers = () => {
-  const [file, setFile] = useState("No File Selected");
+  const [file, setFile] = useState('No File Selected');
   const [filePath, setFilePath] = useState(null);
   const [users, setUsers] = useState([]);
 
@@ -29,16 +29,16 @@ const AddMultipleUsers = () => {
       if (DocumentPicker.isCancel(err)) {
         // User cancelled the picker
       } else {
-        Alert.alert("Error", "Failed to select file");
+        Alert.alert('Error', 'Failed to select file');
       }
     }
   };
 
-  const readExcelFile = async (filePath) => {
+  const readExcelFile = async filePath => {
     try {
-      const fileUri = filePath.replace("file://", "");
+      const fileUri = filePath.replace('file://', '');
       const data = await RNFS.readFile(fileUri, 'base64');
-      const workbook = XLSX.read(data, { type: 'base64' });
+      const workbook = XLSX.read(data, {type: 'base64'});
 
       const sheetName = workbook.SheetNames[2]; // Assuming data is in the third sheet
       const worksheet = workbook.Sheets[sheetName];
@@ -54,7 +54,7 @@ const AddMultipleUsers = () => {
       }));
       setUsers(parsedUsers);
     } catch (error) {
-      Alert.alert("Error", "Failed to read file");
+      Alert.alert('Error', 'Failed to read file');
     }
   };
 
@@ -72,7 +72,9 @@ const AddMultipleUsers = () => {
       const responseBody = await response.json();
 
       const updatedUsers = users.map(user => {
-        const responseItem = responseBody.find(item => item.username === user.username);
+        const responseItem = responseBody.find(
+          item => item.username === user.username,
+        );
         if (responseItem) {
           return {
             ...user,
@@ -84,7 +86,7 @@ const AddMultipleUsers = () => {
       });
       setUsers(updatedUsers);
     } catch (error) {
-      Alert.alert("Error", "Failed to add users");
+      Alert.alert('Error', 'Failed to add users');
     }
   };
 
@@ -93,7 +95,7 @@ const AddMultipleUsers = () => {
     setUsers(filteredUsers);
   };
 
-  const editUser = (index) => {
+  const editUser = index => {
     // Implement user edit functionality
     // You might show a dialog or navigate to another screen to edit the user details
   };
@@ -101,13 +103,14 @@ const AddMultipleUsers = () => {
   return (
     <View style={styles.container}>
       <View style={styles.row}>
-        <Button title="Select File" onPress={selectFile} />
+        <Button title="Select File" onPress={selectFile} color={'#5D5B8D'} />
         <Text style={styles.fileText}>{file}</Text>
         <Button
+          color={'#5D5B8D'}
           title="Load Data"
           onPress={() => {
             if (!filePath) {
-              Alert.alert("Error", "Select File First");
+              Alert.alert('Error', 'Select File First');
             } else {
               readExcelFile(filePath);
             }
@@ -116,31 +119,37 @@ const AddMultipleUsers = () => {
       </View>
       <View style={styles.userListContainer}>
         <View style={styles.row}>
-          <Button title="Clear" onPress={clearRegisteredUsers} />
-          <Button title="Clear All" onPress={() => setUsers([])} />
+          <Button
+            title="Clear"
+            onPress={clearRegisteredUsers}
+            color={'#5D5B8D'}
+          />
+          <Button
+            title="Clear All"
+            onPress={() => setUsers([])}
+            color={'#5D5B8D'}
+          />
         </View>
         <FlatList
           data={users}
           keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item, index }) => (
+          renderItem={({item, index}) => (
             <View style={styles.userTile}>
               <View style={styles.userInfo}>
                 <Text style={styles.userName}>{item.name}</Text>
-                <Text>{item.username}</Text>
+                <Text style={styles.userName}>{item.username}</Text>
                 {item.status && item.message && (
                   <>
                     <Text
                       style={{
-                        color: item.status === 'Success' ? 'green' : 'red',
-                      }}
-                    >
+                        color: item.status === 'Success' ? '#5D5B8D' : 'red',
+                      }}>
                       {item.status}
                     </Text>
                     <Text
                       style={{
-                        color: item.status === 'Success' ? 'green' : 'red',
-                      }}
-                    >
+                        color: item.status === 'Success' ? '#5D5B8D' : 'red',
+                      }}>
                       {item.message}
                     </Text>
                   </>
@@ -148,22 +157,21 @@ const AddMultipleUsers = () => {
               </View>
               <View style={styles.userActions}>
                 <TouchableOpacity onPress={() => editUser(index)}>
-                  <Text>Edit</Text>
+                  <Text style={styles.action}>Edit</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
                     const newUsers = users.filter((_, i) => i !== index);
                     setUsers(newUsers);
-                  }}
-                >
-                  <Text>Delete</Text>
+                  }}>
+                  <Text style={styles.action}>Delete</Text>
                 </TouchableOpacity>
               </View>
             </View>
           )}
         />
       </View>
-      <Button title="Add Users" onPress={addUsers} />
+      <Button title="Add Users" onPress={addUsers} color={'#5D5B8D'} />
     </View>
   );
 };
@@ -182,6 +190,7 @@ const styles = StyleSheet.create({
   fileText: {
     flex: 1,
     textAlign: 'center',
+    color: 'black',
   },
   userListContainer: {
     flex: 1,
@@ -201,8 +210,12 @@ const styles = StyleSheet.create({
   userInfo: {
     flex: 1,
   },
+  action: {
+    color: 'black',
+  },
   userName: {
     fontSize: 18,
+    color: 'black',
   },
   userActions: {
     flexDirection: 'row',

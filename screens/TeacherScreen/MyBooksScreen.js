@@ -241,12 +241,13 @@ const MyBooksScreen = ({navigation, item}) => {
       <TouchableOpacity
         onPress={() =>
           navigation.navigate('PDFReaderScreen', {bookId: item.bookId})
-        }>
+        }
+        style={styles.bookTouchable}>
         <View style={styles.bookDetailsContainer}>
-          <Image
+          {/* <Image
             source={{uri: `${baseURL}/book/cover/${item.bookId}`}}
             style={styles.bookCover}
-          />
+          /> */}
           <View style={styles.bookDetails}>
             <Text style={styles.bookTitle}>{item.bookName}</Text>
             <Text style={styles.bookAuthor}>{item.bookAuthorName}</Text>
@@ -254,16 +255,21 @@ const MyBooksScreen = ({navigation, item}) => {
         </View>
       </TouchableOpacity>
       {activeTab === 'Bookmarked' ? (
-        <TouchableOpacity onPress={() => removeBookmark(item.bookId)}>
+        <TouchableOpacity
+          style={styles.trashIconContainer}
+          onPress={() => removeBookmark(item.bookId)}>
           <IonIcon name="trash-outline" size={24} color="red" />
         </TouchableOpacity>
       ) : (
-        <TouchableOpacity onPress={() => removeDownloadedBook(item.bookId)}>
+        <TouchableOpacity
+          style={styles.trashIconContainer}
+          onPress={() => removeDownloadedBook(item.bookId)}>
           <IonIcon name="trash-outline" size={24} color="red" />
         </TouchableOpacity>
       )}
     </View>
   );
+
   const togglePrivate = async bookId => {
     try {
       const response = await fetch(
@@ -299,13 +305,13 @@ const MyBooksScreen = ({navigation, item}) => {
         navigation.navigate('PDFReaderScreen', {bookId: item.bookId})
       }>
       <View style={styles.bookContainer}>
-        <Image
+        {/* <Image
           source={{uri: item.image}}
           style={{width: 100, height: 100}}
           onError={e =>
             console.error(`Failed to load image:`, e.nativeEvent.error)
           }
-        />
+        /> */}
         <View style={styles.bookDetails}>
           <Text style={styles.bookTitle}>{item.bookName}</Text>
           <Text style={styles.bookAuthor}>{item.bookAuthorName}</Text>
@@ -545,6 +551,11 @@ const styles = StyleSheet.create({
   },
   activeTabButtonText: {
     color: 'white',
+  },
+  trashIconContainer: {
+    //flex: 1, // Take up all available space horizontally
+    alignItems: 'flex-end', // Align items to the end (right side)
+    paddingLeft: 100, // Add some right padding for spacing
   },
   bookContainer: {
     flexDirection: 'row',

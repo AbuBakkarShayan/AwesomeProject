@@ -14,6 +14,7 @@ import {
 import {useNavigation} from '@react-navigation/core';
 import LogoutButton from './customcomponent/logoutComponent';
 import Icon from 'react-native-vector-icons/Ionicons';
+import RNFS from 'react-native-fs';
 import baseURL, {downloadBookPdfURL, imageBaseURL} from '../../config';
 
 const BooksManagementScreen = () => {
@@ -45,20 +46,22 @@ const BooksManagementScreen = () => {
           const bookCoverPagePath = book.bookCoverPagePath
             ? encodeURIComponent(book.bookCoverPagePath)
             : null;
-          const imageUrl = bookCoverPagePath
-            ? `${imageBaseURL}/BookImageFolder/${bookCoverPagePath}`
-            : 'https://via.placeholder.com/150';
+          // const imageUrl = bookCoverPagePath
+          //   ? `${imageBaseURL}/BookImageFolder/${bookCoverPagePath}`
+          //   : 'https://via.placeholder.com/150';
 
-          console.log('Encoded Image URL:', imageUrl);
+          const pdfUrl = `${baseURL}/BookPDFFolder/${encodeURIComponent(
+            book.bookPdfPath,
+          )}`;
+
+          console.log('Encoded PDF URL:', pdfUrl);
 
           return {
             bookId: book.bookId,
             name: book.bookName,
             author: book.bookAuthorName,
-            image: imageUrl,
-            pdfUrl: `${baseURL}/BookPDFFolder/${encodeURIComponent(
-              book.bookPdfPath,
-            )}`,
+            //image: imageUrl,
+            pdfUrl,
             uploaderId: book.uploaderId || 0,
           };
         });
@@ -155,40 +158,37 @@ const BooksManagementScreen = () => {
     );
   };
 
+  const downloadAndOpenPDF = async (pdfUrl, bookName) => {
+    const downloadDest = `${RNFS.DocumentDirectoryPath}/${bookName}.pdf`;
+    console.log('Attempting to download PDF from URL:', pdfUrl);
+    try {
+      const downloadResult = await RNFS.downloadFile({
+        fromUrl: pdfUrl,
+        toFile: downloadDest,
+      }).promise;
+
+      if (downloadResult.statusCode === 200) {
+        console.log('PDF downloaded successfully:', downloadDest);
+        navigation.navigate('PDFReaderScreen', {bookName});
+      } else {
+        console.error('Failed to download file', downloadResult);
+      }
+    } catch (error) {
+      console.error('Error downloading file:', error);
+    }
+  };
+
   const renderItem = ({item}) => (
     <TouchableOpacity
-      onPress={() =>
-        navigation.navigate('PDFReaderScreen', {bookName: item.bookName})
-      }>
+      onPress={() => downloadAndOpenPDF(item.pdfUrl, item.name)}>
       <View style={styles.bookItem}>
         {/* <Image
-          // source={{ uri: item.image }}
-          source={{ uri: imageUrl }}
-          style={styles.bookImage}
-          onError={(error) => {
-            console.error('Failed to load image:', item.image, error);
-          }}
-        /> */}
-        <Image
           source={{uri: item.image}}
           style={{width: 100, height: 100}}
           onError={e =>
             console.error(`Failed to load image:`, e.nativeEvent.error)
           }
-        />
-        {/* <Image
-  source={{
-    uri: encodeURI('http://192.168.163.251/FYPAPI/api/BookImageFolder/English Language_2024515455511.jpg')
-  }}
-  style={{ width: 120, height: 120 }}
-  onError={(e) => {
-    const errorMessage = e.nativeEvent.error;
-    console.log('Failed to load image:', errorMessage);
-    // Additional logging or error handling
-    console.error('Image URL:', 'http://192.168.163.251/FYPAPI/api/BookImageFolder/English Language_2024515455511.jpg');
-  }}
-/> */}
-
+        /> */}
         <View style={styles.bookDetails}>
           <Text style={styles.bookTitle}>{item.name}</Text>
           <Text style={styles.bookAuthor}>{item.author}</Text>

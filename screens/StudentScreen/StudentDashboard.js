@@ -102,10 +102,10 @@
 // });
 
 // export default StudentDashboard;
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {View, Text, TouchableOpacity, StyleSheet, Alert} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import baseURL from '../../config';
 
@@ -113,7 +113,7 @@ const StudentDashboard = () => {
   const route = useRoute();
   const navigation = useNavigation();
 
-  const { studentId = null, isFirstLogin = 'False' } = route.params || {};
+  const {studentId = null, isFirstLogin = 'False'} = route.params || {};
   const [regNo, setRegNo] = useState('');
   const [role, setRole] = useState('');
 
@@ -132,14 +132,20 @@ const StudentDashboard = () => {
   }, [isFirstLogin]);
 
   const logout = async () => {
-    await AsyncStorage.multiRemove(['userRole', 'username', 'regNo', 'phoneNo', 'password']);
+    await AsyncStorage.multiRemove([
+      'userRole',
+      'username',
+      'regNo',
+      'phoneNo',
+      'password',
+    ]);
     navigation.reset({
       index: 0,
-      routes: [{ name: 'LoginScreen1' }],
+      routes: [{name: 'LoginScreen1'}],
     });
   };
 
-  const updatePassword = async (password) => {
+  const updatePassword = async password => {
     const url = `${baseURL}/user/updatepassword`;
     try {
       const response = await fetch(url, {
@@ -174,10 +180,10 @@ const StudentDashboard = () => {
         },
         {
           text: 'Update',
-          onPress: (password) => updatePassword(password),
+          onPress: password => updatePassword(password),
         },
       ],
-      'plain-text'
+      'plain-text',
     );
   };
 
@@ -185,22 +191,24 @@ const StudentDashboard = () => {
     {
       name: 'Course',
       icon: 'document-outline',
-      function: () => navigation.navigate('CoursesScreen', { studentId, role }),
+      function: () => navigation.navigate('CoursesScreen', {studentId, role}),
     },
     {
       name: 'Library Books',
-      icon: 'book-outline',
-      function: () => navigation.navigate('LibraryScreen', { studentId, role }),
+      icon: 'library-outline',
+      function: () => navigation.navigate('LibraryScreen', {studentId, role}),
     },
     {
       name: 'My Item',
       icon: 'save-outline',
-      function: () => navigation.navigate('MyCourseItemsScreen', { studentId, role }),
+      function: () =>
+        navigation.navigate('MyCourseItemsScreen', {studentId, role}),
     },
     {
       name: 'Profile',
       icon: 'person-outline',
-      function: () => navigation.navigate('StudentProfileScreen', { title: 'Student Dashboard', type: 'Student' }),
+      function: () =>
+        navigation.navigate('StudentProfileScreen', {studentId, role}),
     },
   ];
 
@@ -209,7 +217,10 @@ const StudentDashboard = () => {
       <Text style={styles.title}>Student Dashboard {studentId}</Text>
       <Text style={styles.roleText}>Role: {role}</Text>
       {dashboardData.map((item, index) => (
-        <TouchableOpacity key={index} style={styles.tile} onPress={item.function}>
+        <TouchableOpacity
+          key={index}
+          style={styles.tile}
+          onPress={item.function}>
           <Icon name={item.icon} size={40} style={styles.icon} />
           <Text style={styles.tileText}>{item.name}</Text>
         </TouchableOpacity>

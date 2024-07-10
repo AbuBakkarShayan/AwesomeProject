@@ -1,14 +1,26 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Alert, StyleSheet, ActivityIndicator } from 'react-native';
+import React, {useEffect, useState, useCallback} from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  Alert,
+  StyleSheet,
+  ActivityIndicator,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
+import {
+  useNavigation,
+  useRoute,
+  useFocusEffect,
+} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LogoutButton from './customcomponent/logoutComponent';
 import baseURL from '../../config';
 
 const TeachersScreen = () => {
   const navigation = useNavigation();
-  const { departmentId } = useRoute().params;
+  const {departmentId} = useRoute().params;
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,7 +32,9 @@ const TeachersScreen = () => {
 
   const fetchTeachers = async () => {
     try {
-      const response = await fetch(`${baseURL}/teacher/getAllTeacher?departmentid=${departmentId}`);
+      const response = await fetch(
+        `${baseURL}/teacher/getAllTeacher?departmentid=${departmentId}`,
+      );
       const data = await response.json();
       if (data.status === 'Success') {
         setTeachers(data.data);
@@ -37,24 +51,29 @@ const TeachersScreen = () => {
   useFocusEffect(
     useCallback(() => {
       fetchTeachers();
-    }, [departmentId])
+    }, [departmentId]),
   );
 
-  const handleDeleteTeacher = async (teacherId) => {
+  const handleDeleteTeacher = async teacherId => {
     try {
-      const response = await fetch(`${baseURL}/user/deleteUser?teacherId=${teacherId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${baseURL}/user/deleteUser?teacherId=${teacherId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({role: 'Teacher', id: teacherId}),
         },
-        body: JSON.stringify({ role: 'Teacher', id: teacherId }),
-      });
+      );
 
       const result = await response.json();
 
       if (result.status === 'Success') {
         Alert.alert('Success', result.message);
-        setTeachers(prevTeachers => prevTeachers.filter(teacher => teacher.teacherId !== teacherId));
+        setTeachers(prevTeachers =>
+          prevTeachers.filter(teacher => teacher.teacherId !== teacherId),
+        );
       } else {
         Alert.alert('Error', result.message);
       }
@@ -63,23 +82,33 @@ const TeachersScreen = () => {
     }
   };
 
-  const confirmDelete = (teacherId) => {
+  const confirmDelete = teacherId => {
     Alert.alert(
       'Confirm Delete',
       'Are you sure you want to delete this teacher?',
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', onPress: () => handleDeleteTeacher(teacherId) },
-      ]
+        {text: 'Cancel', style: 'cancel'},
+        {text: 'Delete', onPress: () => handleDeleteTeacher(teacherId)},
+      ],
     );
   };
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({item}) => (
     <View style={styles.itemContainer}>
       <Text style={styles.userName}>{item.teacherName}</Text>
       <View style={styles.iconContainer}>
-        <Icon name="create-outline" style={styles.icon} onPress={() => navigation.navigate('EditTeacherScreen', { teacher: item })} />
-        <Icon name="trash" style={styles.icon} onPress={() => confirmDelete(item.teacherId)} />
+        <Icon
+          name="create-outline"
+          style={styles.icon}
+          onPress={() =>
+            navigation.navigate('EditTeacherScreen', {teacher: item})
+          }
+        />
+        <Icon
+          name="trash"
+          style={styles.icon}
+          onPress={() => confirmDelete(item.teacherId)}
+        />
       </View>
     </View>
   );
@@ -92,13 +121,19 @@ const TeachersScreen = () => {
         <FlatList
           data={teachers}
           renderItem={renderItem}
-          keyExtractor={(item, index) => item?.teacherId?.toString() || index.toString()}
+          keyExtractor={(item, index) =>
+            item?.teacherId?.toString() || index.toString()
+          }
         />
       )}
-      <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddSingleTeacher')}>
-        <Text style={styles.addButtonLabel}>Add Teacher</Text>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => navigation.navigate('AddSingleTeacher')}>
+        <Text style={styles.addButtonLabel}>Add Single Teacher</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddTeacherBatch')}>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => navigation.navigate('AddStudentBatch')}>
         <Text style={styles.addButtonLabel}>Add Batch</Text>
       </TouchableOpacity>
     </View>
@@ -118,10 +153,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
     paddingVertical: 10,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 10,
+    marginVertical: 5,
+    paddingHorizontal: 10,
   },
   userName: {
     fontSize: 16,
-    color: '#7E7E7E',
+    color: '#5B5D8B',
   },
   iconContainer: {
     flexDirection: 'row',

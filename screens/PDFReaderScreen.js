@@ -106,51 +106,24 @@
 // });
 
 //new
-// import React from 'react';
-// import {View} from 'react-native';
-// import RNFS from 'react-native-fs';
-// import Pdf from 'react-native-pdf';
-
-// const PDFReaderScreen = ({route}) => {
-//   const {bookName} = route.params;
-//   const pdfSource = `${RNFS.DocumentDirectoryPath}/${bookName}.pdf`;
-
-//   return (
-//     <View style={{flex: 1}}>
-//       <Pdf
-//         source={{uri: pdfSource, cache: true}}
-//         onLoadComplete={(numberOfPages, filePath) => {
-//           console.log(`Number of pages: ${numberOfPages}`);
-//         }}
-//         onPageChanged={(page, numberOfPages) => {
-//           console.log(`Current page: ${page}`);
-//         }}
-//         onError={error => {
-//           console.log(error);
-//         }}
-//         style={{flex: 1}}
-//       />
-//     </View>
-//   );
-// };
-
-// export default PDFReaderScreen;
 import React from 'react';
-import {View, Text} from 'react-native';
+import {View} from 'react-native';
+import RNFS from 'react-native-fs';
 import Pdf from 'react-native-pdf';
 
 const PDFReaderScreen = ({route}) => {
-  const {pdfPath} = route.params;
+  const {bookName} = route.params;
+  const pdfSource = `${RNFS.DocumentDirectoryPath}/${bookName}.pdf`;
 
   return (
     <View style={{flex: 1}}>
       <Pdf
-        source={{uri: pdfPath, cache: true}}
+        source={{uri: pdfSource, cache: true}}
         onLoadComplete={(numberOfPages, filePath) => {
-          console.log(`number of pages: ${numberOfPages}`);
+          console.log(`Number of pages: ${numberOfPages}`);
         }}
         onPageChanged={(page, numberOfPages) => {
-          console.log(`current page: ${page}`);
+          console.log(`Current page: ${page}`);
         }}
         onError={error => {
           console.log(error);
@@ -162,3 +135,30 @@ const PDFReaderScreen = ({route}) => {
 };
 
 export default PDFReaderScreen;
+// import React from 'react';
+// import {View, Text} from 'react-native';
+// import Pdf from 'react-native-pdf';
+
+// const PDFReaderScreen = ({route}) => {
+//   const {pdfPath} = route.params;
+
+//   return (
+//     <View style={{flex: 1}}>
+//       <Pdf
+//         source={{uri: pdfPath, cache: true}}
+//         onLoadComplete={(numberOfPages, filePath) => {
+//           console.log(`number of pages: ${numberOfPages}`);
+//         }}
+//         onPageChanged={(page, numberOfPages) => {
+//           console.log(`current page: ${page}`);
+//         }}
+//         onError={error => {
+//           console.log(error);
+//         }}
+//         style={{flex: 1}}
+//       />
+//     </View>
+//   );
+// };
+
+// export default PDFReaderScreen;

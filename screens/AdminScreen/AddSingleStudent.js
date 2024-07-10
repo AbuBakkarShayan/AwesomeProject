@@ -1,6 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet, ActivityIndicator, TouchableOpacity, Modal } from 'react-native';
-import { Dropdown } from 'react-native-element-dropdown';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  Alert,
+  StyleSheet,
+  ActivityIndicator,
+  TouchableOpacity,
+  Modal,
+} from 'react-native';
+import {Dropdown} from 'react-native-element-dropdown';
 import baseURL from '../../config';
 
 const AddSingleStudent = () => {
@@ -90,7 +100,7 @@ const AddSingleStudent = () => {
     }
 
     // Add the new department to the dropdown
-    const newDept = { label: newDepartment, value: newDepartment };
+    const newDept = {label: newDepartment, value: newDepartment};
     setDepartments([...departments, newDept]);
     setSelectedDepartment(newDepartment); // Select the new department
     setNewDepartment('');
@@ -99,7 +109,6 @@ const AddSingleStudent = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Register as Student</Text>
       <TextInput
         style={styles.input}
         placeholder="Registration Number"
@@ -146,7 +155,9 @@ const AddSingleStudent = () => {
             }}
             selectedTextStyle={styles.selectedText}
           />
-          <TouchableOpacity onPress={() => setIsModalVisible(true)} style={styles.addButton}>
+          <TouchableOpacity
+            onPress={() => setIsModalVisible(true)}
+            style={styles.addButton}>
             <Text style={styles.addButtonText}>+</Text>
           </TouchableOpacity>
         </View>
@@ -157,8 +168,7 @@ const AddSingleStudent = () => {
         transparent={true}
         visible={isModalVisible}
         animationType="slide"
-        onRequestClose={() => setIsModalVisible(false)}
-      >
+        onRequestClose={() => setIsModalVisible(false)}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Add New Department</Text>
@@ -169,8 +179,16 @@ const AddSingleStudent = () => {
               value={newDepartment}
               onChangeText={setNewDepartment}
             />
-            <Button title="Add Department" onPress={handleAddDepartment} color="#5B5D8B" />
-            <Button title="Cancel" onPress={() => setIsModalVisible(false)} color="#888" />
+            <Button
+              title="Add Department"
+              onPress={handleAddDepartment}
+              color="#5B5D8B"
+            />
+            <Button
+              title="Cancel"
+              onPress={() => setIsModalVisible(false)}
+              color="#888"
+            />
           </View>
         </View>
       </Modal>
@@ -190,12 +208,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 12,
     paddingHorizontal: 8,
-    color: "#7E7E7E",
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
-    textAlign: 'center',
+    color: '#7E7E7E',
   },
   dropdownContainer: {
     flexDirection: 'row',
@@ -221,7 +234,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   placeholder: {
-    color: "#7E7E7E",
+    color: '#7E7E7E',
   },
   selectedText: {
     color: '#000',

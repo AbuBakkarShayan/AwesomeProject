@@ -82,7 +82,7 @@
 //     fontSize: 18,
 //     color: 'white',
 //     textAlign:"center"
-    
+
 //   },
 //   tile: {
 //    fontSize: 24,
@@ -98,22 +98,20 @@
 
 // export default AdminDashboard;
 
-
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import React, {useState, useEffect} from 'react';
+import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import LogoutButton from './customcomponent/logoutComponent';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const AdminDashboard = () => {
-  React.useLayoutEffect(()=>{
+  React.useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight:()=><LogoutButton />,
+      headerRight: () => <LogoutButton />,
     });
   }, [navigation]);
 
   const navigation = useNavigation();
-
 
   const dashboardData = [
     {
@@ -139,14 +137,17 @@ const AdminDashboard = () => {
     {
       name: 'Profile',
       icon: 'person-outline',
-       function: () => navigation.navigate('AdminProfileScreen' ),
+      function: () => navigation.navigate('AdminProfileScreen'),
     },
   ];
 
   return (
     <View style={styles.container}>
       {dashboardData.map((item, index) => (
-        <TouchableOpacity key={index} style={styles.tile} onPress={item.function}>
+        <TouchableOpacity
+          key={index}
+          style={styles.tile}
+          onPress={item.function}>
           <Icon name={item.icon} size={40} style={styles.icon} />
           <Text style={styles.tileText}>{item.name}</Text>
         </TouchableOpacity>

@@ -228,9 +228,6 @@ const StudentNamesScreen = ({route}) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.appBar}>
-        <Text style={styles.title}>Student Names</Text>
-      </View>
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />
       ) : students.length === 0 ? (
@@ -251,13 +248,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5F5F5', // Replace with your backgroundColor constant
-  },
-  appBar: {
-    height: 56,
-    backgroundColor: '#6200EE', // Replace with your desired color
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 4,
   },
   title: {
     color: '#FFFFFF',

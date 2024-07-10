@@ -56,7 +56,7 @@ const StudentLogs = () => {
   return (
     <View style={styles.container}>
       <View style={styles.appBar}>
-        <Text style={styles.title}>{regNo}</Text>
+        <Text style={styles.title}>{regNo} </Text>
       </View>
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />
@@ -98,14 +98,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5', // Replace with your backgroundColor constant
   },
   appBar: {
-    height: 56,
-    backgroundColor: '#6200EE', // Replace with your desired color
+    //height: 56,
+    margin: 10,
+    backgroundColor: '#ccc',
+
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 4,
   },
   title: {
-    color: '#FFFFFF',
+    color: '#5B5D8D',
     fontSize: 20,
     fontWeight: 'bold',
   },

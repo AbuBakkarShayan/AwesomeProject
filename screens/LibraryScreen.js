@@ -12,7 +12,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNFS from 'react-native-fs';
-import baseURL from '../config';
+import baseURL, {imageBaseURL} from '../config';
 
 const LibraryScreen = ({navigation, route}) => {
   const [books, setBooks] = useState([]);
@@ -141,17 +141,17 @@ const LibraryScreen = ({navigation, route}) => {
   const handleDownload = async (
     bookId,
     bookName,
-    bookCoverPath,
+    //  bookCoverPath,
     bookPdfPath,
   ) => {
     const isDownloaded = downloadedBooks.has(bookId);
-    const bookCoverLocalPath = `${RNFS.DownloadDirectoryPath}/${bookName}_cover.jpg`;
+    // const bookCoverLocalPath = `${RNFS.DownloadDirectoryPath}/${bookName}_cover.jpg`;
     const bookPdfLocalPath = `${RNFS.DownloadDirectoryPath}/${bookName}.pdf`;
 
     if (isDownloaded) {
       try {
         await RNFS.unlink(bookPdfLocalPath);
-        await RNFS.unlink(bookCoverLocalPath);
+        //await RNFS.unlink(bookCoverLocalPath);
 
         const updatedDownloadedBooks = new Set(downloadedBooks);
         updatedDownloadedBooks.delete(bookId);
@@ -164,16 +164,16 @@ const LibraryScreen = ({navigation, route}) => {
     } else {
       try {
         // Download and save book cover image
-        const bookCoverResponse = await fetch(
-          `${baseURL}/book/downloadBookCover?bookId=${bookId}&userId=${userId}&userType=${role}`,
-        );
-        if (bookCoverResponse.ok) {
-          const bookCoverBlob = await bookCoverResponse.blob();
-          const bookCoverBase64 = await convertBlobToBase64(bookCoverBlob);
-          await RNFS.writeFile(bookCoverLocalPath, bookCoverBase64, 'base64');
-        } else {
-          throw new Error('Failed to download book cover');
-        }
+        // const bookCoverResponse = await fetch(
+        //   `${baseURL}/book/downloadBookCover?bookId=${bookId}&userId=${userId}&userType=${role}`,
+        // );
+        // if (bookCoverResponse.ok) {
+        //   const bookCoverBlob = await bookCoverResponse.blob();
+        //   const bookCoverBase64 = await convertBlobToBase64(bookCoverBlob);
+        //   await RNFS.writeFile(bookCoverLocalPath, bookCoverBase64, 'base64');
+        // } else {
+        //   throw new Error('Failed to download book cover');
+        // }
 
         // Download and save book PDF
         const bookPdfResponse = await fetch(
@@ -266,15 +266,22 @@ const LibraryScreen = ({navigation, route}) => {
     const isDownloaded = downloadedBooks.has(item.bookId);
 
     return (
+      // <TouchableOpacity
+      //   onPress={() =>
+      //     navigation.navigate('PDFReaderScreen', {bookName: item.bookName})
+      //   }>
       <TouchableOpacity
         onPress={() =>
-          navigation.navigate('PDFReaderScreen', {bookName: item.bookName})
+          navigation.navigate('PDFReaderScreen', {
+            name: item.bookName,
+            path: `${imageBaseURL}/BookPDFFolder/${item.bookPdfPath}`,
+          })
         }>
         <View style={styles.bookContainer}>
-          <Image
+          {/* <Image
             source={{uri: item.bookCoverPagePath}}
             style={styles.bookCover}
-          />
+          /> */}
           <View style={styles.bookDetails}>
             <Text style={styles.bookTitle}>{item.bookName}</Text>
             <Text style={styles.bookAuthor}>{item.bookAuthorName}</Text>
@@ -285,7 +292,7 @@ const LibraryScreen = ({navigation, route}) => {
                 handleDownload(
                   item.bookId,
                   item.bookName,
-                  item.bookCoverPagePath,
+                  // item.bookCoverPagePath,
                   item.bookPdfPath,
                 )
               }>
