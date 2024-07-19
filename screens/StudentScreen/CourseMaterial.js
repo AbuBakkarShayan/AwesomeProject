@@ -16,11 +16,19 @@ import {
 } from '@react-navigation/native';
 import DocumentPicker from 'react-native-document-picker';
 import baseURL from '../../config';
+import LogoutButton from '../AdminScreen/customcomponent/logoutComponent';
 
 const CourseMaterial = () => {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
+
   const navigation = useNavigation();
   const route = useRoute();
   const {course, studentId} = route.params;
+  console.log('bbb', studentId);
   const [activeTab, setActiveTab] = useState('Books');
   const [subTab, setSubTab] = useState('Lesson Plan');
   const [weekNo, setWeekNo] = useState('');
@@ -226,6 +234,15 @@ const CourseMaterial = () => {
     }
   };
 
+  const shareLessonPlan = lessonPlanId => {
+    const courseCode = course.courseCode;
+    navigation.navigate('ShareReference', {
+      lessonPlanId,
+      courseCode,
+      studentId,
+    });
+  };
+
   const selectPdf = async () => {
     try {
       const res = await DocumentPicker.pick({
@@ -258,6 +275,7 @@ const CourseMaterial = () => {
 
   return (
     <View style={styles.container}>
+      <Text>{studentId}</Text>
       <View style={styles.tabContainer}>
         <TouchableOpacity
           onPress={() => setActiveTab('Books')}
@@ -285,6 +303,7 @@ const CourseMaterial = () => {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
+          //onPress={() => setActiveTab('My Lesson Plan')}
           onPress={() => setActiveTab('My Lesson Plan')}
           style={[
             styles.tabButton,
@@ -295,11 +314,10 @@ const CourseMaterial = () => {
               styles.tabText,
               activeTab !== 'My Lesson Plan' && styles.inactiveTabText,
             ]}>
-            My Lesson Plan
+            My References
           </Text>
         </TouchableOpacity>
       </View>
-
       {activeTab === 'Books' && (
         <FlatList
           data={books}
@@ -321,7 +339,6 @@ const CourseMaterial = () => {
           ListEmptyComponent={<Text>No books assigned to this course.</Text>}
         />
       )}
-
       {activeTab === 'Weekly LP' && (
         <View style={styles.contentContainer}>
           <View style={styles.subTabContainer}>
@@ -400,7 +417,6 @@ const CourseMaterial = () => {
           )}
         </View>
       )}
-
       {activeTab === 'My Lesson Plan' && (
         <View style={styles.contentContainer}>
           <TextInput
@@ -416,7 +432,7 @@ const CourseMaterial = () => {
             <Text style={styles.selectedFileText}>{selectedPdf.name}</Text>
           )}
           <TouchableOpacity style={styles.button} onPress={uploadLessonPlan}>
-            <Text style={styles.buttonText}>Add Lesson Plan</Text>
+            <Text style={styles.buttonText}>Add Reference</Text>
           </TouchableOpacity>
 
           <FlatList
@@ -434,6 +450,12 @@ const CourseMaterial = () => {
                   <TouchableOpacity
                     onPress={() => deleteLessonPlan(item.lessonPlanId)}>
                     <Text style={styles.deleteText}>Delete</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() =>
+                      shareLessonPlan(item.lessonPlanId, item.studentId)
+                    }>
+                    <Text style={styles.shareText}>Share</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -553,6 +575,11 @@ const styles = StyleSheet.create({
   },
   deleteText: {
     color: '#ff0000',
+    marginRight: 10,
+  },
+  shareText: {
+    color: '#5B5D8B',
+    marginRight: 10,
   },
   itemContainer: {
     padding: 10,

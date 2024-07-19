@@ -22,7 +22,7 @@
 //       index: '2',
 //       name: 'Data Structure',
 //       screen: 'CourseMaterial', // Define the corresponding screen name
-    
+
 //     },
 //     {
 //       index: '3',
@@ -32,7 +32,7 @@
 //     {
 //       index: '4',
 //       name: 'Digital Logic Design',
-//       screen:'CourseMaterial'  
+//       screen:'CourseMaterial'
 //     },
 //   ];
 
@@ -206,19 +206,38 @@
 // });
 
 // export default Courses;
-import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import baseURL from '../../config';
+import LogoutButton from '../AdminScreen/customcomponent/logoutComponent';
 
 const Courses = () => {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
+
   const navigation = useNavigation();
   const route = useRoute();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [studentId, setStudentId] = useState(null); // State to store studentId
+
+  // const courseCode = courses
+
+  // console.log();
 
   useEffect(() => {
     const fetchStudentId = async () => {
@@ -256,12 +275,17 @@ const Courses = () => {
         console.log(`Fetching courses for studentId: ${fetchedStudentId}`);
 
         // API call to fetch courses
-        const response = await fetch(`${baseURL}/enrollment/getEnrollment?studentId=${studentId}&year=${new Date().getFullYear()}&month=${new Date().getMonth() + 1}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
+        const response = await fetch(
+          `${baseURL}/enrollment/getEnrollment?studentId=${studentId}&year=${new Date().getFullYear()}&month=${
+            new Date().getMonth() + 1
+          }`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
           },
-        });
+        );
 
         console.log(`API Response Status: ${response.status}`);
 
@@ -279,7 +303,9 @@ const Courses = () => {
         } else {
           const errorText = await response.text();
           console.log('Response not OK:', errorText);
-          setError(`Failed to fetch courses: ${response.status} ${response.statusText}`);
+          setError(
+            `Failed to fetch courses: ${response.status} ${response.statusText}`,
+          );
         }
       } catch (error) {
         console.error('Fetch Error:', error);
@@ -295,7 +321,13 @@ const Courses = () => {
   }, [route.params, studentId]);
 
   if (loading) {
-    return <ActivityIndicator style={styles.loadingIndicator} size="large" color="#7d6dc1" />;
+    return (
+      <ActivityIndicator
+        style={styles.loadingIndicator}
+        size="large"
+        color="#7d6dc1"
+      />
+    );
   }
 
   if (error) {
@@ -306,14 +338,18 @@ const Courses = () => {
     <View style={styles.container}>
       <FlatList
         data={courses}
-        keyExtractor={(item) => item.courseCode.toString()}
-        renderItem={({ item }) => (
+        keyExtractor={item => item.courseCode.toString()}
+        renderItem={({item}) => (
           <TouchableOpacity
             style={styles.courseContainer}
-            onPress={() => navigation.navigate('CourseMaterial', { course: item, studentId })} // Pass studentId to CourseMaterialScreen
+            onPress={() =>
+              navigation.navigate('CourseMaterial', {course: item, studentId})
+            } // Pass studentId to CourseMaterialScreen
           >
             <Text style={styles.courseName}>{item.courseName}</Text>
-            <Text style={styles.creditHour}>Credit Hours: {item.creditHours}</Text>
+            <Text style={styles.creditHour}>
+              Credit Hours: {item.creditHours}
+            </Text>
           </TouchableOpacity>
         )}
       />

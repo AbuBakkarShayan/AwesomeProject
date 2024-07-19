@@ -162,3 +162,44 @@ export default PDFReaderScreen;
 // };
 
 // export default PDFReaderScreen;
+// import React from 'react';
+// import {View, Text} from 'react-native';
+// import Pdf from 'react-native-pdf';
+// import {fetchBookUrl} from './fetchBookUrl';
+
+// const PDFReaderScreen = ({fileName}) => {
+//   const [pdfUri, setPdfUri] = React.useState(null);
+
+//   React.useEffect(() => {
+//     const loadPdf = async () => {
+//       const uri = await fetchBookUrl(fileName);
+//       setPdfUri(uri);
+//     };
+
+//     loadPdf();
+//   }, [fileName]);
+
+//   return (
+//     <View style={{flex: 1}}>
+//       {pdfUri ? (
+//         <Pdf
+//           source={{uri: pdfUri}}
+//           onLoadComplete={(numberOfPages, filePath) => {
+//             console.log(`Number of pages: ${numberOfPages}`);
+//           }}
+//           onPageChanged={(page, numberOfPages) => {
+//             console.log(`Current page: ${page}`);
+//           }}
+//           onError={error => {
+//             console.log(error);
+//           }}
+//           style={{flex: 1}}
+//         />
+//       ) : (
+//         <Text>Loading PDF...</Text>
+//       )}
+//     </View>
+//   );
+// };
+
+// export default PDFReaderScreen;

@@ -8,13 +8,25 @@ import {
   Image,
   TouchableOpacity,
   Alert,
+  Modal,
+  Button,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {Dropdown} from 'react-native-element-dropdown';
 import RNFS from 'react-native-fs';
 import baseURL, {imageBaseURL} from '../config';
+import LogoutButton from './AdminScreen/customcomponent/logoutComponent';
+import PDFReaderScreen from './PDFReaderScreen';
 
 const LibraryScreen = ({navigation, route}) => {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
+
+  const [selectedBooks, setSelectedBooks] = useState(null);
   const [books, setBooks] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredBooks, setFilteredBooks] = useState([]);
@@ -22,6 +34,64 @@ const LibraryScreen = ({navigation, route}) => {
   const [role, setRole] = useState('');
   const [bookmarkedBooks, setBookmarkedBooks] = useState(new Set());
   const [downloadedBooks, setDownloadedBooks] = useState(new Set());
+
+  //assign book to course by modal
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [courses, setCourses] = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [selectedBook, setSelectedBook] = useState(null);
+
+  useEffect(() => {
+    if (isModalVisible) {
+      fetchCourses();
+    }
+  }, [isModalVisible]);
+
+  const fetchCourses = async () => {
+    try {
+      const response = await fetch(`${baseURL}/course/getAll`);
+      const result = await response.json();
+      if (result.status === 'Success') {
+        setCourses(result.data);
+      } else {
+        // Handle the case when there are no courses
+        console.log(result.message);
+      }
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+    }
+  };
+  const assignBookCourse = async (bookId, courseCode) => {
+    try {
+      const response = await fetch(
+        `${baseURL}/coursebookassign/assignBookCourse`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({bookId, courseCode}),
+        },
+      );
+      const result = await response.json();
+      if (result.status === 'Success') {
+        console.log(result.message);
+      } else {
+        console.log(result.message);
+      }
+    } catch (error) {
+      console.error('Error assigning book to course:', error);
+    }
+  };
+
+  const handleAssignCourse = () => {
+    if (selectedCourse && selectedBook) {
+      assignBookCourse(selectedBook.bookId, selectedCourse.courseCode);
+      setModalVisible(false);
+    } else {
+      console.log('Please select a course');
+    }
+  };
 
   useEffect(() => {
     const fetchRoleAndId = async () => {
@@ -319,7 +389,14 @@ const LibraryScreen = ({navigation, route}) => {
               onPress={() => {
                 handleHighlights(item.bookId);
               }}>
-              <Icon name="eye" size={25} color="#5B5D8B" />
+              <Icon name="eyedrop-sharp" size={25} color="#5B5D8B" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                setSelectedBook(item);
+                setModalVisible(true);
+              }}>
+              <Icon name="document-outline" size={24} color="#5B5D8D" />
             </TouchableOpacity>
           </View>
         </View>
@@ -329,15 +406,16 @@ const LibraryScreen = ({navigation, route}) => {
 
   return (
     <View style={styles.container}>
-      <Text style={{color: 'black'}}>
+      {/* <Text style={{color: 'black'}}>
         {userId ? `ID: ${userId}` : 'ID not found'}
       </Text>
       <Text style={{color: 'black'}}>
         {role ? `Role: ${role}` : 'Role not found'}
-      </Text>
+      </Text> */}
       <TextInput
         style={styles.searchBar}
         placeholder="Search books..."
+        placeholderTextColor={'#7E7E7E'}
         value={searchQuery}
         onChangeText={setSearchQuery}
       />
@@ -346,6 +424,53 @@ const LibraryScreen = ({navigation, route}) => {
         renderItem={renderBookItem}
         keyExtractor={item => item.bookId.toString()}
       />
+
+      <Modal
+        visible={isModalVisible}
+        //</View>animationType="slide">
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Assign Book to Course</Text>
+            <Dropdown
+              style={styles.dropdown}
+              data={courses}
+              labelField="courseName"
+              valueField="courseCode"
+              placeholder="Select Course"
+              value={selectedCourse?.courseCode}
+              onChange={item => setSelectedCourse(item)}
+            />
+            <TouchableOpacity
+              onPress={handleAssignCourse}
+              style={styles.assignButton}>
+              <Text style={styles.assignButtonText}>Assign</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setModalVisible(false)}
+              style={styles.cancelButton}>
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      {/* <View style={{flex: 1}}>
+        {selectedBooks ? (
+          <PDFReaderScreen fileName={selectedBooks.bookPdfPath} />
+        ) : (
+          <FlatList
+            data={books}
+            keyExtractor={item => item.bookId.toString()}
+            renderItem={({item}) => (
+              <Button
+                title={item.bookName}
+                onPress={() => setSelectedBooks(item)}
+              />
+            )}
+          />
+        )}
+      </View> */}
     </View>
   );
 };
@@ -356,12 +481,13 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   searchBar: {
-    height: 40,
+    height: 50,
     borderColor: 'gray',
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 10,
+    color: 'black',
   },
   bookContainer: {
     flexDirection: 'row',
@@ -391,6 +517,45 @@ const styles = StyleSheet.create({
   bookActions: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    backgroundColor: '#5B5D8B',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 20,
+  },
+  dropdown: {
+    width: '100%',
+    marginBottom: 20,
+  },
+  dropdownPlaceholder: {
+    color: 'black',
+  },
+  dropdownSelectedText: {
+    color: 'black',
+  },
+  assignButton: {
+    backgroundColor: 'green',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  assignButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 

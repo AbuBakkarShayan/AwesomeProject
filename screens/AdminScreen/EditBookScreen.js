@@ -1,14 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Image } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  Image,
+} from 'react-native';
 import DocumentPicker from 'react-native-document-picker';
-import { useNavigation, useRoute } from '@react-navigation/core';
-import { Dropdown } from 'react-native-element-dropdown';
+import {useNavigation, useRoute} from '@react-navigation/core';
+import {Dropdown} from 'react-native-element-dropdown';
 import baseURL from '../../config';
 
 const EditBookScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { bookId, onBookUpdated } = route.params || {};
+  const {bookId, onBookUpdated} = route.params || {};
 
   console.log('EditBookScreen route params:', route.params);
   console.log('Editing book with ID:', bookId);
@@ -57,7 +66,9 @@ const EditBookScreen = () => {
 
   const fetchBookDetails = async () => {
     try {
-      const response = await fetch(`${baseURL}/book/getSingleBook?bookId=${bookId}`);
+      const response = await fetch(
+        `${baseURL}/book/getSingleBook?bookId=${bookId}`,
+      );
       const result = await response.json();
       if (result.status === 'Success') {
         setBookDetails(result.data);
@@ -97,13 +108,16 @@ const EditBookScreen = () => {
         });
       }
 
-      const response = await fetch(`${baseURL}/book/updateBook?bookId=${bookId}`, {
-        method: 'PUT',
-        body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
+      const response = await fetch(
+        `${baseURL}/book/updateBook?bookId=${bookId}`,
+        {
+          method: 'PUT',
+          body: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         },
-      });
+      );
 
       const result = await response.json();
       console.log('Response from API:', result);
@@ -162,19 +176,21 @@ const EditBookScreen = () => {
       <TextInput
         style={styles.input}
         value={bookDetails.bookName}
-        onChangeText={(text) => setBookDetails({ ...bookDetails, bookName: text })}
+        onChangeText={text => setBookDetails({...bookDetails, bookName: text})}
       />
 
       <Text style={styles.label}>Author Name</Text>
       <TextInput
         style={styles.input}
         value={bookDetails.bookAuthorName}
-        onChangeText={(text) => setBookDetails({ ...bookDetails, bookAuthorName: text })}
+        onChangeText={text =>
+          setBookDetails({...bookDetails, bookAuthorName: text})
+        }
       />
 
       <Text style={styles.label}>Category</Text>
       <Dropdown
-        style={styles.input}
+        style={styles.dropdown}
         placeholder="Select Category"
         placeholderTextColor="#7E7E7E"
         data={categories}
@@ -195,7 +211,7 @@ const EditBookScreen = () => {
       </TouchableOpacity>
 
       {newImage && (
-        <Image source={{ uri: newImage.uri }} style={styles.imagePreview} />
+        <Image source={{uri: newImage.uri}} style={styles.imagePreview} />
       )}
 
       <TouchableOpacity style={styles.saveButton} onPress={handleUpdateBook}>
@@ -217,12 +233,22 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   input: {
-    width: '80%',
+    width: '100%',
     marginBottom: 10,
     padding: 10,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
+    color: 'black',
+  },
+  dropdown: {
+    width: '100%',
+    marginBottom: 10,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    backgroundColor: '#7E7E7E',
     color: 'black',
   },
   button: {

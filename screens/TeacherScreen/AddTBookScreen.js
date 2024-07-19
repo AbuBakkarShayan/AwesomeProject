@@ -172,7 +172,7 @@ const AddBookScreen = ({navigation, route}) => {
       console.log('PDF Path:', result.pdfPath);
 
       // Navigate to the PDF reader screen with the PDF path
-      navigation.navigate('PdfReaderScreen', {pdfPath: result.pdfPath});
+      //  navigation.navigate('PdfReaderScreen', {pdfPath: result.pdfPath});
 
       Alert.alert('Success', 'Successfully uploaded the book');
       console.log(result);

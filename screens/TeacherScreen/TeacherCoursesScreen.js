@@ -1,10 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Icon from 'react-native-vector-icons/Ionicons';
 import baseURL from '../../config';
+import LogoutButton from '../AdminScreen/customcomponent/logoutComponent';
 
 const TeacherCoursesScreen = () => {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
+
   const navigation = useNavigation();
   const route = useRoute();
   const [courses, setCourses] = useState([]);
@@ -48,12 +64,15 @@ const TeacherCoursesScreen = () => {
         console.log(`Fetching courses for teacherId: ${fetchedTeacherId}`);
 
         // API call to fetch courses
-        const response = await fetch(`${baseURL}/Course/getTeacherCourses?teacherId=${fetchedTeacherId}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
+        const response = await fetch(
+          `${baseURL}/Course/getTeacherCourses?teacherId=${fetchedTeacherId}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
           },
-        });
+        );
 
         console.log(`API Response Status: ${response.status}`);
 
@@ -71,7 +90,9 @@ const TeacherCoursesScreen = () => {
         } else {
           const errorText = await response.text();
           console.log('Response not OK:', errorText);
-          setError(`Failed to fetch courses: ${response.status} ${response.statusText}`);
+          setError(
+            `Failed to fetch courses: ${response.status} ${response.statusText}`,
+          );
         }
       } catch (error) {
         console.error('Fetch Error:', error);
@@ -87,7 +108,13 @@ const TeacherCoursesScreen = () => {
   }, [route.params, teacherId]);
 
   if (loading) {
-    return <ActivityIndicator style={styles.loadingIndicator} size="large" color="#7d6dc1" />;
+    return (
+      <ActivityIndicator
+        style={styles.loadingIndicator}
+        size="large"
+        color="#7d6dc1"
+      />
+    );
   }
 
   if (error) {
@@ -98,14 +125,21 @@ const TeacherCoursesScreen = () => {
     <View style={styles.container}>
       <FlatList
         data={courses}
-        keyExtractor={(item) => item.courseCode.toString()}
-        renderItem={({ item }) => (
+        keyExtractor={item => item.courseCode.toString()}
+        renderItem={({item}) => (
           <TouchableOpacity
             style={styles.courseContainer}
-            onPress={() => navigation.navigate('CourseScreen', { course: item, teacherId })} // Pass teacherId to CourseScreen
+            // onPress={() =>
+            //   navigation.navigate('CourseScreen', {course: item, teacherId})
+            onPress={() =>
+              navigation.navigate('CourseWeeks', {course: item, teacherId})
+            } // Pass teacherId to CourseScreen
           >
             <Text style={styles.courseName}>{item.courseName}</Text>
-            <Text style={styles.creditHour}>Credit Hours: {item.creditHours}</Text>
+            <Text style={styles.creditHour}>
+              Credit Hours: {item.creditHours}
+            </Text>
+            <Icon name="list" size={25} style={styles.icon} />
           </TouchableOpacity>
         )}
       />
@@ -140,6 +174,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: 'black',
+  },
+  icon: {
+    marginLeft: 300,
+    color: 'black',
+    paddingTop: 0,
+    marginTop: 0,
   },
 });
 

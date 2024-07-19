@@ -3,8 +3,8 @@
 // const config = {
 //     baseURL: 'http://192.168.10.2/FYPAPI/api',
 //   };
-var baseURL = 'http://192.168.147.238/FYPAPI/api';
-const imageBaseURL = 'http://192.168.147.238/FYPAPI';
+var baseURL = 'http://192.168.247.23/FYPAPI/api';
+const imageBaseURL = 'http://192.168.247.23/FYPAPI';
 const downloadBookPdfURL = 'http://192.168.10.2/FYPAPI';
 const downloadLPPdfURL = 'http://192.168.10.2/FYPAPI';
 export default baseURL;

@@ -114,10 +114,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import baseURL from '../../config';
-
+import LogoutButton from '../AdminScreen/customcomponent/logoutComponent';
 const TeacherDashboard = () => {
   const route = useRoute();
   const navigation = useNavigation();
+
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
 
   const {teacherId = null, isFirstLogin = 'False'} = route.params || {};
   const [username, setUserName] = useState('');
@@ -226,8 +232,8 @@ const TeacherDashboard = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Teacher Dashboard {teacherId}</Text>
-      <Text style={styles.roleText}>Role: {role}</Text>
+      {/* <Text style={styles.title}>Teacher Dashboard {teacherId}</Text>
+      <Text style={styles.roleText}>Role: {role}</Text> */}
       {dashboardData.map((item, index) => (
         <TouchableOpacity
           key={index}

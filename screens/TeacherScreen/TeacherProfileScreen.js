@@ -61,7 +61,7 @@ const TeacherProfileScreen = () => {
               });
               const result = await response.json();
               if (result.status === 'Success') {
-                await AsyncStorage.clear();
+                //await AsyncStorage.clear();
                 navigation.navigate('LoginScreen1');
               } else {
                 Alert.alert('Error', result.message);

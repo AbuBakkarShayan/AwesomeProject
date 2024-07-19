@@ -87,8 +87,7 @@ const StudentProfileScreen = () => {
       {
         text: 'OK',
         onPress: async () => {
-          await AsyncStorage.clear();
-
+          // await AsyncStorage.clear();
           navigation.navigate('LoginScreen1');
         },
       },

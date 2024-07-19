@@ -108,8 +108,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import baseURL from '../../config';
+import LogoutButton from '../AdminScreen/customcomponent/logoutComponent';
 
 const StudentDashboard = () => {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
+
   const route = useRoute();
   const navigation = useNavigation();
 

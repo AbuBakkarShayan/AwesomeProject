@@ -15,8 +15,14 @@ import baseURL from '../../config';
 import IonIcon from 'react-native-vector-icons/Ionicons';
 import {Dropdown} from 'react-native-element-dropdown';
 import RNFS from 'react-native-fs';
+import LogoutButton from '../AdminScreen/customcomponent/logoutComponent';
+const MyBooksScreen = ({navigation}) => {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
 
-const MyBooksScreen = ({navigation, item}) => {
   const [activeTab, setActiveTab] = useState('Bookmarked');
   const [bookmarkedBooks, setBookmarkedBooks] = useState([]);
   const [downloadedBooks, setDownloadedBooks] = useState([]);
@@ -168,11 +174,13 @@ const MyBooksScreen = ({navigation, item}) => {
       const response = await fetch(
         `${baseURL}/book/getMyBooks?uploaderId=${teacherId}`,
       );
+
       if (!response.ok) {
         throw new Error('Failed to fetch uploaded books');
       }
 
       const data = await response.json();
+      console.log('teacher uploaded books data: ', data);
       if (data.status === 'Success') {
         setUploadedBooks(data.data);
       } else {
@@ -299,6 +307,41 @@ const MyBooksScreen = ({navigation, item}) => {
   // const assignBookCourse = bookId => {
   //   navigation.navigate('AssignBook', bookId);
   // };
+  const editUploadedBook = bookId => {
+    navigation.navigate('EditTBookScreen', {bookId});
+  };
+
+  const handleDeleteBook = async (bookId, uploaderId) => {
+    try {
+      const response = await fetch(
+        `${baseURL}/book/deleteBook?bookId=${bookId}&uploaderId=${uploaderId}`,
+        {
+          method: 'DELETE',
+        },
+      );
+      const result = await response.json();
+      if (response.ok && result.status === 'Success') {
+        fetchBooks();
+      } else {
+        console.error('Failed to delete book:', result.message);
+      }
+    } catch (error) {
+      console.error('Error deleting book:', error);
+    }
+  };
+
+  const confirmDeleteBook = (bookId, uploaderId) => {
+    Alert.alert(
+      'Delete Book',
+      'Are you sure you want to delete this book?',
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {text: 'Delete', onPress: () => handleDeleteBook(bookId, uploaderId)},
+      ],
+      {cancelable: false},
+    );
+  };
+
   const renderUploadItem = ({item}) => (
     <TouchableOpacity
       onPress={() =>
@@ -317,21 +360,25 @@ const MyBooksScreen = ({navigation, item}) => {
           <Text style={styles.bookAuthor}>{item.bookAuthorName}</Text>
         </View>
         <View style={styles.iconContainer}>
-          <TouchableOpacity onPress={() => deleteUploadedBook(item.bookId)}>
+          {/* <TouchableOpacity onPress={() => deleteUploadedBook(item.bookId)}>
             <IonIcon name="trash-outline" size={24} color="#5B5D8D" />
+          </TouchableOpacity> */}
+          <TouchableOpacity
+            onPress={() => confirmDeleteBook(item.bookId, item.uploaderId)}>
+            <IonIcon name="trash-outline" size={30} color="#5B5D8B" />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => editUploadedBook(item.bookId)}>
             <IonIcon name="pencil-outline" size={24} color="#5B5D8D" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => bookmarkUploadedBook(item.bookId)}>
+          {/* <TouchableOpacity onPress={() => bookmarkUploadedBook(item.bookId)}>
             <IonIcon name="bookmark-outline" size={24} color="#5B5D8D" />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => downloadUploadedBook(item.bookId, item.bookName)}>
             <IonIcon name="download-outline" size={24} color="#5B5D8D" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity onPress={() => togglePrivate(item.bookId)}>
-            <IonIcon name="document-lock-outline" size={24} color="#5B5D8D" />
+            <IonIcon name="bag" size={24} color="#5B5D8D" />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
@@ -523,7 +570,7 @@ const styles = StyleSheet.create({
   iconContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: 100,
+    width: 150,
   },
   tabContainer: {
     flexDirection: 'row',

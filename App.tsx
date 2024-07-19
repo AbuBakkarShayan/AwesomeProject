@@ -11,6 +11,7 @@ import TeacherDashboard from './screens/TeacherScreen/TeacherDashboard';
 import EditTeacherScreen from './screens/AdminScreen/EditTeacherScreen';
 import TeacherCoursesScreen from './screens/TeacherScreen/TeacherCoursesScreen';
 import AddTBookScreen from './screens/TeacherScreen/AddTBookScreen';
+import EditTBookScreen from './screens/TeacherScreen/EditTBookScreen';
 import TeacherProfileScreen from './screens/TeacherScreen/TeacherProfileScreen';
 import DownloadedBooks from './screens/TeacherScreen/DownloadedBooks';
 import CourseScreen from './screens/TeacherScreen/Courses';
@@ -53,6 +54,8 @@ import AddTOC from './screens/AdminScreen/AddTOC';
 import MyBooksScreen from './screens/TeacherScreen/MyBooksScreen';
 import { navigate } from '@react-navigation/routers/lib/typescript/src/CommonActions';
 import StudentLogs from './screens/TeacherScreen/StudentLogs';
+import CourseWeeks from './screens/TeacherScreen/CourseWeeks';
+import ShareReference from './screens/StudentScreen/ShareReference';
 
 import Tester from './screens/Tester';
 
@@ -107,25 +110,27 @@ const App = () => {
         }}/>
         <Stack.Screen name="AddTBookScreen" component={AddTBookScreen} options={{title:'Upload Book by Teacher'
         }}/>
+        <Stack.Screen name="EditTBookScreen" component={EditTBookScreen} options={{title:'Edit Book'
+        }}/>
         <Stack.Screen name="TeacherProfileScreen" component={TeacherProfileScreen} options={{title:'Teacher Profile'
         }}/>
         <Stack.Screen name='DownloadedBooks' component={DownloadedBooks} />
         <Stack.Screen name='EditLessonPlan' component={EditLessonPlan} options={{title:'EditLessonPlan'}} />
         <Stack.Screen name='CourseScreen' component={CourseScreen} options={{title:'Course'}}/>
         <Stack.Screen name='MyBooksScreen' component={MyBooksScreen} />
-        <Stack.Screen name='StudentLogsScreen' component={StudentLogsScreen} />
-        <Stack.Screen name='StudentNamesScreen' component={StudentNamesScreen} />
-        <Stack.Screen name='StudentLogs' component={StudentLogs}/>
+        <Stack.Screen name='StudentLogsScreen' component={StudentLogsScreen} options={{title:"Semesters"}}/>
+        <Stack.Screen name='StudentNamesScreen' component={StudentNamesScreen} options={{title:"Students"}}/>
+        <Stack.Screen name='StudentLogs' component={StudentLogs} options={{title:"Student Logs"}}/>
         <Stack.Screen name="StudentDashboard" component={StudentDashboard} />
         <Stack.Screen name="AdminDashboard" component={AdminDashboard} options={{title:'Admin Dashboard'}} />
-        <Stack.Screen name="CoursesScreen" component={CoursesScreen} />
-        <Stack.Screen name='CourseMaterial' component={CourseMaterial} />
+        <Stack.Screen name="CoursesScreen" component={CoursesScreen} options={{title:'Courses'}} />
+        <Stack.Screen name='CourseMaterial' component={CourseMaterial} options={{title:'Course Material'}}/>
         <Stack.Screen name='BookmarkLessons' component={BookmarkLessons} />
         <Stack.Screen name='BookmarkBooks' component={BookmarkBooks} />
         <Stack.Screen name='Downloads' component={Downloads} />
 
-        <Stack.Screen name='LibraryScreen' component={LibraryScreen} />
-        <Stack.Screen name='MyCourseItemsScreen' component={MyCourseItemsScreen} />
+        <Stack.Screen name='LibraryScreen' component={LibraryScreen} options={{title:" Library Books"}} />
+        <Stack.Screen name='MyCourseItemsScreen' component={MyCourseItemsScreen} options={{title:'Course Items'}} />
         <Stack.Screen name='StudentHighlights' component={StudentHighlights} options={{title:"Highlights"}}/>
         <Stack.Screen name='StudentProfileScreen' component={StudentProfileScreen} options={{title:"Profile"}} />
         <Stack.Screen name='StudentDepartmentScreen' component={StudentDepartmentScreen} options={{title:'Student Departments'}}/>
@@ -143,17 +148,20 @@ const App = () => {
         <Stack.Screen name='AssignBook' component={AssignBook} options={{title:"Assign Book"}}/>
 
 
-        <Stack.Screen name='CourseManagementScreen' component={CourseManagementScreen} />
-        <Stack.Screen name='AssignTeacher' component={AssignTeacher} />
-        <Stack.Screen name="EnrollStudent" component={EnrollStudent} />
-        <Stack.Screen name='EnrollMultipleStudents' component={EnrollMultipleStudents}/>
-        <Stack.Screen name='AddCourseScreen' component={AddCourseScreen} />
-        <Stack.Screen name='UpdateCourseScreen' component={UpdateCourseScreen} />
-        <Stack.Screen name='AddBookScreen' component={AddBookScreen} />
-        <Stack.Screen name='AddTOC' component={AddTOC} />
+        <Stack.Screen name='CourseManagementScreen' component={CourseManagementScreen}  options={{title:'Course Management'}}/>
+        <Stack.Screen name='AssignTeacher' component={AssignTeacher} options={{title:'Assign Teacher'}} />
+        <Stack.Screen name="EnrollStudent" component={EnrollStudent} options={{title:'Single Student Enrollment'}}/>
+        <Stack.Screen name='EnrollMultipleStudents' component={EnrollMultipleStudents} options={{title:'Multiple Student Enrollment'}}/>
+        <Stack.Screen name='AddCourseScreen' component={AddCourseScreen} options={{title:'Add Course'}}  />
+        <Stack.Screen name='UpdateCourseScreen' component={UpdateCourseScreen} options={{title:'Update Course'}}/>
+        <Stack.Screen name='AddBookScreen' component={AddBookScreen} options={{title:'Add Book'}} />
+        <Stack.Screen name='AddTOC' component={AddTOC} options={{title:'Add Table of Content'}}/>
         <Stack.Screen name='Tester' component={Tester} />
-        <Stack.Screen name='AdminProfileScreen' component={AdminProfileScreen} />
+        <Stack.Screen name='AdminProfileScreen' component={AdminProfileScreen} options={{title:'Profile'}} />
+        <Stack.Screen name='CourseWeeks' component={CourseWeeks} options={{title:'Course Weeks'}} />
+        <Stack.Screen name='ShareReference' component={ShareReference} options={{title:'Share Reference'}} />
       </Stack.Navigator>
+      
     </NavigationContainer>
   );
 };

@@ -12,8 +12,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import baseURL from '../../config';
 import Icon from 'react-native-vector-icons/MaterialIcons'; // Assuming you are using react-native-vector-icons
 import RNFS from 'react-native-fs';
+import LogoutButton from '../AdminScreen/customcomponent/logoutComponent';
 
 const MyCourseItemsScreen = ({navigation}) => {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
+
   const [activeTab, setActiveTab] = useState('Bookmarked');
   const [bookmarkedBooks, setBookmarkedBooks] = useState([]);
   const [downloadedBooks, setDownloadedBooks] = useState([]);
