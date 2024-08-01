@@ -1,13 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+} from 'react-native';
 import DocumentPicker from 'react-native-document-picker';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import LogoutButton from '../AdminScreen/customcomponent/logoutComponent';
 import baseURL from '../../config';
 
 const EditLessonPlan = () => {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
+
   const navigation = useNavigation();
   const route = useRoute();
-  const { lessonPlanId } = route.params;
+  const {lessonPlanId} = route.params;
 
   const [lessonPlanTitle, setLessonPlanTitle] = useState('');
   const [lessonPlanPdf, setLessonPlanPdf] = useState(null);
@@ -29,10 +43,10 @@ const EditLessonPlan = () => {
   //       Alert.alert('Error', 'Failed to fetch lesson plan');
   //     }
   //   };
-  
+
   //   fetchLessonPlan();
   // }, [lessonPlanId]);
-  
+
   const handleBrowseFile = async () => {
     try {
       const res = await DocumentPicker.pickSingle({
@@ -67,13 +81,16 @@ const EditLessonPlan = () => {
         });
       }
 
-      const response = await fetch(`${baseURL}/LessonPlan/updateLessonPlan?id=${lessonPlanId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'multipart/form-data',
+      const response = await fetch(
+        `${baseURL}/LessonPlan/updateLessonPlan?id=${lessonPlanId}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          body: formData,
         },
-        body: formData,
-      });
+      );
 
       const result = await response.json();
       if (result.status === 'Success') {
@@ -99,7 +116,13 @@ const EditLessonPlan = () => {
       <TextInput
         style={styles.input}
         placeholder="Lesson Plan PDF"
-        value={lessonPlanPdf && typeof lessonPlanPdf === 'string' ? lessonPlanPdf.split('/').pop() : lessonPlanPdf ? lessonPlanPdf.name : ''}
+        value={
+          lessonPlanPdf && typeof lessonPlanPdf === 'string'
+            ? lessonPlanPdf.split('/').pop()
+            : lessonPlanPdf
+            ? lessonPlanPdf.name
+            : ''
+        }
         editable={false}
       />
       <TouchableOpacity style={styles.button} onPress={handleBrowseFile}>

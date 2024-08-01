@@ -1,9 +1,16 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
+import React, {useState} from 'react';
+import {View, Text, TextInput, Button, Alert, StyleSheet} from 'react-native';
 import DocumentPicker from 'react-native-document-picker';
+import LogoutButton from './customcomponent/logoutComponent';
 import baseURL from '../../config';
 
 const AddCourseScreen = () => {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
+
   const [courseCode, setCourseCode] = useState('');
   const [courseName, setCourseName] = useState('');
   const [creditHours, setCreditHours] = useState('');
@@ -19,8 +26,9 @@ const AddCourseScreen = () => {
     formData.append('courseCode', courseCode);
     formData.append('courseName', courseName);
     formData.append('creditHours', creditHours);
-    
-    if (selectedFile) { // If a file is selected, append it to the form data
+
+    if (selectedFile) {
+      // If a file is selected, append it to the form data
       formData.append('courseContent', {
         uri: selectedFile.uri,
         type: selectedFile.type,
@@ -61,7 +69,7 @@ const AddCourseScreen = () => {
       setSelectedFile(doc); // Set the selected file
     } catch (err) {
       if (DocumentPicker.isCancel(err)) {
-        console.log("User canceled the upload", err);
+        console.log('User canceled the upload', err);
       } else {
         console.log(err);
       }
@@ -88,14 +96,18 @@ const AddCourseScreen = () => {
         value={creditHours}
         onChangeText={setCreditHours}
       />
-      <Button title="Select Course Content" onPress={handleSelectFile} />
+      <Button
+        title="Select Course Content"
+        color="#5B5D8B"
+        onPress={handleSelectFile}
+      />
       {selectedFile && (
         <View>
           <Text>Selected File:</Text>
           <Text>{selectedFile.name}</Text>
         </View>
       )}
-      <Button title="Add Course" onPress={handleAddCourse} />
+      <Button title="Add Course" color="#5B5D8B" onPress={handleAddCourse} />
     </View>
   );
 };
@@ -108,7 +120,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     marginBottom: 8,
-    color: "black",
+    color: 'black',
   },
   input: {
     borderWidth: 1,
@@ -116,7 +128,7 @@ const styles = StyleSheet.create({
     padding: 8,
     marginBottom: 16,
     borderRadius: 4,
-    color: "black",
+    color: 'black',
   },
 });
 

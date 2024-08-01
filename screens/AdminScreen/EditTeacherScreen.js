@@ -113,9 +113,16 @@ import {
 } from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {Dropdown} from 'react-native-element-dropdown';
+import LogoutButton from './customcomponent/logoutComponent';
 import baseURL from '../../config';
 
 const EditTeacherScreen = () => {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
+
   const navigation = useNavigation();
   const route = useRoute();
   const {teacher} = route.params;

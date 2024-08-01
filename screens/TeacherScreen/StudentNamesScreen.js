@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import baseURL from '../../config';
+import LogoutButton from '../AdminScreen/customcomponent/logoutComponent';
 
 const headers = {
   'Content-Type': 'application/json',
@@ -16,6 +17,12 @@ const headers = {
 };
 
 const StudentNamesScreen = ({route}) => {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
+
   const {smesterNumber} = route.params;
   const [students, setStudents] = useState([]);
   const [message, setMessage] = useState('');

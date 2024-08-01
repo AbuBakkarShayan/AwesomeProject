@@ -11,9 +11,16 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
+import LogoutButton from '../AdminScreen/customcomponent/logoutComponent';
 import baseURL from '../../config';
 
 const TeacherProfileScreen = () => {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
+
   //const [name, setName] = useState('');
   const [username, setUsername] = useState('');
   //const [phoneNo, setPhoneNo] = useState('');

@@ -12,6 +12,7 @@ import {
 import DocumentPicker from 'react-native-document-picker';
 import RNFS from 'react-native-fs';
 import XLSX from 'xlsx';
+import LogoutButton from './customcomponent/logoutComponent';
 import baseURL from '../../config';
 
 const headers = {
@@ -19,6 +20,11 @@ const headers = {
 };
 
 const EnrollMultipleStudents = () => {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
   const [file, setFile] = useState('No File Selected');
   const [filePath, setFilePath] = useState(null);
   const [enrollments, setEnrollments] = useState([]);

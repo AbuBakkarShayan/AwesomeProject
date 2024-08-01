@@ -1,10 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, ActivityIndicator, TouchableOpacity, Text, Alert } from 'react-native';
-import { Dropdown } from 'react-native-element-dropdown';
+import React, {useState, useEffect} from 'react';
+import {
+  StyleSheet,
+  View,
+  ActivityIndicator,
+  TouchableOpacity,
+  Text,
+  Alert,
+} from 'react-native';
+import {Dropdown} from 'react-native-element-dropdown';
 import baseURL from '../../config';
+import LogoutButton from './customcomponent/logoutComponent';
 
-const AssignTeacher = ({ route, navigation }) => {
-  const { courseCode } = route.params;
+const AssignTeacher = ({route, navigation}) => {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
+  const {courseCode} = route.params;
   const [departments, setDepartments] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [selectedDepartment, setSelectedDepartment] = useState(null);
@@ -48,7 +61,7 @@ const AssignTeacher = ({ route, navigation }) => {
     }
   }, [selectedDepartment]);
 
-  const fetchTeachers = (departmentId) => {
+  const fetchTeachers = departmentId => {
     setLoadingTeachers(true);
     //fetch(`${baseURL}/teacher/allTeacher?departmentId=${departmentId}`)
     fetch(`${baseURL}/teacher/getAllTeacher?departmentId=${departmentId}`)
@@ -184,7 +197,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
   },
-  placeholder:{
-    color:'#7E7E7E'
-  }
+  placeholder: {
+    color: '#7E7E7E',
+  },
 });

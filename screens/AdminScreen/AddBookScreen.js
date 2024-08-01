@@ -1,12 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, Text, Alert, StyleSheet } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  Text,
+  Alert,
+  StyleSheet,
+} from 'react-native';
 import DocumentPicker from 'react-native-document-picker';
 import LogoutButton from './customcomponent/logoutComponent';
 import baseURL from '../../config';
-import { Dropdown } from 'react-native-element-dropdown';
+import {Dropdown} from 'react-native-element-dropdown';
 
-const AddBookScreen = ({ navigation }) => {
-
+const AddBookScreen = ({navigation}) => {
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => <LogoutButton />,
@@ -51,14 +57,16 @@ const AddBookScreen = ({ navigation }) => {
     fetchCategories();
   }, []);
 
-
   const handleCoverImagePick = async () => {
     try {
       const doc = await DocumentPicker.pickSingle({
         type: [DocumentPicker.types.images],
       });
       if (doc.size > MAX_FILE_SIZE) {
-        Alert.alert('Error', 'Cover image file size exceeds the maximum limit of 50 MB');
+        Alert.alert(
+          'Error',
+          'Cover image file size exceeds the maximum limit of 50 MB',
+        );
         return;
       }
       setCoverImage(doc);
@@ -77,7 +85,10 @@ const AddBookScreen = ({ navigation }) => {
         type: [DocumentPicker.types.pdf],
       });
       if (doc.size > MAX_FILE_SIZE) {
-        Alert.alert('Error', 'PDF file size exceeds the maximum limit of 50 MB');
+        Alert.alert(
+          'Error',
+          'PDF file size exceeds the maximum limit of 50 MB',
+        );
         return;
       }
       setPdfFile(doc);
@@ -93,11 +104,18 @@ const AddBookScreen = ({ navigation }) => {
   const handleUpload = async () => {
     try {
       const uploaderId = 0; // Default uploader ID for admin
-  
-      if (!title || !category || !coverImage || !pdfFile || !author || !keywords) {
+
+      if (
+        !title ||
+        !category ||
+        !coverImage ||
+        !pdfFile ||
+        !author ||
+        !keywords
+      ) {
         throw new Error('Please fill in all fields');
       }
-  
+
       const formData = new FormData();
       formData.append('bookName', title);
       formData.append('categoryId', category);
@@ -114,7 +132,7 @@ const AddBookScreen = ({ navigation }) => {
       formData.append('bookAuthor', author);
       formData.append('keywords', keywords);
       formData.append('uploaderId', uploaderId);
-  
+
       const response = await fetch(`${baseURL}/book/uploadBook`, {
         method: 'POST',
         headers: {
@@ -122,34 +140,34 @@ const AddBookScreen = ({ navigation }) => {
         },
         body: formData,
       });
-  
+
       if (!response.ok) {
         const errorMessage = await response.text();
         throw new Error(`Failed to upload book: ${errorMessage}`);
       }
-  
+
       const result = await response.json();
       console.log('Upload result:', result);
-  
+
       // Additional logging to check the result structure
       if (!result.bookId) {
         console.error('Server response:', result);
         throw new Error('Book ID not returned from the server');
       }
-  
+
       if (result.status !== 'Success') {
         throw new Error(result.message);
       }
-  
+
       // Navigate to AddTOC screen with bookId
       // navigation.navigate('AddTOC', { bookId: result.bookId });
-      Alert.alert("Success","Successfully uploaded the book");
+      Alert.alert('Success', 'Successfully uploaded the book');
     } catch (error) {
       console.log('Error uploading book:', error);
       Alert.alert('Error', error.message);
     }
   };
-  
+
   return (
     <View style={styles.container}>
       <TextInput

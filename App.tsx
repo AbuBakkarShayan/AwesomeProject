@@ -117,7 +117,7 @@ const App = () => {
         <Stack.Screen name='DownloadedBooks' component={DownloadedBooks} />
         <Stack.Screen name='EditLessonPlan' component={EditLessonPlan} options={{title:'EditLessonPlan'}} />
         <Stack.Screen name='CourseScreen' component={CourseScreen} options={{title:'Course'}}/>
-        <Stack.Screen name='MyBooksScreen' component={MyBooksScreen} />
+        <Stack.Screen name='MyBooksScreen' component={MyBooksScreen} options={{title:'My Items'}}/>
         <Stack.Screen name='StudentLogsScreen' component={StudentLogsScreen} options={{title:"Semesters"}}/>
         <Stack.Screen name='StudentNamesScreen' component={StudentNamesScreen} options={{title:"Students"}}/>
         <Stack.Screen name='StudentLogs' component={StudentLogs} options={{title:"Student Logs"}}/>

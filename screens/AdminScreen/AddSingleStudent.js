@@ -11,9 +11,16 @@ import {
   Modal,
 } from 'react-native';
 import {Dropdown} from 'react-native-element-dropdown';
+import LogoutButton from './customcomponent/logoutComponent';
 import baseURL from '../../config';
 
 const AddSingleStudent = () => {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
+
   const [regNo, setRegNo] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');

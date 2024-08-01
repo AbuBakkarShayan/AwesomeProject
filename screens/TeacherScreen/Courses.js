@@ -473,7 +473,7 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   tabText: {
-    color: 'black',
+    color: 'white',
     fontWeight: 'bold',
   },
   contentContainer: {

@@ -12,8 +12,14 @@ import DocumentPicker from 'react-native-document-picker';
 import XLSX from 'xlsx';
 import RNFS from 'react-native-fs';
 import baseURL from '../../config';
+import LogoutButton from './customcomponent/logoutComponent';
 
 const AddMultipleUsers = () => {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
   const [file, setFile] = useState('No File Selected');
   const [filePath, setFilePath] = useState(null);
   const [users, setUsers] = useState([]);

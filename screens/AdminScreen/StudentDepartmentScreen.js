@@ -1,11 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/Ionicons'; 
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
+import {useNavigation, useFocusEffect} from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import LogoutButton from './customcomponent/logoutComponent';
 import baseURL from '../../config';
 
-const StudentDepartmentScreen = ({ route }) => {
+const StudentDepartmentScreen = ({route}) => {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
   const navigation = useNavigation();
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,24 +49,36 @@ const StudentDepartmentScreen = ({ route }) => {
       }, 10000);
 
       fetchDepartments().then(() => clearTimeout(timeoutId));
-    }, [])
+    }, []),
   );
 
-  const handleUpdateDepartment = (departmentId) => {
+  const handleUpdateDepartment = departmentId => {
     // Handle update logic, navigate to update screen with departmentId
-    navigation.navigate('UpdateDepartmentScreen', { departmentId, currentDepartmentName: departments.find(dep => dep.departmentId === departmentId).departmentName });
+    navigation.navigate('UpdateDepartmentScreen', {
+      departmentId,
+      currentDepartmentName: departments.find(
+        dep => dep.departmentId === departmentId,
+      ).departmentName,
+    });
   };
 
-  const handleDeleteDepartment = async (departmentId) => {
+  const handleDeleteDepartment = async departmentId => {
     // Handle delete logic, send delete request to API
     try {
-      const response = await fetch(`${baseURL}/department/deleteDepartment/${departmentId}`, {
-        method: 'DELETE',
-      });
+      const response = await fetch(
+        `${baseURL}/department/deleteDepartment/${departmentId}`,
+        {
+          method: 'DELETE',
+        },
+      );
       const data = await response.json();
       if (data.status === 'Success') {
         // Remove deleted department from state
-        setDepartments(departments.filter(department => department.departmentId !== departmentId));
+        setDepartments(
+          departments.filter(
+            department => department.departmentId !== departmentId,
+          ),
+        );
       } else {
         Alert.alert('Error', data.message);
       }
@@ -63,15 +88,22 @@ const StudentDepartmentScreen = ({ route }) => {
     }
   };
 
-  const renderDepartmentItem = ({ item }) => (
-    <TouchableOpacity onPress={() => navigation.navigate('AddStudentScreen', { departmentId: item.departmentId })}>
+  const renderDepartmentItem = ({item}) => (
+    <TouchableOpacity
+      onPress={() =>
+        navigation.navigate('AddStudentScreen', {
+          departmentId: item.departmentId,
+        })
+      }>
       <View style={styles.itemContainer}>
         <Text style={styles.departmentName}>{item.departmentName}</Text>
         <View style={styles.iconContainer}>
-          <TouchableOpacity onPress={() => handleUpdateDepartment(item.departmentId)}>
+          <TouchableOpacity
+            onPress={() => handleUpdateDepartment(item.departmentId)}>
             <Icon name="create-outline" size={24} color="white" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleDeleteDepartment(item.departmentId)}>
+          <TouchableOpacity
+            onPress={() => handleDeleteDepartment(item.departmentId)}>
             <Icon name="trash-outline" size={24} color="white" />
           </TouchableOpacity>
         </View>
@@ -103,7 +135,7 @@ const StudentDepartmentScreen = ({ route }) => {
       <FlatList
         data={departments}
         renderItem={renderDepartmentItem}
-        keyExtractor={(item) => item.departmentId.toString()}
+        keyExtractor={item => item.departmentId.toString()}
       />
     </View>
   );

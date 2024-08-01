@@ -1,10 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, Text, Alert, StyleSheet, FlatList } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  Text,
+  Alert,
+  StyleSheet,
+  FlatList,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import LogoutButton from './customcomponent/logoutComponent';
 import baseURL from '../../config';
 
-const AddTOC = ({ route, navigation }) => {
+const AddTOC = ({route, navigation}) => {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
   const [nameOfContent, setNameOfContent] = useState('');
   const [pageNo, setPageNo] = useState('');
   const [keywords, setKeywords] = useState('');
@@ -18,9 +31,11 @@ const AddTOC = ({ route, navigation }) => {
     }
   }, [route.params?.bookId]);
 
-  const fetchTOCItems = async (bookId) => {
+  const fetchTOCItems = async bookId => {
     try {
-      const response = await fetch(`${baseURL}/book/getBookTOC?BookId=${bookId}`);
+      const response = await fetch(
+        `${baseURL}/book/getBookTOC?BookId=${bookId}`,
+      );
       const result = await response.json();
       if (result.status === 'Success') {
         setTocItems(result.data);
@@ -32,18 +47,12 @@ const AddTOC = ({ route, navigation }) => {
     }
   };
 
-  React.useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => <LogoutButton />,
-    });
-  }, [navigation]);
-
   const handleAddTOC = async () => {
     if (!nameOfContent || !pageNo || !keywords) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
-  
+
     try {
       const response = await fetch(`${baseURL}/book/addTOC`, {
         method: 'POST',
@@ -58,26 +67,27 @@ const AddTOC = ({ route, navigation }) => {
           bookId: bookId,
         }),
       });
-  
+
       const result = await response.json();
-  
+
       // Check if response is valid
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-  
+
       // Check if result status is not 'Success'
-      if (result.status !== 'Success' && result.status !== 'success') { // Check for both cases
+      if (result.status !== 'Success' && result.status !== 'success') {
+        // Check for both cases
         throw new Error(result.message || 'Failed to add TOC');
       }
-  
+
       const newTOCItem = {
         tocId: result.tocid,
         tocContent: nameOfContent,
         tocPageNo: parseInt(pageNo),
         tocKeywords: keywords,
       };
-  
+
       setTocItems([...tocItems, newTOCItem]);
       setNameOfContent('');
       setPageNo('');
@@ -87,9 +97,8 @@ const AddTOC = ({ route, navigation }) => {
       Alert.alert('Error', error.message || 'Failed to add TOC');
     }
   };
-  
-  
-  const handleDeleteTOC = async (id) => {
+
+  const handleDeleteTOC = async id => {
     try {
       const response = await fetch(`${baseURL}/book/deleteTOC?tocId=${id}`, {
         method: 'DELETE',
@@ -107,22 +116,25 @@ const AddTOC = ({ route, navigation }) => {
     }
   };
 
-  const renderTOCItem = ({ item }) => (
+  const renderTOCItem = ({item}) => (
     <View style={styles.tocItemContainer}>
       <View>
-        <Text>{item.tocContent} (Page: {item.tocPageNo})</Text>
-        <Text>{item.tocKeywords ? item.tocKeywords.split(',').join(', ') : ''}</Text>
+        <Text>
+          {item.tocContent} (Page: {item.tocPageNo})
+        </Text>
+        <Text>
+          {item.tocKeywords ? item.tocKeywords.split(',').join(', ') : ''}
+        </Text>
       </View>
       <TouchableOpacity onPress={() => handleDeleteTOC(item.tocId)}>
         <Icon name="trash-outline" size={24} color="#C4C4C4" />
       </TouchableOpacity>
     </View>
   );
-  
 
   return (
     <View style={styles.container}>
-      <Text style={{color:'black'}}>{bookId}</Text>
+      <Text style={{color: 'black'}}>{bookId}</Text>
       <TextInput
         style={styles.input}
         placeholder="Name Of Content"
@@ -150,10 +162,12 @@ const AddTOC = ({ route, navigation }) => {
       </TouchableOpacity>
       <FlatList
         data={tocItems}
-        keyExtractor={(item) => item.tocId.toString()}
+        keyExtractor={item => item.tocId.toString()}
         renderItem={renderTOCItem}
       />
-      <TouchableOpacity style={styles.submitButton} onPress={() => navigation.goBack()}>
+      <TouchableOpacity
+        style={styles.submitButton}
+        onPress={() => navigation.goBack()}>
         <Text style={styles.buttonText}>Finish</Text>
       </TouchableOpacity>
     </View>

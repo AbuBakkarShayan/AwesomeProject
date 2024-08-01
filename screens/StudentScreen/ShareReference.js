@@ -11,11 +11,19 @@ import {
 import {Dropdown} from 'react-native-element-dropdown';
 import baseURL from '../../config';
 import {FlatList} from 'react-native-gesture-handler';
+import LogoutButton from '../AdminScreen/customcomponent/logoutComponent';
 
 const ShareReference = ({route, navigation}) => {
   //   const {studentId} = route.params || {};
   //   console.log('StudentId: ', studentId);
   //const route = useRoute();
+
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
+
   const {course, studentId} = route.params;
   console.log('course and aaa StudentId: ', studentId, course);
   const {lessonPlanId} = route.params;

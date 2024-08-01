@@ -1,8 +1,15 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React, {useState} from 'react';
 import {TouchableOpacity} from 'react-native-gesture-handler';
+import LogoutButton from '../AdminScreen/customcomponent/logoutComponent';
 
 const StudentHighlights = () => {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
+
   const [activeTab, setActiveTab] = useState('allHighlights');
   return (
     <View style={styles.container}>

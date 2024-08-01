@@ -314,9 +314,16 @@ import {
 import DocumentPicker from 'react-native-document-picker';
 import {useNavigation, useRoute} from '@react-navigation/core';
 import {Dropdown} from 'react-native-element-dropdown';
+import LogoutButton from '../AdminScreen/customcomponent/logoutComponent';
 import baseURL from '../../config';
 
 const EditBookScreen = () => {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
+
   const navigation = useNavigation();
   const route = useRoute();
   const {bookId, onBookUpdated} = route.params || {};

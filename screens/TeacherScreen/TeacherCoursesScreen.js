@@ -132,7 +132,7 @@ const TeacherCoursesScreen = () => {
             // onPress={() =>
             //   navigation.navigate('CourseScreen', {course: item, teacherId})
             onPress={() =>
-              navigation.navigate('CourseWeeks', {course: item, teacherId})
+              navigation.navigate('CourseScreen', {course: item, teacherId})
             } // Pass teacherId to CourseScreen
           >
             <Text style={styles.courseName}>{item.courseName}</Text>

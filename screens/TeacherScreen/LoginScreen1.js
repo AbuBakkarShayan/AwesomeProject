@@ -13,11 +13,18 @@ import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import baseURL from '../../config';
 import Icon from 'react-native-vector-icons/Ionicons';
+import LogoutButton from '../AdminScreen/customcomponent/logoutComponent';
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
 const LoginScreen1 = () => {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
+
   const halfScreenHeight = screenHeight / 2.2;
   const navigation = useNavigation();
   const [username, setUsername] = useState('');

@@ -1,11 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, ActivityIndicator, TouchableOpacity, Text, Alert, TextInput, FlatList } from 'react-native';
-import { Dropdown } from 'react-native-element-dropdown';
+import React, {useState, useEffect} from 'react';
+import {
+  StyleSheet,
+  View,
+  ActivityIndicator,
+  TouchableOpacity,
+  Text,
+  Alert,
+  TextInput,
+  FlatList,
+} from 'react-native';
+import {Dropdown} from 'react-native-element-dropdown';
 import Icon from 'react-native-vector-icons/Ionicons';
+import LogoutButton from './customcomponent/logoutComponent';
 import baseURL from '../../config';
 
-const EnrollStudent = ({ route, navigation }) => {
-  const { courseCode } = route.params;
+const EnrollStudent = ({route, navigation}) => {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <LogoutButton />,
+    });
+  }, [navigation]);
+
+  const {courseCode} = route.params;
   const [departments, setDepartments] = useState([]);
   const [students, setStudents] = useState([]);
   const [selectedDepartment, setSelectedDepartment] = useState(null);
@@ -62,11 +78,11 @@ const EnrollStudent = ({ route, navigation }) => {
     setSession(`${semester} ${year}`);
   };
 
-  const getSemester = (month) => {
+  const getSemester = month => {
     if (month >= 1 && month <= 6) {
-      return "Spring";
+      return 'Spring';
     } else {
-      return "Fall";
+      return 'Fall';
     }
   };
 
@@ -79,7 +95,9 @@ const EnrollStudent = ({ route, navigation }) => {
       month = 7;
     }
 
-    fetch(`${baseURL}/enrollment/getEnrolledStudents?courseCode=${courseCode}&year=${year}&month=${month}`)
+    fetch(
+      `${baseURL}/enrollment/getEnrolledStudents?courseCode=${courseCode}&year=${year}&month=${month}`,
+    )
       .then(response => {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -110,7 +128,7 @@ const EnrollStudent = ({ route, navigation }) => {
     }
   }, [selectedDepartment]);
 
-  const fetchStudents = (departmentId) => {
+  const fetchStudents = departmentId => {
     setLoadingStudents(true);
     fetch(`${baseURL}/student/getAllStudent?departmentId=${departmentId}`)
       .then(response => {
@@ -184,7 +202,9 @@ const EnrollStudent = ({ route, navigation }) => {
             ...prevEnrolledStudents,
             {
               studentId: selectedStudent,
-              studentName: students.find(student => student.value === selectedStudent).label,
+              studentName: students.find(
+                student => student.value === selectedStudent,
+              ).label,
             },
           ]);
           setSelectedStudent(null); // Clear selected student
@@ -199,7 +219,7 @@ const EnrollStudent = ({ route, navigation }) => {
       });
   };
 
-  const removeEnrollment = (studentId) => {
+  const removeEnrollment = studentId => {
     const [semester, year] = session.split(' ');
     let month;
     if (semester === 'Spring') {
@@ -208,9 +228,12 @@ const EnrollStudent = ({ route, navigation }) => {
       month = 7;
     }
 
-    fetch(`${baseURL}/enrollment/removeEnrollment?studentId=${studentId}&year=${year}&month=${month}&courseCode=${courseCode}`, {
-      method: 'DELETE',
-    })
+    fetch(
+      `${baseURL}/enrollment/removeEnrollment?studentId=${studentId}&year=${year}&month=${month}&courseCode=${courseCode}`,
+      {
+        method: 'DELETE',
+      },
+    )
       .then(response => {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -221,7 +244,9 @@ const EnrollStudent = ({ route, navigation }) => {
         if (data.status === 'Success') {
           Alert.alert('Success', 'Enrollment removed');
           setEnrolledStudents(prevEnrolledStudents =>
-            prevEnrolledStudents.filter(student => student.studentId !== studentId)
+            prevEnrolledStudents.filter(
+              student => student.studentId !== studentId,
+            ),
           );
         } else {
           Alert.alert('Error', data.message);
@@ -233,7 +258,7 @@ const EnrollStudent = ({ route, navigation }) => {
       });
   };
 
-  const renderEnrolledStudentItem = ({ item }) => (
+  const renderEnrolledStudentItem = ({item}) => (
     <View style={styles.enrolledStudentItem}>
       <Text style={styles.enrolledStudentName}>{item.studentName}</Text>
       <TouchableOpacity onPress={() => removeEnrollment(item.studentId)}>
@@ -291,9 +316,11 @@ const EnrollStudent = ({ route, navigation }) => {
       ) : (
         <FlatList
           data={enrolledStudents}
-          keyExtractor={(item) => item.studentId.toString()}
+          keyExtractor={item => item.studentId.toString()}
           renderItem={renderEnrolledStudentItem}
-          ListEmptyComponent={<Text style={styles.emptyMessage}>No students enrolled</Text>}
+          ListEmptyComponent={
+            <Text style={styles.emptyMessage}>No students enrolled</Text>
+          }
           contentContainerStyle={styles.enrolledStudentsList}
         />
       )}
@@ -355,7 +382,7 @@ const styles = StyleSheet.create({
   },
   enrolledStudentName: {
     fontSize: 16,
-    color:"black",
+    color: 'black',
   },
   emptyMessage: {
     textAlign: 'center',
